@@ -320,7 +320,7 @@ function vAsistencia(){
 function vNinos(){
   var q=S.kidQ.toLowerCase();
   var list=KIDS.filter(function(k){return (S.kidG<0||k.g===S.kidG)&&(!q||k.name.toLowerCase().indexOf(q)>=0);});
-  var h=top("Niños","Nómina de la École de Jeu · "+KIDS.length+" niños")+'<div class="card"><div class="row"><div style="flex:2;min-width:200px"><input type="text" id="kq" placeholder="Buscar por nombre" aria-label="Buscar por nombre" value="'+esc(S.kidQ)+'"></div><div style="flex:1;min-width:160px"><select data-c="kidG" aria-label="Filtrar por grupo"><option value="-1">Todos los grupos</option>'+GROUPS.map(function(g,i){return '<option value="'+i+'"'+(S.kidG===i?" selected":"")+'>'+g.name+'</option>';}).join("")+'</select></div><button class="btn" data-a="go" data-v="grupos">Importar nómina</button></div><span class="lock">🔒 Contactos y autorizados visibles solo para el coordinador</span></div>';
+  var h=top("Niños","Nómina de la École de Jeu · "+KIDS.length+" niños")+'<div class="card"><div class="row"><div style="flex:2;min-width:200px"><input type="text" id="kq" placeholder="Buscar por nombre" aria-label="Buscar por nombre" value="'+esc(S.kidQ)+'"></div><div style="flex:1;min-width:160px"><select data-c="kidG" aria-label="Filtrar por grupo"><option value="-1">Todos los grupos</option>'+GROUPS.map(function(g,i){return '<option value="'+i+'"'+(S.kidG===i?" selected":"")+'>'+g.name+'</option>';}).join("")+'</select></div><button class="btn" data-a="go" data-v="grupos">Agregar lista</button></div><span class="lock">🔒 Contactos y autorizados visibles solo para el coordinador</span></div>';
   h+='<div class="grid2"><div class="card"><h2>'+list.length+' niños</h2><div class="list">'+(list.length?list.map(function(k){return '<div class="item"><div class="grow"><b>'+esc(k.name)+'</b><span class="muted">'+GROUPS[k.g].name+' · '+GROUPS[k.g].lvl+'</span></div><button class="btn small" data-a="kid" data-v="'+k.id+'">Ver ficha</button></div>';}).join(""):'<p class="empty">No hay niños con ese nombre.</p>')+'</div></div>';
   h+='<div class="card"><h2>Ficha del niño</h2><p>Toca <b>Ver ficha</b> en cualquier niño para abrir su información: grupo, asistencia de hoy y adultos autorizados a retirarlo.</p><p class="muted">Sin RUT del niño, según la especificación. Los cambios quedan en el registro de accesos.</p></div>';
   return h+'</div>';
@@ -467,10 +467,10 @@ function vGrupos(){
   if(S.gview==="det")return vGrupo();
   var h=top("Grupos","Cursos de la École de Jeu y su nómina · "+KIDS.length+" niños")+'<div class="grid3">'+GROUPS.map(function(g,gi){var ks=kidsOf(gi),ts=[0,1,2].map(function(m){return tallerAt(gi,S.day,m);});
     return '<div class="card"><div class="row between"><p class="kidname">'+g.name+'</p><span class="pill p-info">'+ks.length+' niños</span></div><p class="muted">'+g.lvl+'</p><p class="muted">'+DAYS[S.day].name+': '+ts.map(function(t){return esc(partName(t,S.day));}).join(" → ")+'</p><button class="btn primary" data-a="gopen" data-v="'+gi+'">Ver grupo</button></div>';}).join("")+'</div>';
-  h+='<div class="card"><h2>Subir nómina</h2><p>Sube un Excel o CSV con una columna <b>Nombre</b> (y si quieres <b>Apellido</b>) y una columna <b>Grupo</b> con PS 1, PS 2, MS 1, MS 2, GS 1 o GS 2. Si no trae grupo, todos van al grupo que elijas.</p>'+
-    '<div class="row"><div class="field" style="flex:2;min-width:220px"><label for="impF">Archivo (Excel o CSV)</label><input type="file" id="impF" accept=".xlsx,.xls,.csv,.txt"></div><div class="field" style="flex:1;min-width:180px"><label for="impG">Si no trae grupo, asignar a</label><select id="impG">'+GROUPS.map(function(g,i){return '<option value="'+i+'">'+g.name+'</option>';}).join("")+'</select></div></div>'+
+  h+='<div class="card" id="addList"><h2>Agregar lista</h2><p>Sube un Excel o CSV con una columna <b>Nombre</b> (y si quieres <b>Apellido</b>) y una columna <b>Grupo</b> con PS 1, PS 2, MS 1, MS 2, GS 1 o GS 2. Si no trae grupo, todos van al grupo que elijas.</p>'+
+    '<div class="row"><div class="field" style="flex:2;min-width:220px"><label for="impF">Archivo (Excel o CSV)</label><input type="file" id="impF" accept=".xlsx,.xls,.csv,.txt"></div><div class="field" style="flex:1;min-width:180px"><label for="impG">Si no trae grupo, asignar a</label><select id="impG">'+GROUPS.map(function(g,i){return '<option value="'+i+'"'+((S.impG||0)===i?" selected":"")+'>'+g.name+'</option>';}).join("")+'</select></div></div>'+
     '<div class="field"><label for="impT">O pega la lista (un niño por línea; opcional: Nombre, Grupo)</label><textarea id="impT" placeholder="Sofía Soto, PS 1&#10;Mateo Muñoz, PS 2"></textarea></div>'+
-    '<div class="row"><button class="btn primary" data-a="import">Importar</button><label class="row" style="gap:8px;font-weight:700"><input type="checkbox" id="impR" style="width:20px;height:20px"> Reemplazar la nómina actual</label></div><p class="muted">La nómina que entrega el liceo viene en PDF: conviértela una vez a Excel y súbela aquí. El sistema real tendrá esta misma carga.</p></div>';
+    '<div class="row"><button class="btn primary" data-a="import">Agregar lista</button><label class="row" style="gap:8px;font-weight:700"><input type="checkbox" id="impR" style="width:20px;height:20px"> Reemplazar la nómina actual</label></div><p class="muted">La nómina que entrega el liceo viene en PDF: conviértela una vez a Excel y súbela aquí. El sistema real tendrá esta misma carga.</p></div>';
   return h;
 }
 function vGrupo(){
@@ -479,7 +479,7 @@ function vGrupo(){
   h+='<div class="card"><h2>Semana de '+g.name+'</h2><div class="scroll"><div class="week"><div></div>'+MODS.map(function(mm){return '<div class="muted" style="font-weight:800">'+mm.h+'</div>';}).join("");
   DAYS.forEach(function(d,di){h+='<div style="font-weight:800;align-self:center">'+d.name+'</div>';for(var m=0;m<3;m++){var t=tallerAt(gi,di,m);h+='<div class="cell t-'+t.id+'"><b style="font-size:16px">'+esc(partName(t,di))+'</b><span>'+esc(t.sala)+'</span></div>';}});
   h+='</div></div></div>';
-  h+='<div class="card"><div class="row between"><h2>Nómina</h2><span class="lock">🔒 Solo coordinador</span></div><form id="addKid" class="row"><input type="text" id="addKidN" placeholder="Nombre y apellido del niño" aria-label="Nombre del niño nuevo" style="flex:1;min-width:200px"><button class="btn primary small" type="submit">Agregar niño</button></form><div class="list">'+
+  h+='<div class="card"><div class="row between"><h2>Nómina</h2><div class="row"><button class="btn small" data-a="goImport" data-v="'+gi+'">Agregar lista</button><span class="lock">🔒 Solo coordinador</span></div></div><form id="addKid" class="row"><input type="text" id="addKidN" placeholder="Nombre y apellido del niño" aria-label="Nombre del niño nuevo" style="flex:1;min-width:200px"><button class="btn primary small" type="submit">Agregar niño</button></form><div class="list">'+
     (ks.length?ks.map(function(k){return '<div class="item"><div class="grow"><b>'+esc(k.name)+'</b><span class="muted">'+(k.aut&&k.aut.length?k.aut.length+' autorizados':'Sin autorizados registrados')+'</span></div><select data-c="moveKid" data-k="'+k.id+'" aria-label="Mover a '+esc(k.name)+' a otro grupo" style="width:auto;min-width:110px">'+GROUPS.map(function(x,i){return '<option value="'+i+'"'+(i===gi?" selected":"")+'>'+x.name+'</option>';}).join("")+'</select><button class="btn small" data-a="kid" data-v="'+k.id+'">Ficha</button><button class="btn small" data-a="delKid" data-v="'+k.id+'" aria-label="Quitar a '+esc(k.name)+'">✕</button></div>';}).join(""):'<p class="empty">Este grupo no tiene niños todavía.</p>')+'</div></div>';
   return h;
 }
@@ -554,10 +554,11 @@ document.addEventListener("click",function(e){
   else if(a==="tback"){S.tview="list";window.scrollTo(0,0);}
   else if(a==="gopen"){S.gsel=+v;S.gview="det";window.scrollTo(0,0);}
   else if(a==="gback"){S.gview="list";window.scrollTo(0,0);}
+  else if(a==="goImport"){S.gview="list";S.impG=+v;save();render();var al=document.getElementById("addList");if(al)al.scrollIntoView({block:"start"});return;}
   else if(a==="delKid"){S.kids=S.kids.filter(function(k){return k.id!==v;});KIDS=S.kids;toast("Niño quitado de la nómina.");}
   else if(a==="import"){
     var defG=+document.getElementById("impG").value,replace=document.getElementById("impR").checked,fi=document.getElementById("impF"),tx=document.getElementById("impT").value.trim();
-    var done=function(nAdded){if(!nAdded){toast("No encontré nombres para importar.");return;}save();render();toast(nAdded+" niños importados.");};
+    var done=function(nAdded){if(!nAdded){toast("No encontré nombres para importar.");return;}save();render();toast(nAdded+" niños agregados a la lista.");};
     if(fi.files&&fi.files[0]){var file=fi.files[0],rd=new FileReader();
       if(/\.(xlsx|xls)$/i.test(file.name)){
         if(!window.XLSX){toast("No se pudo leer Excel aquí; guárdalo como CSV y vuelve a subirlo.");return;}
