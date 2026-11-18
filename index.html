@@ -203,8 +203,8 @@ var KIDS=[],n=0;
 GROUPS.forEach(function(g,gi){for(var i=0;i<SIZES[gi];i++,n++){
   var ap=APE[(n*7+3)%APE.length];
   KIDS.push({id:"k"+n,g:gi,name:NOM[n%NOM.length]+" "+ap,
-    aut:[{name:ADU[n%ADU.length]+" "+ap,rel:n%2?"Padre":"Madre",tel:"+56 9 0000 "+String(1000+n).slice(-4)},
-         {name:ADU[(n+5)%ADU.length]+" "+APE[(n*3+1)%APE.length],rel:["Abuela","Tía","Abuelo","Tío"][n%4],tel:"+56 9 0000 "+String(2000+n).slice(-4)}]});
+    aut:[{name:ADU[n%ADU.length]+" "+ap,rel:"Apoderado/a",tel:"+56 9 0000 "+String(1000+n).slice(-4)},
+         {name:ADU[(n+5)%ADU.length]+" "+APE[(n*3+1)%APE.length],rel:"Familiar",tel:"+56 9 0000 "+String(2000+n).slice(-4)}]});
 }});
 
 var dow=new Date().getDay();
@@ -217,6 +217,7 @@ var S={role:"coord",view:"inicio",day:startDay===undefined?2:startDay,hview:"dia
     {id:3,title:"Reunión de monitores",text:"Reunión de planificación el miércoles a las 15:00 en la sala de profesores.",dest:"mon",tipo:"Interno",date:"10 nov",reads:6}
   ],
   noShow:{},
+  early:{},rgroup:0,rkid:"",rq:"",
   monitors:{},
   tx:{},tsel:"art",
   mats:{art:[{t:"Calcetines para títeres",ok:true},{t:"Témperas de colores",ok:false},{t:"Teatrino",ok:true}],exp:[{t:"Lupas (17)",ok:true},{t:"Bicarbonato y vinagre",ok:false}],con:[{t:"Bloques de madera",ok:true},{t:"Juegos de mesa",ok:false}]},
@@ -248,7 +249,7 @@ function toast(msg){var t=document.getElementById("toast");t.textContent=msg;t.c
 function destLabel(d){if(d==="all")return "Todas las familias";if(d==="mon")return "Monitores";if(d==="dir")return "Dirección";if(d.indexOf("lvl:")===0)return d.slice(4);var g=GROUPS.filter(function(x){return x.id===d;})[0];return g?"Familias de "+g.name:d;}
 
 var NAV={
-  coord:[["inicio","⌂","Inicio"],["horario","▦","Horario"],["talleres","◉","Talleres"],["grupos","▤","Grupos"],["asistencia","✓","Asistencia"],["ninos","☺","Niños"],["salida","➜","Salida"],["avisos","✉","Avisos"],["equipo","★","Equipo"],["planes","☰","Planificaciones"],["academie","◇","Académie"]],
+  coord:[["inicio","⌂","Inicio"],["horario","▦","Horario"],["talleres","◉","Talleres"],["grupos","▤","Grupos"],["asistencia","✓","Asistencia"],["ninos","☺","Niños"],["retiros","➜","Retiros"],["avisos","✉","Avisos"],["equipo","★","Equipo"],["planes","☰","Planificaciones"],["academie","◇","Académie"]],
   mon:[["midia","⌂","Mi día"],["asistencia","✓","Asistencia"],["miplan","☰","Planificación"],["avisos","✉","Avisos internos"]],
   dir:[["resumen","⌂","Resumen"],["horario","▦","Horario"],["avisos","✉","Avisos enviados"]],
   fam:[["mihijo","☺","Mi hijo"],["avisos","✉","Avisos"]]
@@ -270,14 +271,15 @@ function board(di,hlG){
 /* ---------- Coordinador ---------- */
 function vInicio(){
   var abs=absCount(),tk=takenCount(),pend=6-tk;
-  var noOut=KIDS.filter(function(k){return present(k)&&!outOf(k);}).length;
+  var ear=(S.early[dk()]||[]).length;
   var h=top("Inicio",DAYS[S.day].name+" · resumen del día")+'<div class="card">'+dayChips()+'</div>';
-  h+='<div class="tiles"><div class="tile ok"><b>'+(KIDS.length-abs)+'</b><span>Presentes de '+KIDS.length+'</span></div><div class="tile'+(abs?' bad':'')+'"><b>'+abs+'</b><span>Ausentes</span></div><div class="tile'+(pend?' warn':'')+'"><b>'+tk+'/6</b><span>Grupos con asistencia</span></div><div class="tile"><b>'+noOut+'</b><span>Por retirar a las 16:00</span></div></div>';
+  h+='<div class="tiles"><div class="tile ok"><b>'+(KIDS.length-abs)+'</b><span>Presentes de '+KIDS.length+'</span></div><div class="tile'+(abs?' bad':'')+'"><b>'+abs+'</b><span>Ausentes</span></div><div class="tile'+(pend?' warn':'')+'"><b>'+tk+'/6</b><span>Grupos con asistencia</span></div><div class="tile"><b>'+ear+'</b><span>Retiros anticipados hoy</span></div></div>';
   h+='<div class="card"><h2>Alertas</h2><div class="list" style="gap:8px">';
   var al=[];
   for(var g=0;g<6;g++){if(!(S.taken[dk()]||{})[g]){var t=tallerAt(g,S.day,0);al.push('<div class="alert warn">⚠ <span><b>'+GROUPS[g].name+'</b> no tiene asistencia registrada (módulo 1 en '+t.name+').</span></div>');}}
-  var bad=Object.keys(S.noShow[dk()]||{});
-  bad.forEach(function(id){var k=KIDS.filter(function(x){return x.id===id;})[0];if(k)al.push('<div class="alert bad">⛔ <span>Retiro de <b>'+esc(k.name)+'</b> registrado por una persona no autorizada.</span></div>');});
+  (S.early[dk()]||[]).forEach(function(r){if(!r.ok){var k=kidById(r.kid);if(k)al.push('<div class="alert bad">⛔ <span>Retiro anticipado de <b>'+esc(k.name)+'</b> por una persona no autorizada ('+esc(r.by)+', '+r.time+').</span></div>');}});
+  var sinAut=KIDS.filter(function(k){return !k.aut||!k.aut.length;}).length;
+  if(sinAut)al.push('<div class="alert warn">⚠ <span>'+sinAut+' niños no tienen personas autorizadas registradas. <button class="btn small" data-a="go" data-v="retiros">Revisar</button></span></div>');
   TALLERES.forEach(function(t){if(!monName(t))al.push('<div class="alert warn">⚠ <span><b>'+t.name+'</b> no tiene monitor inscrito. <button class="btn small" data-a="go" data-v="equipo">Inscribir</button></span></div>');});
   var pendP=TALLERES.filter(function(t){return !S.plans[t.id+"|"+wkKey(0)];}).length;
   if(pendP)al.push('<div class="alert warn">⚠ <span>'+pendP+' de 6 talleres no han subido su planificación de esta semana.</span></div>');
@@ -323,15 +325,26 @@ function vNinos(){
   h+='<div class="card"><h2>Ficha del niño</h2><p>Toca <b>Ver ficha</b> en cualquier niño para abrir su información: grupo, asistencia de hoy y adultos autorizados a retirarlo.</p><p class="muted">Sin RUT del niño, según la especificación. Los cambios quedan en el registro de accesos.</p></div>';
   return h+'</div>';
 }
-function vSalida(){
-  var gi=S.sgroup,ks=kidsOf(gi).filter(present);
-  var done=ks.filter(outOf).length;
-  var h=top("Salida","16:00 · control de retiro (solo coordinador)")+'<div class="card">'+dayChips()+groupSel("sg",gi,"sgroup")+'<div class="row between"><p><b>'+done+' de '+ks.length+'</b> <span class="muted">retirados en '+GROUPS[gi].name+'</span></p><span class="lock">🔒 Solo coordinador</span></div><div class="list">';
-  h+=ks.map(function(k){var o=outOf(k);
-    if(o)return '<div class="item"><div class="grow"><b>'+esc(k.name)+'</b><span class="muted">Retirado por '+esc(o.by)+' · '+o.time+'</span></div><span class="pill '+(o.ok?'p-ok':'p-bad')+'">'+(o.ok?'Retirado':'No autorizado')+'</span></div>';
-    return '<div class="item"><div class="grow"><b>'+esc(k.name)+'</b><select data-c="pick" data-k="'+k.id+'" aria-label="Quién retira a '+esc(k.name)+'" style="margin-top:6px;max-width:320px"><option value="">¿Quién retira?</option>'+k.aut.map(function(a,i){return '<option value="'+i+'">'+esc(a.name)+' ('+a.rel+')</option>';}).join("")+'<option value="x">Otra persona (no autorizada)</option></select></div><button class="btn small primary" data-a="out" data-v="'+k.id+'">Registrar</button></div>';
-  }).join("");
-  return h+'</div></div>';
+function kidById(id){return KIDS.filter(function(k){return k.id===id;})[0];}
+function nowHM(){var n=new Date();return ("0"+n.getHours()).slice(-2)+":"+("0"+n.getMinutes()).slice(-2);}
+function earlyForm(gi,showTel){
+  var ks=kidsOf(gi),k=kidById(S.rkid);if(!k||k.g!==gi)k=ks[0];
+  return '<form id="earlyForm" class="list" style="gap:12px"><div class="row"><div class="field" style="flex:1;min-width:160px"><label for="rg">Grupo</label><select id="rg" data-c="rgroup">'+GROUPS.map(function(g,i){return '<option value="'+i+'"'+(i===gi?" selected":"")+'>'+g.name+'</option>';}).join("")+'</select></div><div class="field" style="flex:2;min-width:200px"><label for="rk">Niño</label><select id="rk" data-c="rkid">'+ks.map(function(x){return '<option value="'+x.id+'"'+(k&&x.id===k.id?" selected":"")+'>'+esc(x.name)+'</option>';}).join("")+'</select></div></div>'+
+   '<div class="field"><label for="rw">Quién lo retira</label><select id="rw">'+(k&&k.aut.length?k.aut.map(function(a,i){return '<option value="'+i+'">'+esc(a.name)+' · '+a.rel+(showTel?' · '+a.tel:'')+'</option>';}).join(""):'<option value="" disabled>Sin autorizados registrados</option>')+'<option value="x">Otra persona (no está autorizada)</option></select></div>'+
+   '<div class="row"><div class="field" style="width:130px"><label for="rt">Hora</label><input type="text" id="rt" value="'+nowHM()+'"></div><div class="field" style="flex:1;min-width:200px"><label for="rm">Motivo</label><input type="text" id="rm" placeholder="Ej.: control médico"></div></div><div class="row"><button class="btn primary" type="submit">Registrar retiro anticipado</button></div></form>';
+}
+function earlyLog(){
+  var l=S.early[dk()]||[];
+  return '<div class="list">'+(l.length?l.map(function(r){var k=kidById(r.kid);return '<div class="item"><div class="grow"><b>'+esc(k?k.name:"(niño eliminado)")+'</b><span class="muted">'+r.time+' · '+esc(r.by)+(r.motivo?' · '+esc(r.motivo):'')+' · registrado por '+r.reg+'</span></div><span class="pill '+(r.ok?'p-ok':'p-bad')+'">'+(r.ok?'Autorizado':'No autorizado')+'</span></div>';}).join(""):'<p class="empty">Sin retiros anticipados este día.</p>')+'</div>';
+}
+function vRetiros(){
+  var h=top("Retiros","Retiros anticipados y personas autorizadas")+'<div class="card"><p>La salida normal de las 16:00 la hacen las familias con el equipo como siempre. Aquí se registra solo cuando <b>un niño se va antes</b>, y quién está autorizado a llevárselo.</p>'+dayChips()+'</div>';
+  h+='<div class="grid2"><div class="card"><h2>Registrar retiro anticipado</h2>'+earlyForm(S.rgroup,true)+'</div><div class="card"><h2>Retiros de '+DAYS[S.day].name.toLowerCase()+'</h2>'+earlyLog()+'</div></div>';
+  var q=S.rq.toLowerCase(),list=KIDS.filter(function(k){return !q||k.name.toLowerCase().indexOf(q)>=0;});
+  h+='<div class="card"><div class="row between"><h2>Personas autorizadas</h2><span class="lock">🔒 Teléfonos visibles solo para el coordinador</span></div><input type="text" id="rq" placeholder="Buscar niño" aria-label="Buscar niño" value="'+esc(S.rq)+'"><div class="list">'+
+    list.slice(0,30).map(function(k){return '<div class="item" style="align-items:flex-start"><div class="grow"><b>'+esc(k.name)+'</b><span class="muted">'+GROUPS[k.g].name+'</span><div class="list" style="margin-top:6px">'+(k.aut.length?k.aut.map(function(a,i){return '<div class="row" style="gap:8px"><span>'+esc(a.name)+' · '+a.rel+' · <span class="muted">'+a.tel+'</span></span><button class="btn small" data-a="delAut" data-v="'+k.id+'|'+i+'" aria-label="Quitar a '+esc(a.name)+'">✕</button></div>';}).join(""):'<span class="pill p-warn">Sin autorizados</span>')+'</div></div><button class="btn small" data-a="addAut" data-v="'+k.id+'">+ Autorizado</button></div>';}).join("")+
+    (list.length>30?'<p class="muted">Mostrando 30 de '+list.length+'. Usa el buscador.</p>':'')+'</div></div>';
+  return h;
 }
 function avisoCard(a,compact){
   var h='<div class="aviso"><div class="row between"><b>'+esc(a.title)+'</b><span class="pill p-info">'+a.tipo+'</span></div><p class="meta">'+destLabel(a.dest)+' · '+a.date+(S.role==="coord"&&a.dest!=="mon"&&a.dest!=="dir"?' · leído por '+a.reads+' familias':'')+'</p><p>'+esc(a.text)+'</p>';
@@ -352,7 +365,12 @@ function vAvisos(){
   h+='<div class="card"><h2>'+(mine.length)+' avisos</h2><div class="list" style="gap:10px">'+(mine.length?mine.map(function(a){return avisoCard(a,false);}).join(""):'<p class="empty">No hay avisos.</p>')+'</div></div>';
   return h;
 }
-function monName(t){var m=S.monitors[t.id];return m&&m.name?m.name:"";}
+function mons(t){var m=S.monitors[t.id];if(!m)m=[];else if(!Array.isArray(m))m=m.name?[m]:[];S.monitors[t.id]=m;return m;}
+function monName(t){return mons(t).map(function(x){return x.name;}).join(", ");}
+function monBlock(t){var ms=mons(t);
+  var h='<div class="list">'+(ms.length?ms.map(function(x,i){return '<div class="item"><div class="grow"><b>'+esc(x.name)+'</b><span class="muted">'+(x.email?esc(x.email):'Sin correo')+'</span></div><button class="btn small" data-a="delMon" data-v="'+t.id+'|'+i+'" aria-label="Quitar a '+esc(x.name)+'">✕</button></div>';}).join(""):'<p class="empty">Sin monitores inscritos.</p>')+'</div><div class="row"><span class="pill '+(ms.length>=2?'p-ok':'p-warn')+'">'+ms.length+' de 3 monitores</span></div>';
+  if(ms.length<3)h+='<form class="list" style="gap:10px" data-f="mon" data-t="'+t.id+'"><div class="field"><label for="mn-'+t.id+'">Nombre del monitor</label><input type="text" id="mn-'+t.id+'" placeholder="Nombre y apellido"></div><div class="field"><label for="me-'+t.id+'">Correo (Google)</label><input type="text" id="me-'+t.id+'" placeholder="nombre@gmail.com"></div><div class="row"><button class="btn primary small" type="submit">Agregar monitor</button></div></form>';
+  return h;}
 function vTalleres(){
   if(S.tview==="det")return vTaller();
   return top("Talleres","Gestiona cada taller: datos, monitor, horario, planificaciones y materiales")+'<div class="grid3">'+TALLERES.map(function(t){var mats=S.mats[t.id]||[],falta=mats.filter(function(m){return !m.ok;}).length,p=planFor(t,wkKey(0));
@@ -368,7 +386,7 @@ function vTaller(){
     '<div class="row"><div class="field" style="flex:1;min-width:150px"><label for="tPA">Lunes y martes</label><input type="text" id="tPA" value="'+esc(t.parts?t.parts[0]:t.name)+'"></div><div class="field" style="flex:1;min-width:150px"><label for="tPB">Jueves y viernes</label><input type="text" id="tPB" value="'+esc(t.parts?t.parts[1]:t.name)+'"></div></div>'+
     '<div class="row"><div class="field" style="flex:1;min-width:150px"><label for="tTA">Qué traer (lun y mar)</label><input type="text" id="tTA" value="'+esc(t.traer[0]||"")+'" placeholder="Nada especial"></div><div class="field" style="flex:1;min-width:150px"><label for="tTB">Qué traer (jue y vie)</label><input type="text" id="tTB" value="'+esc(t.traer[1]||"")+'" placeholder="Nada especial"></div></div>'+
     '<div class="row"><button class="btn primary" type="submit">Guardar datos</button><button class="btn" type="button" data-a="treset">Volver a los valores iniciales</button></div></form></div>';
-  h+='<div class="card"><h2>Monitor</h2><form class="list" style="gap:10px" data-f="mon" data-t="'+t.id+'"><div class="field"><label for="mn-'+t.id+'">Nombre del monitor</label><input type="text" id="mn-'+t.id+'" value="'+esc(m.name||"")+'" placeholder="Nombre y apellido"></div><div class="field"><label for="me-'+t.id+'">Correo (Google)</label><input type="text" id="me-'+t.id+'" value="'+esc(m.email||"")+'" placeholder="nombre@gmail.com"></div><div class="row"><button class="btn primary small" type="submit">'+(m.name?'Guardar cambios':'Inscribir monitor')+'</button>'+(m.name?'<span class="pill p-ok">Inscrito</span><button class="btn small" type="button" data-a="tunmon">Quitar monitor</button>':'<span class="pill p-warn">Por definir</span>')+'</div></form>'+
+  h+='<div class="card"><h2>Monitores</h2>'+monBlock(t)+''+
     '<h2 style="margin-top:8px">Notas del taller</h2><textarea id="tNote" placeholder="Observaciones, acuerdos, ideas para la muestra final">'+esc((S.tnotes||{})[t.id]||"")+'</textarea><div class="row"><button class="btn small" data-a="tnote">Guardar notas</button></div></div></div>';
   h+='<div class="grid2"><div class="card"><h2>Horario semanal</h2><div class="scroll"><table><thead><tr><th>Día</th>'+MODS.map(function(x){return '<th>'+x.h+'</th>';}).join("")+'</tr></thead><tbody>'+DAYS.map(function(d,di){return '<tr><td><b>'+d.name+'</b><br><span class="muted">'+esc(partName(t,di))+'</span></td>'+[0,1,2].map(function(x){return '<td>'+GROUPS[groupAt(ti,di,x)].name+'</td>';}).join("")+'</tr>';}).join("")+'</tbody></table></div></div>';
   var falta=mats.filter(function(x){return !x.ok;}).length;
@@ -378,10 +396,10 @@ function vTaller(){
   return h;
 }
 function vEquipo(){
-  var n=TALLERES.filter(monName).length;
-  return top("Equipo",n+" de 6 monitores inscritos · con apoyo de las ASEM")+'<div class="grid3">'+TALLERES.map(function(t){var m=S.monitors[t.id]||{};
+  var n=TALLERES.reduce(function(acc,t){return acc+mons(t).length;},0);
+  return top("Equipo",n+" monitores inscritos · 2 o 3 por taller, con apoyo de las ASEM")+'<div class="grid3">'+TALLERES.map(function(t){var m=S.monitors[t.id]||{};
     return '<div class="card"><div class="tname t-'+t.id+'"><span class="sw s-'+t.id+'"></span><span>'+t.name+'</span></div><p class="muted">'+t.sala+(t.parts?' · '+t.parts[0]+' (lun y mar) / '+t.parts[1]+' (jue y vie)':'')+'</p>'+
-    '<form class="list" style="gap:10px" data-f="mon" data-t="'+t.id+'"><div class="field"><label for="mn-'+t.id+'">Nombre del monitor</label><input type="text" id="mn-'+t.id+'" value="'+esc(m.name||"")+'" placeholder="Nombre y apellido"></div><div class="field"><label for="me-'+t.id+'">Correo (Google)</label><input type="text" id="me-'+t.id+'" value="'+esc(m.email||"")+'" placeholder="nombre@gmail.com"></div><div class="row"><button class="btn primary small" type="submit">'+(m.name?'Guardar cambios':'Inscribir monitor')+'</button>'+(m.name?'<span class="pill p-ok">Inscrito</span>':'<span class="pill p-warn">Por definir</span>')+'</div></form>'+
+    monBlock(t)+
     '<div class="row"><button class="btn small" data-a="toast" data-v="Reemplazo: se elige fecha y adulto (simulado).">Asignar reemplazo</button></div></div>';}).join("")+'</div>';
 }
 function planFor(t,key){return S.plans[t.id+"|"+key];}
@@ -403,6 +421,10 @@ function modalHtml(){
   var body="";
   if(m.type==="kid"){var k=KIDS.filter(function(x){return x.id===m.id;})[0];if(!k)return "";
     body='<p class="muted">Ficha del niño · 🔒 solo coordinador</p><p class="kidname">'+esc(k.name)+'</p><p>'+GROUPS[k.g].name+' · '+GROUPS[k.g].lvl+'</p><p class="muted">Hoy: '+(present(k)?'presente':'ausente')+'</p><h3>Autorizados a retirar</h3><div class="list">'+k.aut.map(function(a){return '<div class="item"><div class="grow"><b>'+esc(a.name)+'</b><span class="muted">'+a.rel+' · '+a.tel+'</span></div></div>';}).join("")+'</div><div class="row"><button class="btn small" data-a="toast" data-v="Edición de la ficha (simulada). El cambio queda en el registro de accesos.">Editar ficha</button></div>';}
+  if(m.type==="aut"){var ka=kidById(m.id);if(!ka)return "";
+    body='<p class="muted">Nueva persona autorizada</p><h2>'+esc(ka.name)+'</h2><form id="autForm" class="list" style="gap:12px"><div class="field"><label for="aN">Nombre y apellido</label><input type="text" id="aN" required></div><div class="row"><div class="field" style="flex:1;min-width:140px"><label for="aR">Parentesco</label><input type="text" id="aR" placeholder="Ej.: Abuela"></div><div class="field" style="flex:1;min-width:160px"><label for="aT">Teléfono</label><input type="text" id="aT" placeholder="+56 9 …"></div></div><button class="btn primary" type="submit">Guardar autorizado</button></form>';}
+  if(m.type==="early"){
+    body='<p class="muted">Retiro anticipado · solo nombres y parentesco</p><h2>'+GROUPS[S.rgroup].name+'</h2>'+earlyForm(S.rgroup,false);}
   if(m.type==="plan"){var parts=m.id.split("|"),t=TALLERES.filter(function(x){return x.id===parts[0];})[0],p=S.plans[m.id];if(!p)return "";
     body='<p class="muted">'+wkLabel(parts[1])+' · '+(monName(t)||"Monitor por definir")+'</p><h2>'+t.name+'</h2><h3>Objetivo</h3><p>'+esc(p.obj)+'</p><h3>Actividades</h3><p class="plan-txt">'+esc(p.act)+'</p>'+(p.mat?'<h3>Materiales</h3><p>'+esc(p.mat)+'</p>':'')+(p.file?'<p class="muted">Adjunto: '+esc(p.file)+'</p>':'');}
   return '<div class="modal-bg" data-a="close"><div class="modal" role="dialog" aria-modal="true" aria-label="Detalle"><button class="x" data-a="close" aria-label="Cerrar">×</button>'+body+'</div></div>';
@@ -415,7 +437,7 @@ function vMiDia(){
   var ti=S.monT,t=TALLERES[ti];
   var h=top("Mi día",(monName(t)?esc(monName(t))+" · ":"")+"Monitor de "+t.name)+'<div class="card"><div class="field"><label for="mt">Demo: elige el taller del monitor</label><select id="mt" data-c="monT">'+TALLERES.map(function(x,i){return '<option value="'+i+'"'+(ti===i?" selected":"")+'>'+x.name+'</option>';}).join("")+'</select></div>'+dayChips()+'</div>';
   h+='<div class="card t-'+t.id+'" style="border:0"><h2>Hoy en '+t.name+': '+partName(t,S.day)+'</h2><p>'+t.sala+'</p></div><div class="grid3">';
-  for(var m=0;m<3;m++){var g=groupAt(ti,S.day,m),ks=kidsOf(g);h+='<div class="card"><p class="muted">'+MODS[m].n+' · '+MODS[m].h+'</p><p class="kidname">'+GROUPS[g].name+'</p><p class="muted">'+ks.filter(present).length+' presentes de '+ks.length+'</p>'+(m===0?'<button class="btn primary" data-a="go" data-v="asistencia">Tomar asistencia</button>':'<button class="btn small" data-a="toast" data-v="Registro de retiro anticipado o llegada tarde (simulado).">Registrar cambio</button>')+'</div>';}
+  for(var m=0;m<3;m++){var g=groupAt(ti,S.day,m),ks=kidsOf(g);h+='<div class="card"><p class="muted">'+MODS[m].n+' · '+MODS[m].h+'</p><p class="kidname">'+GROUPS[g].name+'</p><p class="muted">'+ks.filter(present).length+' presentes de '+ks.length+'</p>'+(m===0?'<button class="btn primary" data-a="go" data-v="asistencia">Tomar asistencia</button>':'<button class="btn small" data-a="monEarly" data-v="'+g+'">Registrar retiro anticipado</button>')+'</div>';}
   return h+'</div>';
 }
 /* ---------- Dirección ---------- */
@@ -473,7 +495,7 @@ function parseRows(rows,defG,replace){
   KIDS=S.kids;S.att={};S.taken={};S.out={};
   return added.length;
 }
-var VIEWS={grupos:vGrupos,talleres:vTalleres,inicio:vInicio,horario:vHorario,asistencia:vAsistencia,ninos:vNinos,salida:vSalida,avisos:vAvisos,equipo:vEquipo,planes:vPlanes,academie:vAcademie,midia:vMiDia,miplan:vMiPlan,resumen:vResumen,mihijo:vMiHijo};
+var VIEWS={grupos:vGrupos,talleres:vTalleres,inicio:vInicio,horario:vHorario,asistencia:vAsistencia,ninos:vNinos,retiros:vRetiros,avisos:vAvisos,equipo:vEquipo,planes:vPlanes,academie:vAcademie,midia:vMiDia,miplan:vMiPlan,resumen:vResumen,mihijo:vMiHijo};
 function render(){
   applyTx();
   var nav=NAV[S.role];
@@ -488,12 +510,21 @@ function render(){
     if(alt&&(!pa||!pb)){toast("Escribe las dos partes del taller.");return;}
     S.tx[S.tsel]={name:nm,sala:document.getElementById("tS").value.trim()||"Por definir",parts:alt?[pa,pb]:null,traer:[document.getElementById("tTA").value.trim()||null,document.getElementById("tTB").value.trim()||null]};
     save();render();toast("Datos del taller guardados.");});
+  var ef=document.getElementById("earlyForm");
+  if(ef)ef.addEventListener("submit",function(e){e.preventDefault();var k=kidById(document.getElementById("rk").value),w=document.getElementById("rw").value;if(!k||w===""){toast("Elige el niño y quién lo retira.");return;}
+    var r={kid:k.id,time:document.getElementById("rt").value||nowHM(),motivo:document.getElementById("rm").value.trim(),reg:S.role==="mon"?"monitor":"coordinador"};
+    if(w==="x"){r.by="Persona no autorizada";r.ok=false;}else{r.by=k.aut[+w].name+" ("+k.aut[+w].rel+")";r.ok=true;}
+    var d=dk();S.early[d]=S.early[d]||[];S.early[d].unshift(r);S.modal=null;save();render();toast(r.ok?"Retiro anticipado registrado.":"Alerta: no está autorizada. Se avisa al coordinador.");});
+  var af=document.getElementById("autForm");
+  if(af)af.addEventListener("submit",function(e){e.preventDefault();var k=kidById(S.modal.id),nm=document.getElementById("aN").value.trim();if(!k||!nm)return;k.aut.push({name:nm,rel:document.getElementById("aR").value.trim()||"Autorizado",tel:document.getElementById("aT").value.trim()||"Sin teléfono"});S.modal=null;save();render();toast("Autorizado agregado.");});
+  var rqI=document.getElementById("rq");
+  if(rqI)rqI.addEventListener("input",function(){S.rq=rqI.value;var pos=rqI.selectionStart;save();render();var n2=document.getElementById("rq");n2.focus();try{n2.setSelectionRange(pos,pos);}catch(e){}});
   var ak=document.getElementById("addKid");
   if(ak)ak.addEventListener("submit",function(e){e.preventDefault();var nm=document.getElementById("addKidN").value.trim();if(!nm)return;S.kids.push({id:"n"+Date.now(),g:S.gsel,name:nm,aut:[]});KIDS=S.kids;save();render();toast(nm+" agregado a "+GROUPS[S.gsel].name+".");});
   var mf=document.getElementById("matForm");
   if(mf)mf.addEventListener("submit",function(e){e.preventDefault();var v=document.getElementById("matT").value.trim();if(!v)return;S.mats[S.tsel]=S.mats[S.tsel]||[];S.mats[S.tsel].push({t:v,ok:false});save();render();});
   document.querySelectorAll('form[data-f="mon"]').forEach(function(fm){fm.addEventListener("submit",function(e){e.preventDefault();var id=fm.getAttribute("data-t"),nm=document.getElementById("mn-"+id).value.trim(),em=document.getElementById("me-"+id).value.trim();
-    if(!nm){toast("Escribe el nombre del monitor.");return;}S.monitors[id]={name:nm,email:em};save();render();toast("Monitor inscrito. En el sistema real se le envía una invitación a su correo.");});});
+    if(!nm){toast("Escribe el nombre del monitor.");return;}var tt=TALLERES.filter(function(x){return x.id===id;})[0];mons(tt).push({name:nm,email:em});save();render();toast("Monitor agregado. En el sistema real se le envía una invitación a su correo.");});});
   var pf=document.getElementById("planForm");
   if(pf)pf.addEventListener("submit",function(e){e.preventDefault();var t=TALLERES[S.monT],key=S.pweek||wkKey(0),fi=document.getElementById("pFile"),old=planFor(t,key)||{};
     var now=new Date(),dias=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
@@ -538,17 +569,13 @@ document.addEventListener("click",function(e){
     toast("Elige un archivo o pega la lista.");return;
   }
   else if(a==="treset"){delete S.tx[S.tsel];toast("Valores iniciales restablecidos.");}
-  else if(a==="tunmon"){delete S.monitors[S.tsel];toast("Monitor quitado del taller.");}
+  else if(a==="delMon"){var pm=v.split("|"),tm2=TALLERES.filter(function(x){return x.id===pm[0];})[0];mons(tm2).splice(+pm[1],1);toast("Monitor quitado del taller.");}
   else if(a==="tnote"){S.tnotes=S.tnotes||{};S.tnotes[S.tsel]=document.getElementById("tNote").value;toast("Notas guardadas.");}
   else if(a==="tmat"){var ml=S.mats[S.tsel];ml[+v].ok=!ml[+v].ok;}
   else if(a==="tmatdel"){S.mats[S.tsel].splice(+v,1);}
-  else if(a==="out"){
-    var sel=document.querySelector('select[data-k="'+v+'"]');if(!sel||sel.value===""){toast("Elige quién retira.");return;}
-    var k=KIDS.filter(function(x){return x.id===v;})[0],now=new Date(),tm=("0"+now.getHours()).slice(-2)+":"+("0"+now.getMinutes()).slice(-2);
-    var d4=dk();S.out[d4]=S.out[d4]||{};
-    if(sel.value==="x"){S.out[d4][v]={by:"Persona no autorizada",time:tm,ok:false};S.noShow[d4]=S.noShow[d4]||{};S.noShow[d4][v]=1;toast("Alerta: persona no autorizada.");}
-    else{S.out[d4][v]={by:k.aut[+sel.value].name,time:tm,ok:true};toast("Retiro registrado.");}
-  }
+  else if(a==="addAut")S.modal={type:"aut",id:v};
+  else if(a==="delAut"){var pr=v.split("|"),kd=kidById(pr[0]);if(kd){kd.aut.splice(+pr[1],1);toast("Autorizado quitado.");}}
+  else if(a==="monEarly"){S.rgroup=+v;S.rkid="";S.modal={type:"early"};}
   else if(a==="copy"){
     var av=S.avisos.filter(function(x){return String(x.id)===v;})[0];if(!av)return;
     var txt="*École de Jeu* · "+av.title+"\n\n"+av.text+"\n\nCoordinación École de Jeu";
@@ -563,7 +590,7 @@ document.addEventListener("change",function(e){
   var c=e.target.getAttribute&&e.target.getAttribute("data-c");if(!c||c==="pick")return;
   var val=e.target.value;
   if(c==="moveKid"){var kk=S.kids.filter(function(k){return k.id===e.target.getAttribute("data-k");})[0];if(kk){kk.g=+val;toast(kk.name+" movido a "+GROUPS[+val].name+".");}}
-  else if(c==="famKid")S.famKid=val;else S[c]=+val;
+  else if(c==="famKid")S.famKid=val;else if(c==="rkid")S.rkid=val;else{S[c]=+val;if(c==="rgroup")S.rkid="";}
   save();render();
 });
 document.addEventListener("keydown",function(e){if(e.key==="Escape"&&S.modal){S.modal=null;save();render();}});
