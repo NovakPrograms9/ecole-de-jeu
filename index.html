@@ -248,7 +248,9 @@ function absCount(){var a=S.att[dk()]||{},c=0;for(var k in a){if(a[k]===false)c+
 function takenCount(){var t=S.taken[dk()]||{},c=0;for(var g=0;g<6;g++){if(t[g])c++;}return c;}
 function outOf(kid){return (S.out[dk()]||{})[kid.id];}
 function toast(msg){var t=document.getElementById("toast");t.textContent=msg;t.classList.remove("hide");clearTimeout(toast._t);toast._t=setTimeout(function(){t.classList.add("hide");},2600);}
-function destLabel(d){if(d==="all")return "Todas las familias";if(d==="mon")return "Monitores";if(d==="dir")return "Dirección";if(d.indexOf("lvl:")===0)return d.slice(4);var g=GROUPS.filter(function(x){return x.id===d;})[0];return g?"Familias de "+g.name:d;}
+function isStaff(d){return d==="mon"||d==="dir"||d.indexOf("tal:")===0||d.indexOf("per:")===0;}
+function perMon(d){var p=d.slice(4).split("|"),t=TALLERES.filter(function(x){return x.id===p[0];})[0];return t?{t:t,m:mons(t)[+p[1]]}:null;}
+function destLabel(d){if(d.indexOf("tal:")===0){var tt=TALLERES.filter(function(x){return x.id===d.slice(4);})[0];return tt?"Monitor de "+tt.name:d;}if(d.indexOf("per:")===0){var pm=perMon(d);return pm&&pm.m?pm.m.name+" (personal)":"Monitor (personal)";}if(d==="all")return "Todas las familias";if(d==="mon")return "Monitores";if(d==="dir")return "Dirección";if(d.indexOf("lvl:")===0)return d.slice(4);var g=GROUPS.filter(function(x){return x.id===d;})[0];return g?"Familias de "+g.name:d;}
 
 var NAV={
   coord:[["inicio","⌂","Inicio"],["horario","▦","Horario"],["talleres","◉","Talleres"],["grupos","▤","Grupos"],["asistencia","✓","Asistencia"],["ninos","☺","Niños"],["retiros","➜","Retiros"],["avisos","✉","Avisos"],["equipo","★","Equipo"],["planes","☰","Planificaciones"]],
@@ -378,30 +380,35 @@ function whenLabel(a){
   var mn=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"][d.getMonth()];
   return dn+" "+d.getDate()+" de "+mn;
 }
-function greet(a){return a.dest==="mon"?"Estimado equipo de monitores:":a.dest==="dir"?"Estimada Dirección:":"Estimados apoderados:";}
+function greet(a){
+  if(a.dest.indexOf("per:")===0){var pm=perMon(a.dest);return "Estimado/a "+(pm&&pm.m?pm.m.name.split(" ")[0]:"")+":";}
+  if(a.dest.indexOf("tal:")===0){var tt=TALLERES.filter(function(x){return x.id===a.dest.slice(4);})[0];return "Estimado/a monitor/a de "+(tt?tt.name:"")+":";}
+  return a.dest==="mon"?"Estimado equipo de monitores:":a.dest==="dir"?"Estimada Dirección:":"Estimados apoderados:";}
 function msgBody(a){
-  return greet(a)+"\n\n"+(a.dest==="mon"||a.dest==="dir"?"":"Junto con saludar, les informamos lo siguiente:\n\n")+(a.when?"📅 Para el "+whenLabel(a)+"\n\n":"")+a.text+"\n\n"+"Saludos cordiales,\nNicolás Novakovic Pinochet\nCoordinador École de Jeu\nLycée Claude Gay · Osorno";
+  return greet(a)+"\n\n"+(isStaff(a.dest)?"":"Junto con saludar, les informamos lo siguiente:\n\n")+(a.when?"📅 Para el "+whenLabel(a)+"\n\n":"")+a.text+"\n\n"+"Saludos cordiales,\nNicolás Novakovic Pinochet\nCoordinador École de Jeu\nLycée Claude Gay · Osorno";
 }
 function mailHref(a){
   var to=[];
   if(a.dest==="mon")TALLERES.forEach(function(t){mons(t).forEach(function(m){if(m.email)to.push(m.email);});});
+  if(a.dest.indexOf("tal:")===0)TALLERES.forEach(function(t){if("tal:"+t.id===a.dest)mons(t).forEach(function(m){if(m.email)to.push(m.email);});});
+  var personal=null;if(a.dest.indexOf("per:")===0){var pm=perMon(a.dest);if(pm&&pm.m&&pm.m.email)personal=pm.m.email;}
   var body=msgBody(a);
-  return "mailto:?"+(to.length?"bcc="+encodeURIComponent(to.join(","))+"&":"")+"subject="+encodeURIComponent("École de Jeu: "+a.title)+"&body="+encodeURIComponent(body);
+  return "mailto:"+(personal?encodeURIComponent(personal):"")+"?"+(to.length?"bcc="+encodeURIComponent(to.join(","))+"&":"")+"subject="+encodeURIComponent("École de Jeu: "+a.title)+"&body="+encodeURIComponent(body);
 }
 function avisoCard(a,compact){
-  var h='<div class="aviso"><div class="row between"><b>'+esc(a.title)+'</b><span class="pill p-info">'+a.tipo+'</span></div>'+(a.when?'<p class="meta" style="font-weight:700;color:var(--ink)">📅 Para el '+whenLabel(a)+'</p>':'')+'<p class="meta">'+destLabel(a.dest)+' · '+a.date+(S.role==="coord"&&a.dest!=="mon"&&a.dest!=="dir"?' · leído por '+a.reads+' familias':'')+'</p><p>'+esc(a.text)+'</p>';
+  var h='<div class="aviso"><div class="row between"><b>'+esc(a.title)+'</b><span class="pill p-info">'+a.tipo+'</span></div>'+(a.when?'<p class="meta" style="font-weight:700;color:var(--ink)">📅 Para el '+whenLabel(a)+'</p>':'')+'<p class="meta">'+destLabel(a.dest)+' · '+a.date+(S.role==="coord"&&!isStaff(a.dest)?' · leído por '+a.reads+' familias':'')+(S.role==="coord"&&isStaff(a.dest)&&a.dest!=="dir"?' · '+(a.readBy&&Object.keys(a.readBy).length?'✓ leído':'sin leer'):'')+'</p><p>'+esc(a.text)+'</p>';
   if(S.role==="coord"&&!compact)h+='<div class="row"><a class="btn small" href="'+mailHref(a)+'">Enviar por correo</a><button class="btn small" data-a="copy" data-v="'+a.id+'">Copiar para WhatsApp</button><button class="btn small" data-a="copy" data-v="'+a.id+'">Copiar para Schooltrack / Colegium</button></div>';
   return h+'</div>';
 }
 function vAvisos(){
   var mine=S.avisos.filter(function(a){
     if(S.role==="coord"||S.role==="dir")return true;
-    if(S.role==="mon")return a.dest==="mon";
+    if(S.role==="mon"){var mt=TALLERES[S.monT];return a.dest==="mon"||a.dest==="tal:"+mt.id||a.dest.indexOf("per:"+mt.id+"|")===0;}
     var k=famKid();return a.dest==="all"||a.dest===GROUPS[k.g].id||a.dest==="lvl:"+GROUPS[k.g].lvl;
   });
   var h=top(S.role==="dir"?"Avisos enviados":S.role==="mon"?"Avisos internos":"Avisos",S.role==="coord"?"Redacta una vez y copia a cada canal":"Información de la École de Jeu");
   if(S.role==="coord"){
-    var opts=[["all","Todas las familias"]].concat(["Petite Section","Moyenne Section","Grande Section"].map(function(l){return ["lvl:"+l,"Familias de "+l];})).concat(GROUPS.map(function(g){return [g.id,"Familias de "+g.name];})).concat([["mon","Monitores"],["dir","Dirección"]]);
+    var opts=[["all","Todas las familias"]].concat(["Petite Section","Moyenne Section","Grande Section"].map(function(l){return ["lvl:"+l,"Familias de "+l];})).concat(GROUPS.map(function(g){return [g.id,"Familias de "+g.name];})).concat([["mon","Todos los monitores"]]).concat(TALLERES.map(function(t){return ["tal:"+t.id,"Monitor de "+t.name];})).concat([].concat.apply([],TALLERES.map(function(t){return mons(t).map(function(m,i){return ["per:"+t.id+"|"+i,"Personal: "+m.name+" ("+t.name+")"];});}))).concat([["dir","Dirección"]]);
     h+='<div class="card"><h2>Nuevo aviso</h2><form id="avForm" class="list" style="gap:12px"><div class="field"><label for="avT">Título</label><input type="text" id="avT" required></div><div class="field"><label for="avX">Mensaje</label><textarea id="avX" required></textarea></div><div class="row"><div class="field" style="flex:1;min-width:200px"><label for="avD">Para</label><select id="avD">'+opts.map(function(o){return '<option value="'+o[0]+'">'+o[1]+'</option>';}).join("")+'</select></div><div class="field" style="flex:1;min-width:160px"><label for="avF">Para cuándo</label><input type="date" id="avF"></div><div class="field" style="flex:1;min-width:160px"><label for="avK">Tipo</label><select id="avK"><option>General</option><option>Qué traer</option><option>Urgente</option><option>Interno</option></select></div></div><div class="row"><button class="btn primary" type="submit">Publicar aviso</button><span class="muted">Después puedes enviarlo por correo o copiarlo para WhatsApp y Schooltrack.</span></div></form></div>';
   }
   h+='<div class="card"><h2>'+(mine.length)+' avisos</h2><div class="list" style="gap:10px">'+(mine.length?mine.map(function(a){return avisoCard(a,false);}).join(""):'<p class="empty">No hay avisos.</p>')+'</div></div>';
@@ -472,9 +479,12 @@ function modalHtml(){
   return '<div class="modal-bg" data-a="close"><div class="modal" role="dialog" aria-modal="true" aria-label="Detalle"><button class="x" data-a="close" aria-label="Cerrar">×</button>'+body+'</div></div>';
 }
 /* ---------- Monitor ---------- */
+function monAvisos(t){return S.avisos.filter(function(a){return (a.dest==="mon"||a.dest==="tal:"+t.id||a.dest.indexOf("per:"+t.id+"|")===0)&&!(a.readBy&&a.readBy[t.id]);});}
 function vMiDia(){
   var ti=S.monT,t=TALLERES[ti];
   var h=top("Mi día",(monName(t)?esc(monName(t))+" · ":"")+"Monitor de "+t.name)+'<div class="card"><div class="field"><label for="mt">Demo: elige el taller del monitor</label><select id="mt" data-c="monT">'+TALLERES.map(function(x,i){return '<option value="'+i+'"'+(ti===i?" selected":"")+'>'+x.name+'</option>';}).join("")+'</select></div>'+dayChips()+'</div>';
+  var ma=monAvisos(t);
+  if(ma.length)h+='<div class="card notif" role="status"><h2>🔔 '+(ma.length===1?'Tienes un aviso nuevo':'Tienes '+ma.length+' avisos nuevos')+'</h2><div class="list" style="gap:8px">'+ma.map(function(a){return '<div class="alert info"><span><b>'+esc(a.title)+'</b>'+(a.when?' · 📅 '+whenLabel(a):'')+(a.dest.indexOf("per:")===0?' · <i>personal</i>':'')+'</span><span>'+esc(a.text)+'</span><div class="row"><button class="btn small primary" data-a="readAv" data-v="'+a.id+'|'+t.id+'">✓ Entendido</button></div></div>';}).join("")+'</div></div>';
   h+='<div class="card t-'+t.id+'" style="border:0"><h2>Hoy en '+t.name+': '+partName(t,S.day)+'</h2><p>'+t.sala+'</p></div><div class="grid3">';
   for(var m=0;m<3;m++){var g=groupAt(ti,S.day,m),ks=kidsOf(g);h+='<div class="card"><p class="muted">'+MODS[m].n+' · '+MODS[m].h+'</p><p class="kidname">'+GROUPS[g].name+'</p><p class="muted">'+ks.filter(present).length+' presentes de '+ks.length+'</p>'+(m===0?'<button class="btn primary" data-a="go" data-v="asistencia">Tomar asistencia</button>':'<button class="btn small" data-a="monEarly" data-v="'+g+'">Registrar retiro anticipado</button>')+'</div>';}
   return h+'</div>';
@@ -585,6 +595,7 @@ document.getElementById("roleSel").addEventListener("change",function(e){S.role=
 document.addEventListener("click",function(e){
   var el=e.target.closest("[data-a]");if(!el)return;
   var a=el.getAttribute("data-a"),v=el.getAttribute("data-v");
+  if(a==="readAv"){var pr=v.split("|");S.avisos.forEach(function(x){if(String(x.id)===pr[0]){x.readBy=x.readBy||{};x.readBy[pr[1]]=true;}});save();render();toast("Aviso marcado como leído.");return;}
   if(a==="pickOk"||a==="pickNo"){DAYS.forEach(function(d){(S.early[d.k]||[]).forEach(function(r){if(String(r.id)===v)r.status=(a==="pickOk"?"ok":"no");});});save();render();toast(a==="pickOk"?"Retiro aprobado. La familia ve que está confirmado.":"Retiro rechazado. Comunícate con la familia.");return;}
   if(a==="go"){S.view=v;if(v==="talleres")S.tview="list";if(v==="grupos")S.gview="list";window.scrollTo(0,0);}
   else if(a==="day")S.day=+v;
