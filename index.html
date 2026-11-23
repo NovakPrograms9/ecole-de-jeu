@@ -378,10 +378,14 @@ function whenLabel(a){
   var mn=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"][d.getMonth()];
   return dn+" "+d.getDate()+" de "+mn;
 }
+function greet(a){return a.dest==="mon"?"Estimado equipo de monitores:":a.dest==="dir"?"Estimada Dirección:":"Estimados apoderados:";}
+function msgBody(a){
+  return greet(a)+"\n\n"+(a.dest==="mon"||a.dest==="dir"?"":"Junto con saludar, les informamos lo siguiente:\n\n")+(a.when?"📅 Para el "+whenLabel(a)+"\n\n":"")+a.text+"\n\n"+"Saludos cordiales,\nCoordinación École de Jeu\nLycée Claude Gay · Osorno";
+}
 function mailHref(a){
   var to=[];
   if(a.dest==="mon")TALLERES.forEach(function(t){mons(t).forEach(function(m){if(m.email)to.push(m.email);});});
-  var body=(a.when?"Para el "+whenLabel(a)+"\n\n":"")+a.text+"\n\n"+"Coordinación École de Jeu · Lycée Claude Gay";
+  var body=msgBody(a);
   return "mailto:?"+(to.length?"bcc="+encodeURIComponent(to.join(","))+"&":"")+"subject="+encodeURIComponent("École de Jeu: "+a.title)+"&body="+encodeURIComponent(body);
 }
 function avisoCard(a,compact){
@@ -621,7 +625,7 @@ document.addEventListener("click",function(e){
   else if(a==="monEarly"){S.rgroup=+v;S.rkid="";S.modal={type:"early"};}
   else if(a==="copy"){
     var av=S.avisos.filter(function(x){return String(x.id)===v;})[0];if(!av)return;
-    var txt="*École de Jeu* · "+av.title+(av.when?"\n📅 Para el "+whenLabel(av):"")+"\n\n"+av.text+"\n\nCoordinación École de Jeu";
+    var txt="*École de Jeu · "+av.title+"*\n\n"+msgBody(av);
     try{navigator.clipboard.writeText(txt).then(function(){toast("Texto copiado.");},function(){toast("No se pudo copiar; selecciona el texto del aviso.");});}catch(err){toast("No se pudo copiar; selecciona el texto del aviso.");}
     return;
   }
