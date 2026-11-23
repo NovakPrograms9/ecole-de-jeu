@@ -147,6 +147,7 @@ thead th{border-top:0;font-size:12px;text-transform:uppercase;letter-spacing:.05
 @media (prefers-reduced-motion:no-preference){.chip,.att,.btn,.nav button{transition:background .15s,color .15s}}
 a.btn{color:inherit;text-decoration:none;display:inline-flex;align-items:center}
 .notif{border:2px solid #2F7DE1;background:#EEF4FF}.alert.info{background:#fff;border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}.nbadge{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:#E5484D;color:#fff;font-size:12px;font-weight:800;margin-left:auto}
+.notif.pur{border-color:#7B4FD6;background:#F3EEFF}.notif.pur .btn.primary{background:#7B4FD6;border-color:#7B4FD6}.nbadge.pur{background:#7B4FD6}
 </style>
 </head>
 <body>
@@ -280,6 +281,8 @@ function vInicio(){
   var abs=absCount(),tk=takenCount(),pend=6-tk;
   var ear=(S.early[dk()]||[]).length;
   var h=top("Inicio",DAYS[S.day].name+" · resumen del día")+'<div class="card">'+dayChips()+'</div>';
+  var rn=S.readN||[];
+  if(rn.length)h+='<div class="card notif pur" role="status"><div class="row between"><h2>📬 '+(rn.length===1?'Un monitor leyó tu aviso':rn.length+' confirmaciones de lectura')+'</h2><button class="btn small" data-a="clearReadN">OK, visto</button></div><div class="list" style="gap:8px">'+rn.map(function(r){return '<div class="alert info"><span>✓ <b>'+esc(r.who)+'</b> marcó como entendido «'+esc(r.title)+'» a las '+r.time+'.</span></div>';}).join("")+'</div></div>';
   var np=newPickups();
   if(np.length)h+='<div class="card notif" role="status"><div class="row between"><h2>🔔 '+(np.length===1?'1 retiro por aprobar':np.length+' retiros por aprobar')+'</h2><button class="btn small" data-a="go" data-v="retiros">Ver en Retiros</button></div><div class="list" style="gap:8px">'+
     np.map(function(x){var r=x[1],k=kidById(r.kid);return '<div class="alert info"><span><b>'+esc(k?k.name:"")+'</b> ('+(k?GROUPS[k.g].name:"")+') se retira el <b>'+x[0].name.toLowerCase()+' a las '+esc(r.time)+'</b>. Lo retira '+esc(r.by)+' ('+esc(r.rel)+') · '+esc(r.tel)+(r.motivo?' · '+esc(r.motivo):'')+'. Avisó: '+esc(r.reg)+'.</span>'+pickBtns(r)+'</div>';}).join("")+'</div></div>';
@@ -484,7 +487,7 @@ function vMiDia(){
   var ti=S.monT,t=TALLERES[ti];
   var h=top("Mi día",(monName(t)?esc(monName(t))+" · ":"")+"Monitor de "+t.name)+'<div class="card"><div class="field"><label for="mt">Demo: elige el taller del monitor</label><select id="mt" data-c="monT">'+TALLERES.map(function(x,i){return '<option value="'+i+'"'+(ti===i?" selected":"")+'>'+x.name+'</option>';}).join("")+'</select></div>'+dayChips()+'</div>';
   var ma=monAvisos(t);
-  if(ma.length)h+='<div class="card notif" role="status"><h2>🔔 '+(ma.length===1?'Tienes un aviso nuevo':'Tienes '+ma.length+' avisos nuevos')+'</h2><div class="list" style="gap:8px">'+ma.map(function(a){return '<div class="alert info"><span><b>'+esc(a.title)+'</b>'+(a.when?' · 📅 '+whenLabel(a):'')+(a.dest.indexOf("per:")===0?' · <i>personal</i>':'')+'</span><span>'+esc(a.text)+'</span><div class="row"><button class="btn small primary" data-a="readAv" data-v="'+a.id+'|'+t.id+'">✓ Entendido</button></div></div>';}).join("")+'</div></div>';
+  if(ma.length)h+='<div class="card notif pur" role="status"><h2>🔔 '+(ma.length===1?'Tienes un aviso nuevo':'Tienes '+ma.length+' avisos nuevos')+'</h2><div class="list" style="gap:8px">'+ma.map(function(a){return '<div class="alert info"><span><b>'+esc(a.title)+'</b>'+(a.when?' · 📅 '+whenLabel(a):'')+(a.dest.indexOf("per:")===0?' · <i>personal</i>':'')+'</span><span>'+esc(a.text)+'</span><div class="row"><button class="btn small primary" data-a="readAv" data-v="'+a.id+'|'+t.id+'">✓ Entendido</button></div></div>';}).join("")+'</div></div>';
   h+='<div class="card t-'+t.id+'" style="border:0"><h2>Hoy en '+t.name+': '+partName(t,S.day)+'</h2><p>'+t.sala+'</p></div><div class="grid3">';
   for(var m=0;m<3;m++){var g=groupAt(ti,S.day,m),ks=kidsOf(g);h+='<div class="card"><p class="muted">'+MODS[m].n+' · '+MODS[m].h+'</p><p class="kidname">'+GROUPS[g].name+'</p><p class="muted">'+ks.filter(present).length+' presentes de '+ks.length+'</p>'+(m===0?'<button class="btn primary" data-a="go" data-v="asistencia">Tomar asistencia</button>':'<button class="btn small" data-a="monEarly" data-v="'+g+'">Registrar retiro anticipado</button>')+'</div>';}
   return h+'</div>';
@@ -551,7 +554,7 @@ function render(){
   var nav=NAV[S.role];
   if(!nav.some(function(x){return x[0]===S.view;}))S.view=nav[0][0];
   document.getElementById("roleSel").value=S.role;
-  document.getElementById("nav").innerHTML=nav.map(function(x){return '<button data-a="go" data-v="'+x[0]+'"'+(S.view===x[0]?' aria-current="page"':'')+'><span class="ico" aria-hidden="true">'+x[1]+'</span>'+x[2]+(S.role==="coord"&&x[0]==="retiros"&&newPickups().length?' <span class="nbadge" aria-label="'+newPickups().length+' avisos nuevos">'+newPickups().length+'</span>':'')+'</button>';}).join("")+(S.role==="coord"?'<button data-a="reset"><span class="ico" aria-hidden="true">↺</span>Restablecer demo</button>':'');
+  document.getElementById("nav").innerHTML=nav.map(function(x){return '<button data-a="go" data-v="'+x[0]+'"'+(S.view===x[0]?' aria-current="page"':'')+'><span class="ico" aria-hidden="true">'+x[1]+'</span>'+x[2]+(S.role==="coord"&&x[0]==="avisos"&&(S.readN||[]).length?' <span class="nbadge pur" aria-label="'+S.readN.length+' confirmaciones">'+S.readN.length+'</span>':'')+(S.role==="coord"&&x[0]==="retiros"&&newPickups().length?' <span class="nbadge" aria-label="'+newPickups().length+' avisos nuevos">'+newPickups().length+'</span>':'')+'</button>';}).join("")+(S.role==="coord"?'<button data-a="reset"><span class="ico" aria-hidden="true">↺</span>Restablecer demo</button>':'');
   document.getElementById("main").innerHTML=(VIEWS[S.view]||VIEWS.inicio)()+modalHtml();
   var mx=document.querySelector(".modal .x");if(mx)mx.focus();
   var tf=document.getElementById("tForm");
@@ -595,7 +598,8 @@ document.getElementById("roleSel").addEventListener("change",function(e){S.role=
 document.addEventListener("click",function(e){
   var el=e.target.closest("[data-a]");if(!el)return;
   var a=el.getAttribute("data-a"),v=el.getAttribute("data-v");
-  if(a==="readAv"){var pr=v.split("|");S.avisos.forEach(function(x){if(String(x.id)===pr[0]){x.readBy=x.readBy||{};x.readBy[pr[1]]=true;}});save();render();toast("Aviso marcado como leído.");return;}
+  if(a==="clearReadN"){S.readN=[];save();render();return;}
+  if(a==="readAv"){var pr=v.split("|");S.avisos.forEach(function(x){if(String(x.id)===pr[0]){x.readBy=x.readBy||{};x.readBy[pr[1]]=true;var tt=TALLERES.filter(function(y){return y.id===pr[1];})[0];S.readN=S.readN||[];S.readN.unshift({id:Date.now(),title:x.title,who:(tt&&monName(tt)?monName(tt):"Monitor")+(tt?" ("+tt.name+")":""),time:nowHM()});}});save();render();toast("Aviso marcado como leído.");return;}
   if(a==="pickOk"||a==="pickNo"){DAYS.forEach(function(d){(S.early[d.k]||[]).forEach(function(r){if(String(r.id)===v)r.status=(a==="pickOk"?"ok":"no");});});save();render();toast(a==="pickOk"?"Retiro aprobado. La familia ve que está confirmado.":"Retiro rechazado. Comunícate con la familia.");return;}
   if(a==="go"){S.view=v;if(v==="talleres")S.tview="list";if(v==="grupos")S.gview="list";window.scrollTo(0,0);}
   else if(a==="day")S.day=+v;
