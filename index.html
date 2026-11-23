@@ -151,6 +151,9 @@ a.btn{color:inherit;text-decoration:none;display:inline-flex;align-items:center}
 .notif.rec{border-color:#F27A1A;background:#FFF3E8}.notif.rec .btn.primary{background:#C25A0E;border-color:#C25A0E}.nbadge.rec{background:#C25A0E}
 @media (prefers-color-scheme: dark){.notif{background:#1B2644;border-color:#5B8FE8}.notif.pur{background:#271F42;border-color:#9C7BE8}.notif.rec{background:#33231A;border-color:#E08A3C}.alert.info{background:rgba(255,255,255,.06)}.notif.pur .btn.primary{background:#8E66E6;border-color:#8E66E6;color:#fff}.notif.rec .btn.primary{background:#D9772E;border-color:#D9772E;color:#fff}}
 .theme{display:flex;gap:6px;margin:0 0 14px}.theme button{flex:1;font:inherit;font-size:13px;font-weight:700;padding:8px 6px;border-radius:10px;border:1px solid var(--line,#E2DFEA);background:transparent;color:inherit;cursor:pointer;min-height:40px}.theme button[aria-pressed="true"]{background:var(--ink,#1F2340);color:var(--bg,#fff);border-color:transparent}
+.notif.absn{border-color:#2E9E5B;background:#EAF7EF}.tile.warn b{color:#B4560E}@media (prefers-color-scheme: dark){.notif.absn{background:#16301F;border-color:#4CC07A}}
+.item .pill{white-space:normal}.print-head{display:none}
+@media print{.app{display:block!important}.side,aside,.noprint,.demo,#toast,.toast,.modal-bg{display:none!important}.main{margin:0!important;padding:0!important;max-width:none!important}.print-head{display:block;margin:0 0 12px}.card{break-inside:avoid;box-shadow:none}body{background:#fff!important;color:#000!important}}
 </style>
 </head>
 <body>
@@ -165,6 +168,7 @@ a.btn{color:inherit;text-decoration:none;display:inline-flex;align-items:center}
         <option value="coord">Coordinador</option>
         <option value="mon">Monitor</option>
         <option value="dir">Dirección</option>
+        <option value="rep">Monitor de reemplazo</option>
         <option value="fam">Familia</option>
       </select>
     </div>
@@ -219,7 +223,7 @@ GROUPS.forEach(function(g,gi){for(var i=0;i<SIZES[gi];i++,n++){
 
 var dow=new Date().getDay();
 var startDay=({1:0,2:1,4:2,5:3})[dow];
-var S={role:"coord",view:"inicio",day:startDay===undefined?2:startDay,hview:"dia",hgroup:0,htaller:0,agroup:0,kidQ:"",kidG:-1,kidSel:null,sgroup:0,monT:0,famKid:"k3",
+var S={wk:0,cal:{"2026-12-08":{tipo:"Feriado",nota:"Inmaculada Concepción"},"2026-12-25":{tipo:"Feriado",nota:"Navidad"}},abs:{},absN:[],sal:{},reps:[{id:"r1",name:"Javiera Muñoz",email:"javiera.munoz@gmail.com",tel:"+56 9 3333 4444"}],repA:[],faltas:[],repSel:"r1",role:"coord",view:"inicio",day:startDay===undefined?2:startDay,hview:"dia",hgroup:0,htaller:0,agroup:0,kidQ:"",kidG:-1,kidSel:null,sgroup:0,monT:0,famKid:"k3",
   att:{},taken:{},out:{},
   avisos:[
     {id:1,title:"Jueves: Exploradores sale al patio",text:"Este jueves Pequeños Exploradores trabaja en el patio. Por favor enviar botas y parka marcadas con el nombre.",dest:"all",tipo:"Qué traer",when:"2026-11-19",date:"16 nov",reads:71},
@@ -239,26 +243,46 @@ var S={role:"coord",view:"inicio",day:startDay===undefined?2:startDay,hview:"dia
   plans:{},
   modal:null
 };
-S.casos=[{id:201,kid:"k10",date:todayISO(),tipo:"Conducta",text:"Empujó a un compañero en el recreo y le costó calmarse. Se conversó y pidió disculpas.",acts:[{t:"Citar al apoderado",done:false},{t:"Notificar a Dirección",done:true,at:"hoy, 14:30"}],rec:todayISO(),seg:[{date:todayISO(),h:"14:30",t:"Se informó a Dirección",n:"Se conversó con Mme. Sonia."}]}];
-(function(){var d=DAYS[S.day].k;S.early[d]=[
+S.casos=[{id:202,kid:"k3",date:dateOf(2,-2),tipo:"Salud",text:"Se golpeó la rodilla en Psicomotricidad. Se aplicó frío y se avisó a la familia.",acts:[{t:"Llamar al apoderado",done:true,at:"15:10"}],rec:dateOf(2,-2),closed:true,seg:[{date:dateOf(2,-2),h:"15:10",t:"Llamada realizada",n:"La mamá quedó informada."}]},{id:201,kid:"k10",date:todayISO(),tipo:"Conducta",text:"Empujó a un compañero en el recreo y le costó calmarse. Se conversó y pidió disculpas.",acts:[{t:"Citar al apoderado",done:false},{t:"Notificar a Dirección",done:true,at:"hoy, 14:30"}],rec:todayISO(),seg:[{date:todayISO(),h:"14:30",t:"Se informó a Dirección",n:"Se conversó con Mme. Sonia."}]}];
+KIDS[5].sal={modo:"furgon",fn:"Furgón Tío Juan",ft:"+56 9 7777 1111"};KIDS[30].sal={modo:"furgon",fn:"Furgón Tío Juan",ft:"+56 9 7777 1111"};KIDS[48].sal={modo:"academie"};
+S.repA=[{id:301,date:dateOf(S.day,0),tid:"mus",rid:"r1",motivo:"Licencia médica",read:false}];
+S.faltas=[{id:401,tid:"rit",date:dateOf((S.day+1)%4,S.day===3?1:0),motivo:"Trámite personal",at:"09:40"}];
+(function(){var nd=dateOf((S.day+1)%4,S.day===3?1:0);S.abs[nd]={k12:{motivo:"Viaje familiar",reg:KIDS[12].aut[0].name,at:"08:15"}};S.att[nd]={k12:false};S.absN=[{kid:"k12",date:nd,motivo:"Viaje familiar",reg:KIDS[12].aut[0].name,at:"08:15"}];})();
+(function(){for(var w=-3;w<=-1;w++)for(var i=0;i<4;i++){var iso=dateOf(i,w);S.taken[iso]={0:true,1:true,2:true,3:true,4:true,5:true};S.att[iso]={};
+    KIDS.forEach(function(k,j){if(((j*7+i*3+w*11)%23+23)%23===0)S.att[iso][k.id]=false;});}
+  var p1=dateOf(1,-1),p2=dateOf(3,-2);S.early[p1]=[{id:111,status:"ok",kid:"k3",src:"fam",ok:true,time:"15:15",by:"Felipe Bórquez",rel:"Papá",tel:KIDS[3].aut[0].tel,motivo:"Dentista",reg:"Felipe Bórquez (familia)"}];
+  S.early[p2]=[{id:112,status:"ok",kid:"k10",src:"fam",ok:true,time:"14:45",by:"Verónica Igor",rel:"Mamá",tel:"+56 9 0000 1010",motivo:"Control médico",reg:"Verónica Igor (familia)"}];
+  S.abs[p2]={k3:{motivo:"Resfriado",reg:"Felipe Bórquez",at:"08:05"}};S.att[p2].k3=false;})();
+(function(){var d=dateOf(S.day,0);S.early[d]=[
   {id:101,status:"pend",kid:"k3",src:"fam",ok:true,time:"15:00",by:"Marta Soto",rel:"Abuela",tel:"+56 9 8765 4321",motivo:"Control médico",reg:KIDS[3].aut[0].name+" (familia)"},
   {id:102,status:"pend",kid:"k20",src:"fam",ok:true,time:"14:40",by:"Ignacio Lagos",rel:"Tío",tel:"+56 9 5555 1234",motivo:"",reg:KIDS[20].aut[0].name+" (familia)"},
   {id:103,status:"ok",kid:"k41",src:"fam",ok:true,time:"15:30",by:"Paula Medina",rel:"Mamá",tel:"+56 9 4444 2222",motivo:"Viaje",reg:"Paula Medina (familia)"}];})();
+var DOFF=[0,1,3,4];
+function isoOf(d){return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
+function dateOf(i,wk){var d=mondayOf(wk||0);d.setDate(d.getDate()+[0,1,3,4][i]);return isoOf(d);}
+function parseIso(iso){var p=iso.split("-");return new Date(+p[0],+p[1]-1,+p[2],12);}
+function dayIdx(iso){return ({1:0,2:1,4:2,5:3})[parseIso(iso).getDay()];}
+function wkOf(iso){var m=mondayOf(0),d=parseIso(iso);d.setDate(d.getDate()-((d.getDay()+6)%7));return Math.round((d-m)/604800000);}
+var DNAME=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+function dayLabel(iso){var d=parseIso(iso);return DNAME[d.getDay()]+" "+d.getDate()+" de "+["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"][d.getMonth()];}
+function blocked(iso){var c=(S.cal||{})[iso];return !!(c&&c.tipo!=="Jornada especial");}
+function schoolDay(iso){return dayIdx(iso)!==undefined&&!blocked(iso);}
+function blockBanner(iso){var c=S.cal[iso];return '<div class="card notif rec" role="status"><h2>🚫 No hay École de Jeu este día</h2><p><b>'+esc(c.tipo)+'</b>'+(c.nota?' · '+esc(c.nota):'')+' · '+dayLabel(iso)+'</p></div>';}
 function mondayOf(off){var d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7)+7*(off||0));return d;}
 function wkKey(off){var d=mondayOf(off);return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
 var MESES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
 function wkLabel(key){var p=key.split("-");return "Semana del "+(+p[2])+" de "+MESES[+p[1]-1];}
 S.plans[TALLERES[3].id+"|"+wkKey(0)]={obj:"Fabricar títeres de calcetín y presentarlos en escena.",act:"Lunes y martes (Arte): cada niño decora su títere con lanas, botones y ojos de cartón.\nJueves y viernes (Teatro): presentamos los títeres al grupo y creamos un saludo para cada personaje.\nPS: títere simple con ayuda; GS: inventan nombre y voz.",mat:"Calcetines, lanas, botones, pegamento escolar, cartón",file:"titeres_semana.pdf",date:"lunes 9:12"};
-var seedDay=DAYS[S.day].k;
+var seedDay=dateOf(S.day,0);
 S.att[seedDay]={k4:false,k22:false,k41:false,k77:false};
 S.taken[seedDay]={0:true,1:true,2:true,4:true,5:true};
-try{var sv=JSON.parse(localStorage.getItem("edj-proto-v5")||"null");if(sv){for(var key in sv){S[key]=sv[key];}}}catch(e){}
+try{var sv=JSON.parse(localStorage.getItem("edj-proto-v7")||"null");if(sv){for(var key in sv){S[key]=sv[key];}}}catch(e){}
 if(!S.kids||!S.kids.length)S.kids=KIDS;KIDS=S.kids;
 S.modal=null;
-function save(){try{localStorage.setItem("edj-proto-v5",JSON.stringify(S));}catch(e){}}
+function save(){try{localStorage.setItem("edj-proto-v7",JSON.stringify(S));}catch(e){}}
 
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
-function dk(){return DAYS[S.day].k;}
+function dk(){return dateOf(S.day,S.wk||0);}
 function present(kid){var a=S.att[dk()]||{};return a[kid.id]!==false;}
 function kidsOf(gi){return KIDS.filter(function(k){return k.g===gi;});}
 function absCount(){var a=S.att[dk()]||{},c=0;for(var k in a){if(a[k]===false)c++;}return c;}
@@ -270,13 +294,15 @@ function perMon(d){var p=d.slice(4).split("|"),t=TALLERES.filter(function(x){ret
 function destLabel(d){if(d.indexOf("tal:")===0){var tt=TALLERES.filter(function(x){return x.id===d.slice(4);})[0];return tt?"Monitor de "+tt.name:d;}if(d.indexOf("per:")===0){var pm=perMon(d);return pm&&pm.m?pm.m.name+" (personal)":"Monitor (personal)";}if(d==="all")return "Todas las familias";if(d==="mon")return "Monitores";if(d==="dir")return "Dirección";if(d.indexOf("lvl:")===0)return d.slice(4);var g=GROUPS.filter(function(x){return x.id===d;})[0];return g?"Familias de "+g.name:d;}
 
 var NAV={
-  coord:[["inicio","⌂","Inicio"],["horario","▦","Horario"],["talleres","◉","Talleres"],["grupos","▤","Grupos"],["asistencia","✓","Asistencia"],["ninos","☺","Niños"],["apoderados","✎","Apoderados"],["retiros","➜","Retiros"],["avisos","✉","Avisos"],["equipo","★","Equipo"],["planes","☰","Planificaciones"]],
+  coord:[["inicio","⌂","Inicio"],["horario","▦","Horario"],["calendario","▣","Calendario"],["talleres","◉","Talleres"],["grupos","▤","Grupos"],["asistencia","✓","Asistencia"],["ninos","☺","Niños"],["apoderados","✎","Apoderados"],["retiros","➜","Retiros"],["salida","⏏","Salida 16:00"],["avisos","✉","Avisos"],["equipo","★","Equipo"],["planes","☰","Planificaciones"],["informes","▤","Informes"]],
   mon:[["midia","⌂","Mi día"],["asistencia","✓","Asistencia"],["miplan","☰","Planificación"],["avisos","✉","Avisos internos"]],
-  dir:[["resumen","⌂","Resumen"],["horario","▦","Horario"],["avisos","✉","Avisos enviados"]],
+  dir:[["resumen","⌂","Resumen"],["horario","▦","Horario"],["calendario","▣","Calendario"],["apoderados","✎","Apoderados"],["avisos","✉","Avisos enviados"]],
+  rep:[["reemplazos","⇄","Mis reemplazos"],["midia","⌂","Día del taller"],["asistencia","✓","Asistencia"]],
   fam:[["mihijo","☺","Mi hijo"],["avisos","✉","Avisos"]]
 };
 
-function dayChips(){return '<div class="chips" role="group" aria-label="Día">'+DAYS.map(function(d,i){return '<button class="chip" data-a="day" data-v="'+i+'" aria-pressed="'+(S.day===i)+'">'+d.name+'</button>';}).join("")+'</div>';}
+function weekBar(){var w=S.wk||0;return '<div class="row wkbar" style="gap:8px;margin:0 0 10px;align-items:center"><button class="btn small" data-a="wk" data-v="-1" aria-label="Semana anterior">◀</button><b>'+wkLabel(wkKey(w))+(w===0?' (esta semana)':'')+'</b><button class="btn small" data-a="wk" data-v="1" aria-label="Semana siguiente">▶</button>'+(w!==0?'<button class="btn small" data-a="wk" data-v="0">Volver a hoy</button>':'')+'</div>';}
+function dayChips(){return weekBar()+'<div class="chips" role="group" aria-label="Día">'+DAYS.map(function(d,i){var iso=dateOf(i,S.wk||0);return '<button class="chip" data-a="day" data-v="'+i+'" aria-pressed="'+(S.day===i)+'">'+d.name+' '+(+iso.slice(8))+(blocked(iso)?' 🚫':'')+'</button>';}).join("")+'</div>';}
 function groupSel(id,val,ch){return '<select id="'+id+'" data-c="'+ch+'" aria-label="Grupo">'+GROUPS.map(function(g,i){return '<option value="'+i+'"'+(val===i?" selected":"")+'>'+g.name+' · '+g.lvl+'</option>';}).join("")+'</select>';}
 function top(title,sub){return '<div class="top"><div><h1>'+title+'</h1><p class="sub">'+sub+'</p></div><span class="demo">Prototipo · datos de ejemplo</span></div>';}
 
@@ -292,11 +318,12 @@ function board(di,hlG){
 /* ---------- Coordinador ---------- */
 function pickStatus(r){var st=r.status||"pend";return st==="ok"?'<span class="pill p-ok">Aprobado</span>':st==="no"?'<span class="pill p-bad">Rechazado</span>':'<span class="pill p-warn">Pendiente</span>';}
 function pickBtns(r){return '<div class="row" style="gap:6px"><button class="btn small primary" data-a="pickOk" data-v="'+r.id+'">✓ Aprobar</button><button class="btn small" data-a="pickNo" data-v="'+r.id+'">✕ Rechazar</button></div>';}
-function newPickups(){var l=[];DAYS.forEach(function(d){(S.early[d.k]||[]).forEach(function(r){if(r.src==="fam"&&(r.status||"pend")==="pend")l.push([d,r]);});});return l;}
+function newPickups(){var l=[];Object.keys(S.early).forEach(function(dd){var d={name:dayLabel(dd),k:dd};(S.early[dd]||[]).forEach(function(r){if(r.src==="fam"&&(r.status||"pend")==="pend")l.push([d,r]);});});return l;}
 function homeAlerts(){
   var al=[];
-  for(var g=0;g<6;g++){if(!(S.taken[dk()]||{})[g]){var t=tallerAt(g,S.day,0);al.push('<div class="alert warn">⚠ <span><b>'+GROUPS[g].name+'</b> no tiene asistencia registrada (módulo 1 en '+t.name+').</span></div>');}}
+  for(var g=0;g<6&&!blocked(dk());g++){if(!(S.taken[dk()]||{})[g]){var t=tallerAt(g,S.day,0);al.push('<div class="alert warn">⚠ <span><b>'+GROUPS[g].name+'</b> no tiene asistencia registrada (módulo 1 en '+t.name+').</span></div>');}}
   (S.early[dk()]||[]).forEach(function(r){if(!r.ok){var k=kidById(r.kid);if(k)al.push('<div class="alert bad">⛔ <span>Retiro anticipado de <b>'+esc(k.name)+'</b> por una persona no autorizada ('+esc(r.by)+', '+r.time+').</span></div>');}});
+  if(dk()===todayISO()&&!blocked(dk())&&nowHM()>="16:15"){var sp=salPending(dk()).length;if(sp)al.push('<div class="alert bad">⛔ <span><b>'+sp+' niños</b> siguen sin retirar después de las 16:15. <button class="btn small" data-a="go" data-v="salida">Ver salida</button></span></div>');}
   var sinAut=KIDS.filter(function(k){return !k.aut||!k.aut.length;}).length;
   if(sinAut)al.push('<div class="alert warn">⚠ <span>'+sinAut+' niños no tienen personas autorizadas registradas. <button class="btn small" data-a="go" data-v="retiros">Revisar</button></span></div>');
   TALLERES.forEach(function(t){if(!monName(t))al.push('<div class="alert warn">⚠ <span><b>'+t.name+'</b> no tiene monitor inscrito. <button class="btn small" data-a="go" data-v="equipo">Inscribir</button></span></div>');});
@@ -307,17 +334,22 @@ function homeAlerts(){
 function todayISO(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
 function fmtDate(iso){if(!iso)return "";var p=iso.split("-");return (+p[2])+" de "+MESES[+p[1]-1];}
 function dueActs(){var l=[],t=todayISO();(S.casos||[]).forEach(function(c){if(!c.closed&&c.rec&&c.rec<=t)c.acts.forEach(function(a,i){if(!a.done)l.push([c,a,i]);});});return l;}
-function alertTotal(){return homeAlerts().length+newPickups().length+(S.readN||[]).length+dueActs().length;}
+function alertTotal(){return homeAlerts().length+newPickups().length+(S.readN||[]).length+dueActs().length+(S.absN||[]).length+(S.faltas||[]).filter(function(f){return !f.done&&!repToday(f.tid,f.date);}).length;}
 function vInicio(){
   var abs=absCount(),tk=takenCount(),pend=6-tk;
   var ear=(S.early[dk()]||[]).length;
   var h=top("Inicio",DAYS[S.day].name+" · resumen del día")+'<div class="card">'+dayChips()+'</div>';
+  var an=S.absN||[];
+  if(an.length)h+='<div class="card notif absn" role="status"><div class="row between"><h2>📝 '+(an.length===1?'1 inasistencia avisada':an.length+' inasistencias avisadas')+'</h2><button class="btn small" data-a="clearAbsN">OK, visto</button></div><div class="list" style="gap:8px">'+an.map(function(x){var k=kidById(x.kid);return '<div class="alert info"><span><b>'+esc(k?k.name:"")+'</b> ('+(k?GROUPS[k.g].name:"")+') no viene el <b>'+dayLabel(x.date)+'</b>'+(x.motivo?' · '+esc(x.motivo):'')+'. Avisó: '+esc(x.reg)+' a las '+x.at+'.</span></div>';}).join("")+'</div></div>';
+  var fl=(S.faltas||[]).filter(function(f){return !f.done&&!repToday(f.tid,f.date);});
+  if(fl.length)h+='<div class="card notif rec" role="status"><div class="row between"><h2>🙋 '+(fl.length===1?'Un monitor avisa que faltará':fl.length+' monitores avisan que faltarán')+'</h2><button class="btn small" data-a="go" data-v="equipo">Ir a Equipo</button></div><div class="list" style="gap:8px">'+fl.map(function(f){var tt=tById(f.tid);return '<div class="alert info"><span><b>'+esc(monName(tt)||"Monitor de "+tt.name)+'</b> ('+tt.name+') faltará el <b>'+dayLabel(f.date)+'</b>'+(f.motivo?' · '+esc(f.motivo):'')+'.</span><div class="row"><button class="btn small primary" data-a="repPre" data-v="'+f.id+'">Asignar reemplazo</button></div></div>';}).join("")+'</div></div>';
   var rn=S.readN||[];
   if(rn.length)h+='<div class="card notif pur" role="status"><div class="row between"><h2>📬 '+(rn.length===1?'Un monitor leyó tu aviso':rn.length+' confirmaciones de lectura')+'</h2><button class="btn small" data-a="clearReadN">OK, visto</button></div><div class="list" style="gap:8px">'+rn.map(function(r){return '<div class="alert info"><span>✓ <b>'+esc(r.who)+'</b> marcó como entendido «'+esc(r.title)+'» a las '+r.time+'.</span></div>';}).join("")+'</div></div>';
   var np=newPickups();
   if(np.length)h+='<div class="card notif" role="status"><div class="row between"><h2>🔔 '+(np.length===1?'1 retiro por aprobar':np.length+' retiros por aprobar')+'</h2><button class="btn small" data-a="go" data-v="retiros">Ver en Retiros</button></div><div class="list" style="gap:8px">'+
     np.map(function(x){var r=x[1],k=kidById(r.kid);return '<div class="alert info"><span><b>'+esc(k?k.name:"")+'</b> ('+(k?GROUPS[k.g].name:"")+') se retira el <b>'+x[0].name.toLowerCase()+' a las '+esc(r.time)+'</b>. Lo retira '+esc(r.by)+' ('+esc(r.rel)+') · '+esc(r.tel)+(r.motivo?' · '+esc(r.motivo):'')+'. Avisó: '+esc(r.reg)+'.</span>'+pickBtns(r)+'</div>';}).join("")+'</div></div>';
   h+='<div class="tiles"><div class="tile ok"><b>'+(KIDS.length-abs)+'</b><span>Presentes de '+KIDS.length+'</span></div><div class="tile'+(abs?' bad':'')+'"><b>'+abs+'</b><span>Ausentes</span></div><div class="tile'+(pend?' warn':'')+'"><b>'+tk+'/6</b><span>Grupos con asistencia</span></div><div class="tile"><b>'+ear+'</b><span>Retiros anticipados hoy</span></div></div>';
+  if(blocked(dk()))h+=blockBanner(dk());
   var due=dueActs();
   if(due.length)h+='<div class="card notif rec" role="status"><div class="row between"><h2>📌 '+(due.length===1?'1 recordatorio':due.length+' recordatorios')+'</h2><button class="btn small" data-a="go" data-v="apoderados">Ver Apoderados</button></div><div class="list" style="gap:8px">'+due.map(function(x){var c=x[0],k=kidById(c.kid);return '<div class="alert info"><span><b>'+esc(x[1].t)+'</b> · '+esc(k?k.name:"")+' ('+(k?GROUPS[k.g].name:"")+') · '+esc(c.tipo)+': '+esc(c.text)+'</span><div class="row"><button class="btn small primary" data-a="actDone" data-v="'+c.id+'|'+x[2]+'">✓ Hecho</button></div></div>';}).join("")+'</div></div>';
   var alc=homeAlerts().length;
@@ -346,12 +378,13 @@ function vHorario(){
 function attList(gi,canSeeAll){
   var ks=kidsOf(gi),pres=ks.filter(present).length,tk=(S.taken[dk()]||{})[gi];
   var h='<div class="row between"><p><b>'+pres+' presentes</b> <span class="muted">de '+ks.length+' · '+GROUPS[gi].name+'</span></p><span class="pill '+(tk?'p-ok':'p-warn')+'">'+(tk?'Asistencia registrada':'Sin registrar')+'</span></div>';
-  h+='<div class="list">'+ks.map(function(k){var p=present(k);return '<div class="item"><div class="grow"><b>'+esc(k.name)+'</b></div><button class="att'+(p?'':' abs')+'" data-a="att" data-v="'+k.id+'" aria-pressed="'+(!p)+'">'+(p?'Presente':'Ausente')+'</button></div>';}).join("")+'</div>';
+  h+='<div class="list">'+ks.map(function(k){var p=present(k);var ab=(S.abs[dk()]||{})[k.id];return '<div class="item"><div class="grow"><b>'+esc(k.name)+'</b>'+(ab?'<span class="muted" style="display:block">📝 La familia avisó que no viene'+(ab.motivo?': '+esc(ab.motivo):'')+'</span>':'')+'</div><button class="att'+(p?'':' abs')+'" data-a="att" data-v="'+k.id+'" aria-pressed="'+(!p)+'">'+(p?'Presente':'Ausente')+'</button></div>';}).join("")+'</div>';
   h+='<div class="row"><button class="btn primary" data-a="saveatt" data-v="'+gi+'">Guardar asistencia</button><button class="btn" data-a="allp" data-v="'+gi+'">Todos presentes</button></div>';
   return h;
 }
 function vAsistencia(){
-  if(S.role==="mon"){
+  if(blocked(dk()))return top("Asistencia",dayLabel(dk()))+'<div class="card">'+dayChips()+'</div>'+blockBanner(dk());
+  if(S.role==="mon"||S.role==="rep"){
     var ti=S.monT,g=groupAt(ti,S.day,0);
     return top("Asistencia",DAYS[S.day].name+" · tu grupo del módulo 1")+'<div class="card">'+dayChips()+'<p class="muted">Tomas la asistencia del grupo que llega a '+TALLERES[ti].name+' a las 14:00. Solo ves los nombres.</p>'+attList(g)+'</div>';
   }
@@ -361,24 +394,24 @@ var CTIPOS=["Conducta","Convivencia","Salud","Accidente","Comunicación con la f
 var SEGS=["Citación agendada","Apoderado asistió","Apoderado no asistió","Se envió correo","Apoderado respondió el correo","Apoderado no ha respondido","Llamada realizada","Se informó a Dirección","Otro"];
 var CACTS=["Citar al apoderado","Enviar correo al apoderado","Notificar a Dirección","Informar a la educadora","Llamar al apoderado"];
 function casoCard(c,kk,pend){
-  var ed=S.cedit===c.id;
+  var ro=S.role!=="coord",ed=!ro&&S.cedit===c.id;
   var h='<div class="aviso"'+(c.closed?' style="opacity:.75"':'')+'><div class="row between"><b>'+esc(kk?kk.name:"")+' · '+(kk?GROUPS[kk.g].name:"")+'</b><div class="row" style="gap:6px">'+(c.closed?'<span class="pill p-ok">Cerrado</span>':'')+'<span class="pill p-info">'+esc(c.tipo)+'</span></div></div><p class="meta">'+fmtDate(c.date)+(kk&&kk.aut[0]?' · Apoderado: '+esc(kk.aut[0].name)+' · '+kk.aut[0].tel:'')+'</p>';
   if(ed){
     h+='<form class="list casoEdit" data-id="'+c.id+'" style="gap:10px"><div class="row"><div class="field" style="flex:1;min-width:180px"><label for="et'+c.id+'">Tipo</label><select id="et'+c.id+'">'+CTIPOS.map(function(t){return '<option'+(t===c.tipo?' selected':'')+'>'+t+'</option>';}).join("")+'</select></div><div class="field" style="width:200px"><label for="er'+c.id+'">Recordarme el</label><input type="date" id="er'+c.id+'" value="'+(c.rec||"")+'"></div></div>'+
       '<div class="field"><label for="ex'+c.id+'">Qué pasó</label><textarea id="ex'+c.id+'">'+esc(c.text)+'</textarea></div><div class="field"><label for="ea'+c.id+'">Agregar acción pendiente (opcional)</label><input type="text" id="ea'+c.id+'" placeholder="Ej.: Enviar informe a la educadora"></div>'+
       '<div class="row"><button class="btn primary small" type="submit">Guardar cambios</button><button class="btn small" type="button" data-a="cEdit" data-v="">Cancelar</button></div></form>';
   }else h+='<p>'+esc(c.text)+'</p>';
-  if(c.acts.length)h+='<div class="list" style="gap:6px">'+c.acts.map(function(a,i){return '<div class="row" style="gap:8px"><button class="btn small'+(a.done?'':' primary')+'" data-a="actDone" data-v="'+c.id+'|'+i+'" aria-pressed="'+!!a.done+'">'+(a.done?'✓ Hecho':'Marcar hecho')+'</button><span'+(a.done?' style="text-decoration:line-through;color:var(--soft)"':'')+'>'+esc(a.t)+'</span>'+(a.done&&a.at?'<span class="muted" style="font-size:13px">· hecho: '+esc(a.at)+'</span>':'')+'</div>';}).join("")+'</div>';
+  if(c.acts.length)h+='<div class="list" style="gap:6px">'+c.acts.map(function(a,i){return '<div class="row" style="gap:8px">'+(ro?'<span class="pill '+(a.done?'p-ok':'p-warn')+'">'+(a.done?'✓ Hecho':'Pendiente')+'</span>':'<button class="btn small'+(a.done?'':' primary')+'" data-a="actDone" data-v="'+c.id+'|'+i+'" aria-pressed="'+!!a.done+'">'+(a.done?'✓ Hecho':'Marcar hecho')+'</button>')+'<span'+(a.done?' style="text-decoration:line-through;color:var(--soft)"':'')+'>'+esc(a.t)+'</span>'+(a.done&&a.at?'<span class="muted" style="font-size:13px">· hecho: '+esc(a.at)+'</span>':'')+'</div>';}).join("")+'</div>';
   var seg=c.seg||[];
   h+='<div style="margin-top:10px"><b style="font-size:14px">Seguimiento</b>'+(seg.length?'<div class="list" style="gap:4px;margin-top:6px;border-left:3px solid #E2DFEA;padding-left:10px">'+seg.slice().sort(function(p,q){return (p.date+(p.h||'')).localeCompare(q.date+(q.h||''));}).map(function(x){return '<span><b>'+fmtDate(x.date)+(x.h?', '+esc(x.h):'')+'</b> · '+esc(x.t)+(x.n?' — '+esc(x.n):'')+'</span>';}).join("")+'</div>':'<p class="muted" style="margin:4px 0">Aún sin seguimiento.</p>')+'</div>';
-  if(!c.closed)h+='<form class="row segForm" data-id="'+c.id+'" style="gap:8px;margin-top:8px;align-items:flex-end"><div class="field" style="flex:2;min-width:190px"><label for="sg'+c.id+'">Agregar seguimiento</label><select id="sg'+c.id+'">'+SEGS.map(function(x){return '<option>'+x+'</option>';}).join("")+'</select></div><div class="field" style="width:160px"><label for="sd'+c.id+'">Fecha</label><input type="date" id="sd'+c.id+'" value="'+todayISO()+'"></div><div class="field" style="width:110px"><label for="sh'+c.id+'">Hora</label><input type="text" id="sh'+c.id+'" value="'+nowHM()+'" placeholder="16:00"></div><div class="field" style="flex:2;min-width:180px"><label for="sn'+c.id+'">Nota (opcional)</label><input type="text" id="sn'+c.id+'" placeholder="Ej.: vino la mamá, se acordó..."></div><button class="btn small primary" type="submit">Agregar</button></form>';
-  h+='<div class="row between" style="margin-top:10px"><p class="meta" style="margin:0">'+(c.closed?'✓ Caso cerrado':pend?'📌 Recordatorio: '+fmtDate(c.rec)+' · '+pend+' pendiente'+(pend>1?'s':''):'✓ Acciones hechas')+'</p><div class="row" style="gap:6px">'+(ed?'':'<button class="btn small" data-a="cEdit" data-v="'+c.id+'">✎ Editar</button>')+'<button class="btn small" data-a="cClose" data-v="'+c.id+'">'+(c.closed?'Reabrir caso':'Cerrar caso')+'</button></div></div>';
+  if(!c.closed&&!ro)h+='<form class="row segForm" data-id="'+c.id+'" style="gap:8px;margin-top:8px;align-items:flex-end"><div class="field" style="flex:2;min-width:190px"><label for="sg'+c.id+'">Agregar seguimiento</label><select id="sg'+c.id+'">'+SEGS.map(function(x){return '<option>'+x+'</option>';}).join("")+'</select></div><div class="field" style="width:160px"><label for="sd'+c.id+'">Fecha</label><input type="date" id="sd'+c.id+'" value="'+todayISO()+'"></div><div class="field" style="width:110px"><label for="sh'+c.id+'">Hora</label><input type="text" id="sh'+c.id+'" value="'+nowHM()+'" placeholder="16:00"></div><div class="field" style="flex:2;min-width:180px"><label for="sn'+c.id+'">Nota (opcional)</label><input type="text" id="sn'+c.id+'" placeholder="Ej.: vino la mamá, se acordó..."></div><button class="btn small primary" type="submit">Agregar</button></form>';
+  h+='<div class="row between" style="margin-top:10px"><p class="meta" style="margin:0">'+(c.closed?'✓ Caso cerrado':pend?'📌 Recordatorio: '+fmtDate(c.rec)+' · '+pend+' pendiente'+(pend>1?'s':''):'✓ Acciones hechas')+'</p><div class="row" style="gap:6px">'+(ro?'':(ed?'':'<button class="btn small" data-a="cEdit" data-v="'+c.id+'">✎ Editar</button>')+'<button class="btn small" data-a="cClose" data-v="'+c.id+'">'+(c.closed?'Reabrir caso':'Cerrar caso')+'</button>')+'</div></div>';
   return h+'</div>';
 }
 function vApoderados(){
   var gi=S.cgroup||0,ks=kidsOf(gi),k=kidById(S.ckid);if(!k||k.g!==gi)k=ks[0];
-  var h=top("Apoderados","Registro de situaciones y seguimiento con las familias")+'<div class="card"><p>Registra aquí cualquier situación con un niño (conducta, salud, un accidente) y lo que tienes que hacer después. El sistema te recuerda en el Inicio cuando llegue la fecha.</p><span class="lock">🔒 Visible solo para el coordinador</span></div>';
-  h+='<div class="card"><h2>Registrar situación</h2><form id="casoForm" class="list" style="gap:12px">'+
+  var h=top("Apoderados","Registro de situaciones y seguimiento con las familias")+'<div class="card"><p>'+(S.role==="coord"?'Registra aquí cualquier situación con un niño (conducta, salud, un accidente) y lo que tienes que hacer después. El sistema te recuerda en el Inicio cuando llegue la fecha.':'Registros del coordinador sobre situaciones con los niños y su seguimiento. Vista de solo lectura.')+'</p><span class="lock">🔒 Visible solo para el coordinador y la Dirección. Monitores y familias no tienen acceso.</span></div>';
+  if(S.role==="coord")h+='<div class="card"><h2>Registrar situación</h2><form id="casoForm" class="list" style="gap:12px">'+
    '<div class="row"><div class="field" style="flex:1;min-width:140px"><label for="cg">Grupo</label><select id="cg" data-c="cgroup">'+GROUPS.map(function(g,i){return '<option value="'+i+'"'+(i===gi?" selected":"")+'>'+g.name+'</option>';}).join("")+'</select></div>'+
    '<div class="field" style="flex:2;min-width:200px"><label for="ck">Niño</label><select id="ck" data-c="ckid">'+ks.map(function(x){return '<option value="'+x.id+'"'+(k&&x.id===k.id?" selected":"")+'>'+esc(x.name)+'</option>';}).join("")+'</select></div>'+
    '<div class="field" style="width:170px"><label for="cf">Fecha</label><input type="date" id="cf" value="'+todayISO()+'"></div></div>'+
@@ -392,6 +425,66 @@ function vApoderados(){
   h+='<div class="card"><div class="row between"><h2>Registros ('+(S.casos||[]).length+')</h2></div><input type="text" id="cq" placeholder="Buscar niño" aria-label="Buscar niño" value="'+esc(S.cq||"")+'"><div class="list" style="gap:10px;margin-top:10px">'+
    (list.length?list.map(function(c){var kk=kidById(c.kid),pend=c.acts.filter(function(a){return !a.done;}).length;
      return casoCard(c,kk,pend);}).join(""):'<p class="empty">Sin registros.</p>')+'</div></div>';
+  return h;
+}
+var CALT=["Feriado","Suspensión de clases","Vacaciones","Jornada especial"];
+function vCalendario(){
+  var edit=S.role==="coord",t=todayISO();
+  var h=top("Calendario","Feriados, suspensiones y vacaciones");
+  if(edit)h+='<div class="card"><h2>Bloquear días</h2><p class="muted">Los días bloqueados no tienen asistencia, retiros ni salida, y las familias los ven en su vista.</p><form id="calForm" class="list" style="gap:12px"><div class="row"><div class="field" style="width:180px"><label for="cdA">Desde</label><input type="date" id="cdA" required></div><div class="field" style="width:180px"><label for="cdB">Hasta (opcional)</label><input type="date" id="cdB"></div><div class="field" style="flex:1;min-width:180px"><label for="cdT">Tipo</label><select id="cdT">'+CALT.map(function(x){return '<option>'+x+'</option>';}).join("")+'</select></div></div><div class="field"><label for="cdN">Nota</label><input type="text" id="cdN" placeholder="Ej.: Fiestas Patrias"></div><div class="row"><button class="btn primary" type="submit">Agregar al calendario</button></div></form></div>';
+  var ks=Object.keys(S.cal||{}).sort(),up=ks.filter(function(x){return x>=t;}),past=ks.filter(function(x){return x<t;});
+  var row=function(iso){var c=S.cal[iso];return '<div class="item"><div class="grow"><b>'+dayLabel(iso)+'</b><span class="muted" style="display:block">'+esc(c.tipo)+(c.nota?' · '+esc(c.nota):'')+'</span></div><span class="pill '+(c.tipo==="Jornada especial"?'p-info':'p-warn')+'">'+(c.tipo==="Jornada especial"?'Con École de Jeu':'Sin École de Jeu')+'</span>'+(edit?'<button class="btn small" data-a="calDel" data-v="'+iso+'" aria-label="Quitar '+dayLabel(iso)+'">Quitar</button>':'')+'</div>';};
+  h+='<div class="card"><h2>Próximos días marcados</h2><div class="list">'+(up.length?up.map(row).join(""):'<p class="empty">No hay días marcados.</p>')+'</div>'+(past.length?'<h3 style="margin-top:14px">Ya pasaron</h3><div class="list">'+past.map(row).join("")+'</div>':'')+'</div>';
+  return h;
+}
+/* ---------- Salida 16:00 ---------- */
+function salMode(k){var m=(k.sal||{}).modo||"familia";return m==="furgon"?'<span class="pill p-info">🚐 '+esc(k.sal.fn||"Furgón")+(k.sal.ft?' · '+esc(k.sal.ft):'')+'</span>':m==="academie"?'<span class="pill p-info">Se queda en Académie</span>':'<span class="pill">Lo retira la familia</span>';}
+function earlyIds(iso){var o={};(S.early[iso]||[]).forEach(function(r){if(r.status!=="no")o[r.kid]=r.time;});return o;}
+function salPending(iso){var e=earlyIds(iso),a=S.att[iso]||{},sv=S.sal[iso]||{};return KIDS.filter(function(k){return a[k.id]!==false&&!e[k.id]&&!sv[k.id]&&((k.sal||{}).modo||"familia")!=="academie";});}
+function vSalida(){
+  var iso=dk(),h=top("Salida 16:00",dayLabel(iso))+'<div class="card">'+dayChips()+'</div>';
+  if(blocked(iso))return h+blockBanner(iso);
+  var e=earlyIds(iso),a=S.att[iso]||{},sv=S.sal[iso]||{},pend=salPending(iso);
+  h+='<div class="tiles"><div class="tile ok"><b>'+Object.keys(sv).length+'</b><span>Entregados</span></div><div class="tile'+(pend.length?' warn':'')+'"><b>'+pend.length+'</b><span>Por entregar</span></div></div>';
+  h+='<div class="card"><p class="muted">Marca a cada niño cuando se va. A las 16:15, si queda alguno sin retirar, te aparece una alerta en el Inicio.</p></div><div class="grid3">';
+  for(var g=0;g<6;g++){h+='<div class="card"><h2>'+GROUPS[g].name+'</h2><div class="list">'+kidsOf(g).map(function(k){
+    var st=a[k.id]===false?'<span class="pill">Ausente</span>':e[k.id]?'<span class="pill p-ok">Retiro anticipado '+e[k.id]+'</span>':sv[k.id]?'<button class="btn small" data-a="salOk" data-v="'+k.id+'" aria-pressed="true">✓ '+sv[k.id]+'</button>':'<button class="btn small primary" data-a="salOk" data-v="'+k.id+'">Entregado</button>';
+    return '<div class="item" style="flex-wrap:wrap"><div class="grow"><b>'+esc(k.name)+'</b><span style="display:block;margin-top:4px">'+salMode(k)+'</span></div>'+st+'</div>';}).join("")+'</div></div>';}
+  return h+'</div>';
+}
+function inPer(iso){var t=todayISO();return iso<=t&&(S.iper==="todo"||iso.slice(0,7)===t.slice(0,7));}
+function kidStats(k){var d=0,a=0,av=0,r=0;Object.keys(S.taken||{}).forEach(function(iso){if(inPer(iso)&&S.taken[iso][k.g]){d++;if((S.att[iso]||{})[k.id]===false){a++;if((S.abs[iso]||{})[k.id])av++;}}});
+  Object.keys(S.early||{}).forEach(function(iso){if(inPer(iso))(S.early[iso]||[]).forEach(function(x){if(x.kid===k.id&&x.status!=="no"&&x.status!=="pend")r++;});});
+  var cs=(S.casos||[]).filter(function(c){return c.kid===k.id&&inPer(c.date);});return {d:d,a:a,av:av,r:r,c:cs,pct:d?Math.round((d-a)*100/d):null};}
+function sumStats(ks){var o={d:0,a:0,av:0,r:0,c:[],n:ks.length};ks.forEach(function(k){var x=kidStats(k);o.d+=x.d;o.a+=x.a;o.av+=x.av;o.r+=x.r;o.c=o.c.concat(x.c);});o.pct=o.d?Math.round((o.d-o.a)*100/o.d):null;return o;}
+function pctTxt(p){return p===null?'—':p+'%';}
+function statTiles(o,withKids){return '<div class="tiles">'+(withKids?'<div class="tile"><b>'+o.n+'</b><span>Niños</span></div>':'')+'<div class="tile ok"><b>'+pctTxt(o.pct)+'</b><span>Asistencia</span></div><div class="tile"><b>'+o.a+'</b><span>Ausencias ('+o.av+' avisadas)</span></div><div class="tile"><b>'+o.r+'</b><span>Retiros anticipados</span></div><div class="tile'+(o.c.length?' warn':'')+'"><b>'+o.c.length+'</b><span>Situaciones registradas</span></div></div>';}
+function casosPorTipo(cs){var m={};cs.forEach(function(c){m[c.tipo]=(m[c.tipo]||0)+1;});var ks=Object.keys(m);return ks.length?'<div class="row" style="gap:6px">'+ks.map(function(t){return '<span class="pill p-info">'+esc(t)+': '+m[t]+'</span>';}).join("")+'</div>':'<p class="muted">Sin situaciones registradas en el período.</p>';}
+function kidTable(ks){return '<div class="scroll"><table><thead><tr><th>Niño</th><th>Grupo</th><th>Asistencia</th><th>Ausencias</th><th>Retiros</th><th>Situaciones</th><th></th></tr></thead><tbody>'+ks.map(function(k){var x=kidStats(k);return '<tr><td><b>'+esc(k.name)+'</b></td><td>'+GROUPS[k.g].name+'</td><td style="font-variant-numeric:tabular-nums">'+pctTxt(x.pct)+'</td><td>'+x.a+'</td><td>'+x.r+'</td><td>'+(x.c.length||'')+'</td><td class="noprint"><button class="btn small" data-a="hoja" data-v="'+k.id+'">Hoja de vida</button></td></tr>';}).join("")+'</tbody></table></div>';}
+function hojaDeVida(k){
+  var x=kidStats(k),h='<div class="card"><p class="muted">Hoja de vida · 🔒 coordinador y Dirección</p><p class="kidname">'+esc(k.name)+'</p><p>'+GROUPS[k.g].name+' · '+GROUPS[k.g].lvl+' · '+salMode(k)+'</p><h3>Apoderados y autorizados</h3><div class="list">'+k.aut.map(function(a){return '<div class="item"><div class="grow"><b>'+esc(a.name)+'</b><span class="muted" style="display:block">'+esc(a.rel)+' · '+esc(a.tel)+'</span></div></div>';}).join("")+'</div></div>';
+  h+=statTiles(x,false);
+  var ev=[];
+  Object.keys(S.taken||{}).forEach(function(iso){if(inPer(iso)&&S.taken[iso][k.g]&&(S.att[iso]||{})[k.id]===false){var av=(S.abs[iso]||{})[k.id];ev.push({d:iso,h:"",t:av?"Inasistencia avisada por la familia"+(av.motivo?": "+av.motivo:""):"Inasistencia sin aviso",c:"warn"});}});
+  Object.keys(S.early||{}).forEach(function(iso){if(inPer(iso))(S.early[iso]||[]).forEach(function(r){if(r.kid===k.id&&r.status!=="no"&&r.status!=="pend")ev.push({d:iso,h:r.time,t:"Retiro anticipado: lo retiró "+r.by+(r.rel?" ("+r.rel+")":"")+(r.motivo?" · "+r.motivo:""),c:"info"});});});
+  x.c.forEach(function(c){ev.push({d:c.date,h:"",t:c.tipo+": "+c.text+(c.closed?" (caso cerrado)":""),c:"bad"});(c.seg||[]).forEach(function(sg){ev.push({d:sg.date,h:sg.h||"",t:"Seguimiento: "+sg.t+(sg.n?" — "+sg.n:""),c:"info"});});});
+  ev.sort(function(p,q){return (q.d+q.h).localeCompare(p.d+p.h);});
+  h+='<div class="card"><h2>Registro del período</h2>'+(ev.length?'<div class="list" style="gap:6px;border-left:3px solid #E2DFEA;padding-left:12px">'+ev.map(function(e){return '<div><b>'+dayLabel(e.d)+(e.h?', '+esc(e.h):'')+'</b><span class="pill p-'+e.c+'" style="margin-left:6px">'+(e.c==="bad"?"Situación":e.c==="warn"?"Asistencia":"Registro")+'</span><p style="margin:2px 0 6px">'+esc(e.t)+'</p></div>';}).join("")+'</div>':'<p class="empty">Sin registros en el período: asistencia completa y sin situaciones.</p>')+'</div>';
+  return h;
+}
+function vInformes(){
+  var tab=S.itab||"general",per=S.iper||"mes";
+  var tabs=[["general","General"],["seccion","Por sección"],["grupo","Por grupo"],["personal","Hoja de vida"]];
+  var h=top("Informes","Asistencia, retiros y situaciones · "+(per==="mes"?"este mes":"todo el año"))+'<div class="card noprint"><div class="chips" role="group" aria-label="Tipo de informe">'+tabs.map(function(t){return '<button class="chip" data-a="itab" data-v="'+t[0]+'" aria-pressed="'+(tab===t[0])+'">'+t[1]+'</button>';}).join("")+'</div><div class="row" style="margin-top:10px;gap:8px"><div class="chips" role="group" aria-label="Período"><button class="chip" data-a="iper" data-v="mes" aria-pressed="'+(per==="mes")+'">Este mes</button><button class="chip" data-a="iper" data-v="todo" aria-pressed="'+(per==="todo")+'">Todo el año</button></div><button class="btn small" data-a="print">🖨 Imprimir o guardar PDF</button></div>';
+  if(tab==="grupo")h+='<div class="field" style="margin-top:10px"><label for="ig">Grupo</label>'+groupSel("ig",S.igroup||0,"igroup")+'</div>';
+  if(tab==="seccion")h+='<div class="chips" role="group" aria-label="Sección" style="margin-top:10px">'+["PS","MS","GS"].map(function(x,i){return '<button class="chip" data-a="isec" data-v="'+i+'" aria-pressed="'+((S.isec||0)===i)+'">'+["Petite Section","Moyenne Section","Grande Section"][i]+'</button>';}).join("")+'</div>';
+  if(tab==="personal"){var gi=S.cgroup||0,kk=kidById(S.ckid);if(!kk||kk.g!==gi)kk=kidsOf(gi)[0];h+='<div class="row" style="margin-top:10px"><div class="field" style="flex:1;min-width:140px"><label for="hg">Grupo</label><select id="hg" data-c="cgroup">'+GROUPS.map(function(g,i){return '<option value="'+i+'"'+(i===gi?" selected":"")+'>'+g.name+'</option>';}).join("")+'</select></div><div class="field" style="flex:2;min-width:200px"><label for="hk">Niño</label><select id="hk" data-c="ckid">'+kidsOf(gi).map(function(x){return '<option value="'+x.id+'"'+(x.id===kk.id?" selected":"")+'>'+esc(x.name)+'</option>';}).join("")+'</select></div></div>';}
+  h+='</div><div class="print-head"><b>École de Jeu · Lycée Claude Gay</b> · Informe generado el '+dayLabel(todayISO())+'</div>';
+  if(tab==="general"){var all=sumStats(KIDS);h+='<div class="card"><h2>Informe general</h2>'+statTiles(all,true)+'</div><div class="card"><h2>Por grupo</h2><div class="scroll"><table><thead><tr><th>Grupo</th><th>Niños</th><th>Asistencia</th><th>Ausencias</th><th>Retiros</th><th>Situaciones</th></tr></thead><tbody>'+GROUPS.map(function(g,i){var o=sumStats(kidsOf(i));return '<tr><td><b>'+g.name+'</b></td><td>'+o.n+'</td><td>'+pctTxt(o.pct)+'</td><td>'+o.a+'</td><td>'+o.r+'</td><td>'+o.c.length+'</td></tr>';}).join("")+'</tbody></table></div></div><div class="card"><h2>Situaciones por tipo</h2>'+casosPorTipo(all.c)+'</div>';
+    var bl=Object.keys(S.cal||{}).filter(function(d){return inPer(d)&&blocked(d);}).length;h+='<div class="card"><p class="muted">Días sin École de Jeu en el período (feriados, suspensiones, vacaciones): '+bl+'.</p></div>';}
+  if(tab==="seccion"){var si=S.isec||0,ks=KIDS.filter(function(k){return Math.floor(k.g/2)===si;}),o=sumStats(ks);h+='<div class="card"><h2>'+["Petite Section","Moyenne Section","Grande Section"][si]+'</h2>'+statTiles(o,true)+casosPorTipo(o.c)+'</div><div class="card"><h2>Niños</h2>'+kidTable(ks)+'</div>';}
+  if(tab==="grupo"){var g=S.igroup||0,kg=kidsOf(g),og=sumStats(kg);h+='<div class="card"><h2>Grupo '+GROUPS[g].name+'</h2>'+statTiles(og,true)+casosPorTipo(og.c)+'</div><div class="card"><h2>Niños</h2>'+kidTable(kg)+'</div>';}
+  if(tab==="personal"){var gi2=S.cgroup||0,k2=kidById(S.ckid);if(!k2||k2.g!==gi2)k2=kidsOf(gi2)[0];h+=hojaDeVida(k2);}
   return h;
 }
 function vNinos(){
@@ -411,11 +504,11 @@ function earlyForm(gi,showTel){
    '<div class="row"><div class="field" style="width:130px"><label for="rt">Hora</label><input type="text" id="rt" value="'+nowHM()+'"></div><div class="field" style="flex:1;min-width:200px"><label for="rm">Motivo</label><input type="text" id="rm" placeholder="Ej.: control médico"></div></div><div class="row"><button class="btn primary" type="submit">Registrar retiro anticipado</button></div></form>';
 }
 function famPickup(k){
-  var mine=[];DAYS.forEach(function(d){(S.early[d.k]||[]).forEach(function(r){if(r.kid===k.id&&r.src==="fam")mine.push([d,r]);});});
+  var mine=[];Object.keys(S.early).forEach(function(dd){var d={name:dayLabel(dd),k:dd};(S.early[dd]||[]).forEach(function(r){if(r.kid===k.id&&r.src==="fam")mine.push([d,r]);});});
   var ap=k.aut[0]?k.aut[0].name:"";
   var h='<div class="card"><h2>Avisar un retiro anticipado</h2><p class="muted">Si tu hijo se va antes de las 16:00, avísalo aquí. El coordinador recibe el aviso con todos los datos.</p>'+
    '<form id="famPickForm" class="list" style="gap:12px">'+
-   '<div class="row"><div class="field" style="flex:1;min-width:140px"><label for="fpD">Día</label><select id="fpD">'+DAYS.map(function(d,i){return '<option value="'+i+'"'+(i===S.day?" selected":"")+'>'+d.name+'</option>';}).join("")+'</select></div>'+
+   '<div class="row"><div class="field" style="flex:1;min-width:160px"><label for="fpD">Día</label><input type="date" id="fpD" value="'+dk()+'" required></div>'+
    '<div class="field" style="width:130px"><label for="fpH">Hora</label><input type="text" id="fpH" placeholder="15:00" required></div></div>'+
    '<div class="field"><label for="fpN">Quién lo retira</label><input type="text" id="fpN" placeholder="Nombre y apellido" required></div>'+
    '<div class="row"><div class="field" style="flex:1;min-width:160px"><label for="fpR">Parentesco</label><input type="text" id="fpR" placeholder="Ej.: abuela, tío, papá" required></div>'+
@@ -511,12 +604,36 @@ function vTaller(){
   h+='<div class="card"><div class="row between"><h2>Planificaciones</h2><span class="pill '+(planFor(t,wkKey(0))?'p-ok':'p-warn')+'">Esta semana: '+(planFor(t,wkKey(0))?'entregada':'pendiente')+'</span></div><div class="list">'+(weeks.length?weeks.map(function(k){var p=S.plans[k];return '<div class="item"><div class="grow"><b>'+wkLabel(k.split("|")[1])+'</b><span class="muted">'+esc(p.obj)+'</span></div><button class="btn small" data-a="plan" data-v="'+k+'">Ver</button></div>';}).join(""):'<p class="empty">Este taller aún no tiene planificaciones.</p>')+'</div></div>';
   return h;
 }
+function repById(id){return (S.reps||[]).filter(function(r){return r.id===id;})[0];}
+function tById(id){return TALLERES.filter(function(t){return t.id===id;})[0];}
+function repToday(tid,iso){return (S.repA||[]).filter(function(x){return x.tid===tid&&x.date===iso;})[0];}
+function repBlock(){
+  var t=todayISO(),fl=(S.faltas||[]).filter(function(f){return !f.done;});
+  var h='<div class="card"><h2>Reemplazos</h2>';
+  if(fl.length)h+='<div class="list" style="gap:8px;margin-bottom:12px">'+fl.map(function(f){var tt=tById(f.tid);return '<div class="alert warn">🙋 <span><b>'+esc(monName(tt)||"Monitor de "+tt.name)+'</b> avisa que faltará el <b>'+dayLabel(f.date)+'</b>'+(f.motivo?' ('+esc(f.motivo)+')':'')+'. <button class="btn small" data-a="repPre" data-v="'+f.id+'">Asignar reemplazo</button></span></div>';}).join("")+'</div>';
+  var pre=S.repPre||{};
+  h+='<form id="repForm" class="list" style="gap:12px"><div class="row"><div class="field" style="width:180px"><label for="raD">Fecha</label><input type="date" id="raD" value="'+(pre.date||dk())+'" required></div><div class="field" style="flex:1;min-width:180px"><label for="raT">Taller</label><select id="raT">'+TALLERES.map(function(x){return '<option value="'+x.id+'"'+(pre.tid===x.id?' selected':'')+'>'+x.name+'</option>';}).join("")+'</select></div><div class="field" style="flex:1;min-width:180px"><label for="raR">Reemplazante</label><select id="raR">'+(S.reps||[]).map(function(r){return '<option value="'+r.id+'">'+esc(r.name)+'</option>';}).join("")+'</select></div></div><div class="field"><label for="raM">Motivo</label><input type="text" id="raM" value="'+esc(pre.motivo||"")+'" placeholder="Ej.: licencia médica"></div><div class="row"><button class="btn primary" type="submit">Asignar reemplazo</button></div></form>';
+  var up=(S.repA||[]).filter(function(x){return x.date>=t;}).sort(function(p,q){return p.date.localeCompare(q.date);});
+  h+='<h3 style="margin-top:16px">Reemplazos asignados</h3><div class="list">'+(up.length?up.map(function(x){var r=repById(x.rid),tt=tById(x.tid);return '<div class="item"><div class="grow"><b>'+dayLabel(x.date)+' · '+tt.name+'</b><span class="muted" style="display:block">Reemplaza: '+esc(r?r.name:"")+(x.motivo?' · '+esc(x.motivo):'')+'</span></div><span class="pill '+(x.read?'p-ok':'p-warn')+'">'+(x.read?'✓ Confirmado':'Sin confirmar')+'</span><button class="btn small" data-a="repDel" data-v="'+x.id+'">Quitar</button></div>';}).join(""):'<p class="empty">No hay reemplazos asignados.</p>')+'</div>';
+  h+='<h3 style="margin-top:16px">Monitores de reemplazo</h3><div class="list">'+(S.reps||[]).map(function(r){return '<div class="item"><div class="grow"><b>'+esc(r.name)+'</b><span class="muted" style="display:block">'+esc(r.email||"")+(r.tel?' · '+esc(r.tel):'')+'</span></div></div>';}).join("")+'</div>';
+  h+='<form id="repNew" class="row" style="gap:8px;margin-top:10px;align-items:flex-end"><div class="field" style="flex:1;min-width:160px"><label for="rnN">Nombre</label><input type="text" id="rnN" required></div><div class="field" style="flex:1;min-width:160px"><label for="rnE">Correo</label><input type="text" id="rnE"></div><div class="field" style="width:160px"><label for="rnT">Teléfono</label><input type="text" id="rnT"></div><button class="btn small" type="submit">Agregar reemplazante</button></form>';
+  return h+'</div>';
+}
+function vReemplazos(){
+  var r=repById(S.repSel)||(S.reps||[])[0],t=todayISO();
+  var h=top("Mis reemplazos",r?esc(r.name)+" · Monitor de reemplazo":"Monitor de reemplazo")+'<div class="card"><div class="field"><label for="rs">Demo: elige el reemplazante</label><select id="rs" data-c="repSel">'+(S.reps||[]).map(function(x){return '<option value="'+x.id+'"'+(r&&x.id===r.id?' selected':'')+'>'+esc(x.name)+'</option>';}).join("")+'</select></div></div>';
+  var mine=(S.repA||[]).filter(function(x){return r&&x.rid===r.id&&x.date>=t;}).sort(function(p,q){return p.date.localeCompare(q.date);});
+  var nw=mine.filter(function(x){return !x.read;});
+  if(nw.length)h+='<div class="card notif pur" role="status"><h2>🔔 '+(nw.length===1?'Te asignaron un reemplazo':'Te asignaron '+nw.length+' reemplazos')+'</h2><div class="list" style="gap:8px">'+nw.map(function(x){var tt=tById(x.tid);return '<div class="alert info"><span><b>'+dayLabel(x.date)+'</b> · '+tt.name+' ('+tt.sala+')'+(x.motivo?' · '+esc(x.motivo):'')+'</span><div class="row"><button class="btn small primary" data-a="repRead" data-v="'+x.id+'">✓ Entendido</button></div></div>';}).join("")+'</div></div>';
+  h+='<div class="card"><h2>Próximos reemplazos</h2><div class="list">'+(mine.length?mine.map(function(x){var tt=tById(x.tid);return '<div class="item"><div class="grow"><b>'+dayLabel(x.date)+'</b><span class="muted" style="display:block">'+tt.name+' · '+tt.sala+(x.motivo?' · '+esc(x.motivo):'')+'</span></div><button class="btn small primary" data-a="openRep" data-v="'+x.id+'">Ver ese día</button></div>';}).join(""):'<p class="empty">No tienes reemplazos asignados.</p>')+'</div></div>';
+  return h;
+}
 function vEquipo(){
   var n=TALLERES.reduce(function(acc,t){return acc+mons(t).length;},0);
   return top("Equipo",n+" monitores inscritos · 2 o 3 por taller, con apoyo de las ASEM")+'<div class="grid3">'+TALLERES.map(function(t){var m=S.monitors[t.id]||{};
     return '<div class="card"><div class="tname t-'+t.id+'"><span class="sw s-'+t.id+'"></span><span>'+t.name+'</span></div><p class="muted">'+t.sala+(t.parts?' · '+t.parts[0]+' (lun y mar) / '+t.parts[1]+' (jue y vie)':'')+'</p>'+
     monBlock(t)+
-    '<div class="row"><button class="btn small" data-a="toast" data-v="Reemplazo: se elige fecha y adulto (simulado).">Asignar reemplazo</button></div></div>';}).join("")+'</div>';
+    '<div class="row"><button class="btn small" data-a="repPreT" data-v="'+t.id+'">Asignar reemplazo</button></div></div>';}).join("")+'</div>'+'<div id="reemplazos">'+repBlock()+'</div>';
 }
 function planFor(t,key){return S.plans[t.id+"|"+key];}
 function vPlanes(){
@@ -536,7 +653,7 @@ function modalHtml(){
   var m=S.modal;if(!m)return "";
   var body="";
   if(m.type==="kid"){var k=KIDS.filter(function(x){return x.id===m.id;})[0];if(!k)return "";
-    body='<p class="muted">Ficha del niño · 🔒 solo coordinador</p><p class="kidname">'+esc(k.name)+'</p><p>'+GROUPS[k.g].name+' · '+GROUPS[k.g].lvl+'</p><p class="muted">Hoy: '+(present(k)?'presente':'ausente')+'</p><h3>Autorizados a retirar</h3><div class="list">'+k.aut.map(function(a){return '<div class="item"><div class="grow"><b>'+esc(a.name)+'</b><span class="muted">'+a.rel+' · '+a.tel+'</span></div></div>';}).join("")+'</div><div class="row"><button class="btn small" data-a="toast" data-v="Edición de la ficha (simulada). El cambio queda en el registro de accesos.">Editar ficha</button></div>';}
+    body='<p class="muted">Ficha del niño · 🔒 solo coordinador</p><p class="kidname">'+esc(k.name)+'</p><p>'+GROUPS[k.g].name+' · '+GROUPS[k.g].lvl+'</p><p class="muted">Hoy: '+(present(k)?'presente':'ausente')+'</p><h3>Autorizados a retirar</h3><div class="list">'+k.aut.map(function(a){return '<div class="item"><div class="grow"><b>'+esc(a.name)+'</b><span class="muted">'+a.rel+' · '+a.tel+'</span></div></div>';}).join("")+'</div><div class="row"><button class="btn small primary" data-a="hoja" data-v="'+k.id+'">Ver hoja de vida</button></div><h3>Salida de las 16:00</h3><form id="salForm" data-id="'+k.id+'" class="list" style="gap:10px"><div class="field"><label for="sfM">Cómo se va normalmente</label><select id="sfM"><option value="familia"'+(((k.sal||{}).modo||"familia")==="familia"?' selected':'')+'>Lo retira la familia</option><option value="furgon"'+((k.sal||{}).modo==="furgon"?' selected':'')+'>Se va en furgón</option><option value="academie"'+((k.sal||{}).modo==="academie"?' selected':'')+'>Se queda en Académie</option></select></div><div class="row"><div class="field" style="flex:1;min-width:150px"><label for="sfN">Furgón (nombre)</label><input type="text" id="sfN" value="'+esc((k.sal||{}).fn||"")+'"></div><div class="field" style="flex:1;min-width:150px"><label for="sfT">Teléfono del furgón</label><input type="text" id="sfT" value="'+esc((k.sal||{}).ft||"")+'"></div></div><button class="btn small primary" type="submit">Guardar salida</button></form>';}
   if(m.type==="aut"){var ka=kidById(m.id);if(!ka)return "";
     body='<p class="muted">Nueva persona autorizada</p><h2>'+esc(ka.name)+'</h2><form id="autForm" class="list" style="gap:12px"><div class="field"><label for="aN">Nombre y apellido</label><input type="text" id="aN" required></div><div class="row"><div class="field" style="flex:1;min-width:140px"><label for="aR">Parentesco</label><input type="text" id="aR" placeholder="Ej.: Abuela"></div><div class="field" style="flex:1;min-width:160px"><label for="aT">Teléfono</label><input type="text" id="aT" placeholder="+56 9 …"></div></div><button class="btn primary" type="submit">Guardar autorizado</button></form>';}
   if(m.type==="early"){
@@ -550,17 +667,26 @@ function monAvisos(t){return S.avisos.filter(function(a){return (a.dest==="mon"|
 function vMiDia(){
   var ti=S.monT,t=TALLERES[ti];
   var h=top("Mi día",(monName(t)?esc(monName(t))+" · ":"")+"Monitor de "+t.name)+'<div class="card"><div class="field"><label for="mt">Demo: elige el taller del monitor</label><select id="mt" data-c="monT">'+TALLERES.map(function(x,i){return '<option value="'+i+'"'+(ti===i?" selected":"")+'>'+x.name+'</option>';}).join("")+'</select></div>'+dayChips()+'</div>';
-  var ma=monAvisos(t);
+  if(blocked(dk()))return h+blockBanner(dk());
+  var ra=repToday(t.id,dk());
+  if(ra){var rr=repById(ra.rid);h+='<div class="card notif" role="status"><h2>⇄ '+(S.role==="rep"?'Hoy reemplazas en '+t.name:'Este día te reemplaza '+esc(rr?rr.name:"un reemplazante"))+'</h2><p>'+dayLabel(dk())+(ra.motivo?' · '+esc(ra.motivo):'')+'</p></div>';}
+  var ma=S.role==="rep"?[]:monAvisos(t);
   if(ma.length)h+='<div class="card notif pur" role="status"><h2>🔔 '+(ma.length===1?'Tienes un aviso nuevo':'Tienes '+ma.length+' avisos nuevos')+'</h2><div class="list" style="gap:8px">'+ma.map(function(a){return '<div class="alert info"><span><b>'+esc(a.title)+'</b>'+(a.when?' · 📅 '+whenLabel(a):'')+(a.dest.indexOf("per:")===0?' · <i>personal</i>':'')+'</span><span>'+esc(a.text)+'</span><div class="row"><button class="btn small primary" data-a="readAv" data-v="'+a.id+'|'+t.id+'">✓ Entendido</button></div></div>';}).join("")+'</div></div>';
-  h+='<div class="card t-'+t.id+'" style="border:0"><h2>Hoy en '+t.name+': '+partName(t,S.day)+'</h2><p>'+t.sala+'</p></div><div class="grid3">';
+  h+='<div class="card t-'+t.id+'" style="border:0"><h2>'+(dk()===todayISO()?'Hoy':'Este día')+' en '+t.name+(t.parts?': '+partName(t,S.day):'')+'</h2><p>'+t.sala+'</p></div><div class="grid3">';
   for(var m=0;m<3;m++){var g=groupAt(ti,S.day,m),ks=kidsOf(g);h+='<div class="card"><p class="muted">'+MODS[m].n+' · '+MODS[m].h+'</p><p class="kidname">'+GROUPS[g].name+'</p><p class="muted">'+ks.filter(present).length+' presentes de '+ks.length+'</p>'+(m===0?'<button class="btn primary" data-a="go" data-v="asistencia">Tomar asistencia</button>':'<button class="btn small" data-a="monEarly" data-v="'+g+'">Registrar retiro anticipado</button>')+'</div>';}
-  return h+'</div>';
+  h+='</div>';
+  if(S.role==="mon"){var mf=(S.faltas||[]).filter(function(f){return f.tid===t.id&&f.date>=todayISO();});
+    h+='<div class="card"><h2>¿Vas a faltar?</h2><p class="muted">Avísale al coordinador con tiempo para que asigne un reemplazo.</p><form id="faltaForm" class="row" style="gap:8px;align-items:flex-end"><div class="field" style="width:180px"><label for="flD">Día</label><input type="date" id="flD" required></div><div class="field" style="flex:1;min-width:180px"><label for="flM">Motivo (opcional)</label><input type="text" id="flM" placeholder="Ej.: control médico"></div><button class="btn primary small" type="submit">Avisar al coordinador</button></form>'+(mf.length?'<div class="list" style="margin-top:10px">'+mf.map(function(f){var ra2=repToday(f.tid,f.date);return '<div class="item"><div class="grow"><b>'+dayLabel(f.date)+'</b><span class="muted" style="display:block">'+esc(f.motivo||"")+'</span></div><span class="pill '+(ra2?'p-ok':'p-warn')+'">'+(ra2?'Reemplazo asignado':'Esperando reemplazo')+'</span></div>';}).join("")+'</div>':'')+'</div>';}
+  return h;
 }
 /* ---------- Dirección ---------- */
 function vResumen(){
-  var h=top("Resumen","Dirección · sin datos personales")+'<div class="tiles"><div class="tile ok"><b>94%</b><span>Asistencia del mes</span></div><div class="tile"><b>'+KIDS.length+'</b><span>Niños inscritos</span></div><div class="tile"><b>6</b><span>Talleres en simultáneo</span></div><div class="tile"><b>'+S.avisos.length+'</b><span>Avisos enviados</span></div></div>';
-  var pct=[92,95,96,93,94,97];
-  h+='<div class="card"><h2>Asistencia del mes por grupo</h2><div class="scroll"><table><thead><tr><th>Grupo</th><th>Nivel</th><th>Asistencia</th><th style="width:40%"></th></tr></thead><tbody>'+GROUPS.map(function(g,i){return '<tr><td><b>'+g.name+'</b></td><td>'+g.lvl+'</td><td style="font-variant-numeric:tabular-nums">'+pct[i]+'%</td><td><div class="bar"><i style="width:'+pct[i]+'%"></i></div></td></tr>';}).join("")+'</tbody></table></div><div class="row"><button class="btn" data-a="toast" data-v="Informe mensual en PDF (simulado).">Descargar informe PDF</button><button class="btn" data-a="toast" data-v="Exportación a Excel (simulada).">Exportar a Excel</button></div></div>';
+  var mk=todayISO().slice(0,7),tot=0,pr=0,pct=[],days=0;
+  for(var g=0;g<6;g++){var gt=0,gp=0,n=kidsOf(g).length;Object.keys(S.taken||{}).forEach(function(d){if(d.slice(0,7)===mk&&S.taken[d][g]){var ab=0;kidsOf(g).forEach(function(k){if((S.att[d]||{})[k.id]===false)ab++;});gt+=n;gp+=n-ab;}});tot+=gt;pr+=gp;pct.push(gt?Math.round(gp*100/gt):null);}
+  Object.keys(S.taken||{}).forEach(function(d){if(d.slice(0,7)===mk)days++;});
+  var avg=tot?Math.round(pr*100/tot)+"%":"—";
+  var h=top("Resumen","Dirección · sin datos personales")+'<div class="tiles"><div class="tile ok"><b>'+avg+'</b><span>Asistencia del mes ('+days+(days===1?' día':' días')+' registrados)</span></div><div class="tile"><b>'+KIDS.length+'</b><span>Niños inscritos</span></div><div class="tile"><b>6</b><span>Talleres en simultáneo</span></div><div class="tile"><b>'+S.avisos.length+'</b><span>Avisos enviados</span></div></div>';
+  h+='<div class="card"><h2>Asistencia del mes por grupo</h2><div class="scroll"><table><thead><tr><th>Grupo</th><th>Nivel</th><th>Asistencia</th><th style="width:40%"></th></tr></thead><tbody>'+GROUPS.map(function(g,i){return '<tr><td><b>'+g.name+'</b></td><td>'+g.lvl+'</td><td style="font-variant-numeric:tabular-nums">'+(pct[i]===null?'Sin registros':pct[i]+'%')+'</td><td><div class="bar"><i style="width:'+(pct[i]||0)+'%"></i></div></td></tr>';}).join("")+'</tbody></table></div><div class="row"><button class="btn" data-a="toast" data-v="Informe mensual en PDF (simulado).">Descargar informe PDF</button><button class="btn" data-a="toast" data-v="Exportación a Excel (simulada).">Exportar a Excel</button></div></div>';
   return h;
 }
 /* ---------- Familia ---------- */
@@ -570,7 +696,11 @@ function vMiHijo(){
   var nd=(S.day+1)%4;
   var h=top("Mi hijo","Vista de familia")+'<div class="card"><div class="field"><label for="fk">Demo: elige la familia</label><select id="fk" data-c="famKid">'+KIDS.map(function(x){return '<option value="'+x.id+'"'+(x.id===k.id?" selected":"")+'>'+esc(x.name)+' ('+GROUPS[x.g].name+')</option>';}).join("")+'</select></div></div>';
   h+='<div class="card"><p class="kidname">'+esc(k.name)+'</p><p>Grupo <b>'+GROUPS[gi].name+'</b> · '+GROUPS[gi].lvl+'</p></div>';
+  var fa=[];Object.keys(S.abs||{}).sort().forEach(function(d){if(d>=todayISO()&&S.abs[d][k.id])fa.push([d,S.abs[d][k.id]]);});
+  h+='<div class="card"><h2>Avisar que no viene</h2><p class="muted">Si tu hijo no asistirá un día, avísalo aquí. El monitor lo verá como ausente avisado.</p><form id="absForm" class="row" style="gap:8px;align-items:flex-end"><div class="field" style="width:180px"><label for="abD">Día</label><input type="date" id="abD" value="'+dk()+'" required></div><div class="field" style="flex:1;min-width:180px"><label for="abM">Motivo (opcional)</label><input type="text" id="abM" placeholder="Ej.: está resfriado"></div><button class="btn primary" type="submit">Enviar aviso</button></form>'+(fa.length?'<div class="list" style="margin-top:10px">'+fa.map(function(x){return '<div class="item"><div class="grow"><b>No viene el '+dayLabel(x[0])+'</b><span class="muted" style="display:block">'+esc(x[1].motivo||"")+'</span></div><span class="pill p-ok">Avisado</span></div>';}).join("")+'</div>':'')+'</div>';
   h+=famPickup(k);
+  var nb=Object.keys(S.cal||{}).sort().filter(function(d){return d>=todayISO()&&blocked(d);}).slice(0,5);
+  if(nb.length)h+='<div class="card"><h2>Próximos días sin École de Jeu</h2><div class="list">'+nb.map(function(d){return '<div class="item"><div class="grow"><b>'+dayLabel(d)+'</b><span class="muted" style="display:block">'+esc(S.cal[d].tipo)+(S.cal[d].nota?' · '+esc(S.cal[d].nota):'')+'</span></div></div>';}).join("")+'</div></div>';
   var tr=[];for(var m=0;m<3;m++){var x=traerFor(tallerAt(gi,nd,m),nd);if(x&&tr.indexOf(x)<0)tr.push(x);}
   h+='<div class="card t-art" style="border:0"><h2>Qué traer el '+DAYS[nd].name.toLowerCase()+'</h2><p>Colación y botella de agua'+(tr.length?', '+tr.join(", "):'')+'.</p></div>';
   h+='<div class="card"><h2>Semana de '+GROUPS[gi].name+'</h2><div class="scroll"><div class="week"><div></div>'+MODS.map(function(mm){return '<div class="muted" style="font-weight:800">'+mm.h+'</div>';}).join("");
@@ -612,13 +742,13 @@ function parseRows(rows,defG,replace){
   KIDS=S.kids;S.att={};S.taken={};S.out={};
   return added.length;
 }
-var VIEWS={grupos:vGrupos,talleres:vTalleres,inicio:vInicio,horario:vHorario,asistencia:vAsistencia,ninos:vNinos,apoderados:vApoderados,retiros:vRetiros,avisos:vAvisos,equipo:vEquipo,planes:vPlanes,midia:vMiDia,miplan:vMiPlan,resumen:vResumen,mihijo:vMiHijo};
+var VIEWS={grupos:vGrupos,talleres:vTalleres,inicio:vInicio,horario:vHorario,asistencia:vAsistencia,ninos:vNinos,informes:vInformes,calendario:vCalendario,salida:vSalida,reemplazos:vReemplazos,apoderados:vApoderados,retiros:vRetiros,avisos:vAvisos,equipo:vEquipo,planes:vPlanes,midia:vMiDia,miplan:vMiPlan,resumen:vResumen,mihijo:vMiHijo};
 function render(){
   applyTx();
   var nav=NAV[S.role];
   if(!nav.some(function(x){return x[0]===S.view;}))S.view=nav[0][0];
   document.getElementById("roleSel").value=S.role;
-  document.getElementById("nav").innerHTML=nav.map(function(x){return '<button data-a="go" data-v="'+x[0]+'"'+(S.view===x[0]?' aria-current="page"':'')+'><span class="ico" aria-hidden="true">'+x[1]+'</span>'+x[2]+(S.role==="coord"&&x[0]==="inicio"&&alertTotal()?' <span class="nbadge" aria-label="'+alertTotal()+' alertas">'+alertTotal()+'</span>':'')+(S.role==="coord"&&x[0]==="apoderados"&&dueActs().length?' <span class="nbadge rec" aria-label="'+dueActs().length+' recordatorios">'+dueActs().length+'</span>':'')+(S.role==="coord"&&x[0]==="avisos"&&(S.readN||[]).length?' <span class="nbadge pur" aria-label="'+S.readN.length+' confirmaciones">'+S.readN.length+'</span>':'')+(S.role==="coord"&&x[0]==="retiros"&&newPickups().length?' <span class="nbadge" aria-label="'+newPickups().length+' avisos nuevos">'+newPickups().length+'</span>':'')+'</button>';}).join("")+(S.role==="coord"?'<button data-a="reset"><span class="ico" aria-hidden="true">↺</span>Restablecer demo</button>':'');
+  document.getElementById("nav").innerHTML=nav.map(function(x){return '<button data-a="go" data-v="'+x[0]+'"'+(S.view===x[0]?' aria-current="page"':'')+'><span class="ico" aria-hidden="true">'+x[1]+'</span>'+x[2]+(S.role==="coord"&&x[0]==="equipo"&&(S.faltas||[]).filter(function(f){return !f.done&&!repToday(f.tid,f.date);}).length?' <span class="nbadge rec">'+(S.faltas||[]).filter(function(f){return !f.done&&!repToday(f.tid,f.date);}).length+'</span>':'')+(S.role==="coord"&&x[0]==="inicio"&&alertTotal()?' <span class="nbadge" aria-label="'+alertTotal()+' alertas">'+alertTotal()+'</span>':'')+(S.role==="coord"&&x[0]==="apoderados"&&dueActs().length?' <span class="nbadge rec" aria-label="'+dueActs().length+' recordatorios">'+dueActs().length+'</span>':'')+(S.role==="coord"&&x[0]==="avisos"&&(S.readN||[]).length?' <span class="nbadge pur" aria-label="'+S.readN.length+' confirmaciones">'+S.readN.length+'</span>':'')+(S.role==="coord"&&x[0]==="retiros"&&newPickups().length?' <span class="nbadge" aria-label="'+newPickups().length+' avisos nuevos">'+newPickups().length+'</span>':'')+'</button>';}).join("")+(S.role==="coord"?'<button data-a="reset"><span class="ico" aria-hidden="true">↺</span>Restablecer demo</button>':'');
   document.getElementById("main").innerHTML=(VIEWS[S.view]||VIEWS.inicio)()+modalHtml();
   var mx=document.querySelector(".modal .x");if(mx)mx.focus();
   var tf=document.getElementById("tForm");
@@ -632,6 +762,29 @@ function render(){
     var r={kid:k.id,time:document.getElementById("rt").value||nowHM(),motivo:document.getElementById("rm").value.trim(),reg:S.role==="mon"?"monitor":"coordinador"};
     if(w==="x"){r.by="Persona no autorizada";r.ok=false;}else{r.by=k.aut[+w].name+" ("+k.aut[+w].rel+")";r.ok=true;}
     var d=dk();S.early[d]=S.early[d]||[];S.early[d].unshift(r);S.modal=null;save();render();toast(r.ok?"Retiro anticipado registrado.":"Alerta: no está autorizada. Se avisa al coordinador.");});
+  var calf=document.getElementById("calForm");
+  if(calf)calf.addEventListener("submit",function(e){e.preventDefault();var A=document.getElementById("cdA").value,Bv=document.getElementById("cdB").value||A,T=document.getElementById("cdT").value,N=document.getElementById("cdN").value.trim();
+    if(Bv<A){toast("La fecha final es anterior a la inicial.");return;}var d=parseIso(A),end=parseIso(Bv),n=0;
+    while(d<=end){var iso=isoOf(d);if(dayIdx(iso)!==undefined){S.cal[iso]={tipo:T,nota:N};n++;}d.setDate(d.getDate()+1);}
+    save();render();toast(n?n+(n===1?" día marcado.":" días marcados."):"En esas fechas no hay días de École de Jeu (lun, mar, jue, vie).");});
+  var absf=document.getElementById("absForm");
+  if(absf)absf.addEventListener("submit",function(e){e.preventDefault();var k=famKid(),d=document.getElementById("abD").value,m=document.getElementById("abM").value.trim();
+    if(!schoolDay(d)){toast("Ese día no hay École de Jeu.");return;}var who=(k.aut[0]?k.aut[0].name:"Apoderado");
+    S.abs[d]=S.abs[d]||{};S.abs[d][k.id]={motivo:m,reg:who,at:nowHM()};S.att[d]=S.att[d]||{};S.att[d][k.id]=false;
+    S.absN=S.absN||[];S.absN.unshift({kid:k.id,date:d,motivo:m,reg:who,at:nowHM()});save();render();toast("Aviso enviado. El monitor lo verá como ausente avisado.");});
+  var salf=document.getElementById("salForm");
+  if(salf)salf.addEventListener("submit",function(e){e.preventDefault();var k=kidById(salf.getAttribute("data-id"));if(!k)return;
+    k.sal={modo:document.getElementById("sfM").value,fn:document.getElementById("sfN").value.trim(),ft:document.getElementById("sfT").value.trim()};save();render();toast("Salida guardada.");});
+  var rf=document.getElementById("repForm");
+  if(rf)rf.addEventListener("submit",function(e){e.preventDefault();var d=document.getElementById("raD").value,ti=document.getElementById("raT").value,ri=document.getElementById("raR").value,mo=document.getElementById("raM").value.trim();
+    if(!schoolDay(d)){toast("Ese día no hay École de Jeu.");return;}
+    S.repA=S.repA||[];S.repA.push({id:Date.now(),date:d,tid:ti,rid:ri,motivo:mo,read:false});
+    if(S.repPre&&S.repPre.fid)(S.faltas||[]).forEach(function(f){if(f.id===S.repPre.fid)f.done=true;});S.repPre=null;save();render();toast("Reemplazo asignado. Le llega el aviso al reemplazante.");});
+  var rn=document.getElementById("repNew");
+  if(rn)rn.addEventListener("submit",function(e){e.preventDefault();S.reps=S.reps||[];S.reps.push({id:"r"+Date.now(),name:document.getElementById("rnN").value.trim(),email:document.getElementById("rnE").value.trim(),tel:document.getElementById("rnT").value.trim()});save();render();toast("Reemplazante agregado.");});
+  var ff=document.getElementById("faltaForm");
+  if(ff)ff.addEventListener("submit",function(e){e.preventDefault();var d=document.getElementById("flD").value;if(!schoolDay(d)){toast("Ese día no hay École de Jeu.");return;}
+    S.faltas=S.faltas||[];S.faltas.push({id:Date.now(),tid:TALLERES[S.monT].id,date:d,motivo:document.getElementById("flM").value.trim(),at:nowHM()});save();render();toast("Aviso enviado al coordinador.");});
   var cf=document.getElementById("casoForm");
   if(cf)cf.addEventListener("submit",function(e){e.preventDefault();var g=function(id){return document.getElementById(id).value.trim();};
     var acts=[];CACTS.forEach(function(a,i){if(document.getElementById("ca"+i).checked)acts.push({t:a,done:false});});if(g("cao"))acts.push({t:g("cao"),done:false});
@@ -654,7 +807,7 @@ function render(){
   var cqi=document.getElementById("cq");if(cqi)cqi.addEventListener("input",function(){S.cq=cqi.value;var p=cqi.selectionStart;save();render();var n=document.getElementById("cq");if(n){n.focus();n.setSelectionRange(p,p);}});
   var fpf=document.getElementById("famPickForm");
   if(fpf)fpf.addEventListener("submit",function(e){e.preventDefault();var k=famKid(),g=function(id){return document.getElementById(id).value.trim();};
-    var di=+document.getElementById("fpD").value,d=DAYS[di].k;
+    var d=document.getElementById("fpD").value;if(!schoolDay(d)){toast("Ese día no hay École de Jeu. Elige lunes, martes, jueves o viernes sin feriado.");return;}
     var r={id:Date.now(),status:"pend",kid:k.id,src:"fam",ok:true,time:g("fpH"),by:g("fpN"),rel:g("fpR"),tel:g("fpT"),motivo:g("fpM"),reg:g("fpS")+" (familia)"};
     S.early[d]=S.early[d]||[];S.early[d].unshift(r);save();render();toast("Aviso enviado. El coordinador lo revisará y te confirmará.");});
   var af=document.getElementById("autForm");
@@ -682,14 +835,28 @@ document.getElementById("roleSel").addEventListener("change",function(e){S.role=
 document.addEventListener("click",function(e){
   var el=e.target.closest("[data-a]");if(!el)return;
   var a=el.getAttribute("data-a"),v=el.getAttribute("data-v");
+  if(a==="itab"){S.itab=v;save();render();return;}
+  if(a==="iper"){S.iper=v;save();render();return;}
+  if(a==="isec"){S.isec=+v;save();render();return;}
+  if(a==="print"){window.print();return;}
+  if(a==="hoja"){var hk=kidById(v);if(hk){S.itab="personal";S.cgroup=hk.g;S.ckid=hk.id;S.view="informes";S.modal=null;}save();render();window.scrollTo(0,0);return;}
+  if(a==="calDel"){delete S.cal[v];save();render();toast("Día quitado del calendario.");return;}
+  if(a==="salOk"){var dd=dk();S.sal[dd]=S.sal[dd]||{};if(S.sal[dd][v])delete S.sal[dd][v];else S.sal[dd][v]=nowHM();save();render();return;}
+  if(a==="clearAbsN"){S.absN=[];save();render();return;}
+  if(a==="repPre"){var f=(S.faltas||[]).filter(function(x){return String(x.id)===v;})[0];if(f)S.repPre={date:f.date,tid:f.tid,motivo:f.motivo,fid:f.id};S.view="equipo";save();render();var el=document.getElementById("reemplazos");if(el)el.scrollIntoView();return;}
+  if(a==="repPreT"){S.repPre={tid:v};save();render();var el2=document.getElementById("reemplazos");if(el2)el2.scrollIntoView();return;}
+  if(a==="repDel"){S.repA=(S.repA||[]).filter(function(x){return String(x.id)!==v;});save();render();return;}
+  if(a==="repRead"){(S.repA||[]).forEach(function(x){if(String(x.id)===v)x.read=true;});save();render();toast("Confirmado. El coordinador ve que estás al tanto.");return;}
+  if(a==="openRep"){var ra=(S.repA||[]).filter(function(x){return String(x.id)===v;})[0];if(ra){S.monT=TALLERES.map(function(t){return t.id;}).indexOf(ra.tid);S.day=dayIdx(ra.date);S.wk=wkOf(ra.date);S.view="midia";}save();render();window.scrollTo(0,0);return;}
   if(a==="cEdit"){S.cedit=v?+v:null;save();render();return;}
   if(a==="cClose"){(S.casos||[]).forEach(function(c){if(String(c.id)===v)c.closed=!c.closed;});save();render();toast("Listo.");return;}
   if(a==="actDone"){var pp=v.split("|");(S.casos||[]).forEach(function(c){if(String(c.id)===pp[0]){var x=c.acts[+pp[1]];if(x){x.done=!x.done;x.at=x.done?fmtDate(todayISO())+", "+nowHM():"";}}});save();render();return;}
   if(a==="clearReadN"){S.readN=[];save();render();return;}
   if(a==="readAv"){var pr=v.split("|");S.avisos.forEach(function(x){if(String(x.id)===pr[0]){x.readBy=x.readBy||{};x.readBy[pr[1]]=true;var tt=TALLERES.filter(function(y){return y.id===pr[1];})[0];S.readN=S.readN||[];S.readN.unshift({id:Date.now(),title:x.title,who:(tt&&monName(tt)?monName(tt):"Monitor")+(tt?" ("+tt.name+")":""),time:nowHM()});}});save();render();toast("Aviso marcado como leído.");return;}
-  if(a==="pickOk"||a==="pickNo"){DAYS.forEach(function(d){(S.early[d.k]||[]).forEach(function(r){if(String(r.id)===v)r.status=(a==="pickOk"?"ok":"no");});});save();render();toast(a==="pickOk"?"Retiro aprobado. La familia ve que está confirmado.":"Retiro rechazado. Comunícate con la familia.");return;}
+  if(a==="pickOk"||a==="pickNo"){Object.keys(S.early).forEach(function(dd){var d={name:dayLabel(dd),k:dd};(S.early[dd]||[]).forEach(function(r){if(String(r.id)===v)r.status=(a==="pickOk"?"ok":"no");});});save();render();toast(a==="pickOk"?"Retiro aprobado. La familia ve que está confirmado.":"Retiro rechazado. Comunícate con la familia.");return;}
   if(a==="go"){S.view=v;if(v==="talleres")S.tview="list";if(v==="grupos")S.gview="list";window.scrollTo(0,0);}
   else if(a==="day")S.day=+v;
+  else if(a==="wk"){if(v==="0"){S.wk=0;var td=({1:0,2:1,4:2,5:3})[new Date().getDay()];if(td!==undefined)S.day=td;}else S.wk=(S.wk||0)+(+v);}
   else if(a==="hview")S.hview=v;
   else if(a==="att"){var d=dk();S.att[d]=S.att[d]||{};if(S.att[d][v]===false)delete S.att[d][v];else S.att[d][v]=false;}
   else if(a==="allp"){var d2=dk();kidsOf(+v).forEach(function(k){if(S.att[d2])delete S.att[d2][k.id];});}
@@ -732,14 +899,14 @@ document.addEventListener("click",function(e){
     return;
   }
   else if(a==="toast"){toast(v);return;}
-  else if(a==="reset"){try{localStorage.removeItem("edj-proto-v5");}catch(err){}location.reload();return;}
+  else if(a==="reset"){try{localStorage.removeItem("edj-proto-v7");}catch(err){}location.reload();return;}
   save();render();
 });
 document.addEventListener("change",function(e){
   var c=e.target.getAttribute&&e.target.getAttribute("data-c");if(!c||c==="pick")return;
   var val=e.target.value;
   if(c==="moveKid"){var kk=S.kids.filter(function(k){return k.id===e.target.getAttribute("data-k");})[0];if(kk){kk.g=+val;toast(kk.name+" movido a "+GROUPS[+val].name+".");}}
-  else if(c==="famKid")S.famKid=val;else if(c==="rkid")S.rkid=val;else if(c==="ckid")S.ckid=val;else{S[c]=+val;if(c==="rgroup")S.rkid="";if(c==="cgroup")S.ckid="";}
+  else if(c==="famKid")S.famKid=val;else if(c==="rkid")S.rkid=val;else if(c==="ckid")S.ckid=val;else if(c==="repSel")S.repSel=val;else{S[c]=+val;if(c==="rgroup")S.rkid="";if(c==="cgroup")S.ckid="";}
   save();render();
 });
 function applyTheme(t){
