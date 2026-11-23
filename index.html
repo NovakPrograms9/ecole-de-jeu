@@ -217,17 +217,24 @@ var S={role:"coord",view:"inicio",day:startDay===undefined?2:startDay,hview:"dia
   avisos:[
     {id:1,title:"Jueves: Exploradores sale al patio",text:"Este jueves Pequeños Exploradores trabaja en el patio. Por favor enviar botas y parka marcadas con el nombre.",dest:"all",tipo:"Qué traer",when:"2026-11-19",date:"16 nov",reads:71},
     {id:2,title:"Bienvenida a la École de Jeu 2027",text:"Les damos la bienvenida a la École de Jeu. Cada día su hijo o hija participa en 3 talleres. Revisen aquí el horario de su grupo y qué traer cada día.",dest:"all",tipo:"General",date:"11 nov",reads:94},
+    {id:5,title:"Materiales para la muestra",text:"Por favor revisa qué materiales te faltan para los títeres de la muestra final y avísame antes del viernes.",dest:"tal:art",tipo:"Interno",when:"2026-11-27",date:"hoy",reads:0},
+    {id:4,title:"Planificación pendiente",text:"Te falta subir la planificación de esta semana. ¿La puedes cargar hoy?",dest:"per:psi|0",tipo:"Interno",when:"2026-11-24",date:"hoy",reads:0,readBy:{psi:true}},
     {id:3,title:"Reunión de monitores",text:"Reunión de planificación el miércoles a las 15:00 en la sala de profesores.",dest:"mon",tipo:"Interno",when:"2026-11-18",date:"10 nov",reads:6}
   ],
   noShow:{},
   early:{},rgroup:0,rkid:"",rq:"",
-  monitors:{},
+  monitors:{psi:[{name:"Camila Rojas",email:"camila.rojas@gmail.com"}],art:[{name:"Tomás Fuentes",email:"tomas.fuentes@gmail.com"}],exp:[{name:"Valentina Pérez",email:"valentina.perez@gmail.com"}]},
+  readN:[{id:1,title:"Planificación pendiente",who:"Camila Rojas (Psicomotricidad y Yoga)",time:"14:52"}],
   tx:{},tsel:"art",
   mats:{art:[{t:"Calcetines para títeres",ok:true},{t:"Témperas de colores",ok:false},{t:"Teatrino",ok:true}],exp:[{t:"Lupas (17)",ok:true},{t:"Bicarbonato y vinagre",ok:false}],con:[{t:"Bloques de madera",ok:true},{t:"Juegos de mesa",ok:false}]},
   tnotes:{},
   plans:{},
   modal:null
 };
+(function(){var d=DAYS[S.day].k;S.early[d]=[
+  {id:101,status:"pend",kid:"k3",src:"fam",ok:true,time:"15:00",by:"Marta Soto",rel:"Abuela",tel:"+56 9 8765 4321",motivo:"Control médico",reg:KIDS[3].aut[0].name+" (familia)"},
+  {id:102,status:"pend",kid:"k20",src:"fam",ok:true,time:"14:40",by:"Ignacio Lagos",rel:"Tío",tel:"+56 9 5555 1234",motivo:"",reg:KIDS[20].aut[0].name+" (familia)"},
+  {id:103,status:"ok",kid:"k41",src:"fam",ok:true,time:"15:30",by:"Paula Medina",rel:"Mamá",tel:"+56 9 4444 2222",motivo:"Viaje",reg:"Paula Medina (familia)"}];})();
 function mondayOf(off){var d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7)+7*(off||0));return d;}
 function wkKey(off){var d=mondayOf(off);return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
 var MESES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
@@ -236,10 +243,10 @@ S.plans[TALLERES[3].id+"|"+wkKey(0)]={obj:"Fabricar títeres de calcetín y pres
 var seedDay=DAYS[S.day].k;
 S.att[seedDay]={k4:false,k22:false,k41:false,k77:false};
 S.taken[seedDay]={0:true,1:true,2:true,4:true,5:true};
-try{var sv=JSON.parse(localStorage.getItem("edj-proto-v1")||"null");if(sv){for(var key in sv){S[key]=sv[key];}}}catch(e){}
+try{var sv=JSON.parse(localStorage.getItem("edj-proto-v2")||"null");if(sv){for(var key in sv){S[key]=sv[key];}}}catch(e){}
 if(!S.kids||!S.kids.length)S.kids=KIDS;KIDS=S.kids;
 S.modal=null;
-function save(){try{localStorage.setItem("edj-proto-v1",JSON.stringify(S));}catch(e){}}
+function save(){try{localStorage.setItem("edj-proto-v2",JSON.stringify(S));}catch(e){}}
 
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
 function dk(){return DAYS[S.day].k;}
@@ -645,7 +652,7 @@ document.addEventListener("click",function(e){
     return;
   }
   else if(a==="toast"){toast(v);return;}
-  else if(a==="reset"){try{localStorage.removeItem("edj-proto-v1");}catch(err){}location.reload();return;}
+  else if(a==="reset"){try{localStorage.removeItem("edj-proto-v2");}catch(err){}location.reload();return;}
   save();render();
 });
 document.addEventListener("change",function(e){
