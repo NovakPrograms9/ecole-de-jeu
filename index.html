@@ -145,6 +145,7 @@ thead th{border-top:0;font-size:12px;text-transform:uppercase;letter-spacing:.05
   .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (prefers-reduced-motion:no-preference){.chip,.att,.btn,.nav button{transition:background .15s,color .15s}}
+a.btn{color:inherit;text-decoration:none;display:inline-flex;align-items:center}
 </style>
 </head>
 <body>
@@ -198,7 +199,7 @@ function traerFor(t,di){return t.traer[DAYS[di].part];}
 var NOM=["Sofía","Mateo","Emilia","Agustín","Isabella","Benjamín","Trinidad","Lucas","Josefa","Tomás","Amanda","Vicente","Florencia","Gaspar","Antonella","Máximo","Julieta","Santiago","Maite","Facundo","Renata","Joaquín","Colomba","León","Martina","Alonso","Agustina","Bastián","Ignacia","Clemente","Rafaela","Cristóbal","Laura","Simón"];
 var APE=["Soto","Muñoz","Vargas","Barría","Oyarzo","Cárdenas","Mansilla","Schmidt","Alvarado","Hott","Vera","Paredes","Momberg","Navarro","Ojeda","Kusch","Aguilar","Uribe","Fuentes","Carrasco","Winkler","Triviño","Gallardo","Igor","Bórquez"];
 var ADU=["Carolina","Rodrigo","Paula","Felipe","Andrea","Cristián","Daniela","Jorge","Macarena","Pablo","Verónica","Mauricio","Claudia","Gonzalo"];
-var SIZES=[17,17,16,17,16,17];
+var SIZES=[14,13,15,12,15,14];
 var KIDS=[],n=0;
 GROUPS.forEach(function(g,gi){for(var i=0;i<SIZES[gi];i++,n++){
   var ap=APE[(n*7+3)%APE.length];
@@ -249,7 +250,7 @@ function toast(msg){var t=document.getElementById("toast");t.textContent=msg;t.c
 function destLabel(d){if(d==="all")return "Todas las familias";if(d==="mon")return "Monitores";if(d==="dir")return "Dirección";if(d.indexOf("lvl:")===0)return d.slice(4);var g=GROUPS.filter(function(x){return x.id===d;})[0];return g?"Familias de "+g.name:d;}
 
 var NAV={
-  coord:[["inicio","⌂","Inicio"],["horario","▦","Horario"],["talleres","◉","Talleres"],["grupos","▤","Grupos"],["asistencia","✓","Asistencia"],["ninos","☺","Niños"],["retiros","➜","Retiros"],["avisos","✉","Avisos"],["equipo","★","Equipo"],["planes","☰","Planificaciones"],["academie","◇","Académie"]],
+  coord:[["inicio","⌂","Inicio"],["horario","▦","Horario"],["talleres","◉","Talleres"],["grupos","▤","Grupos"],["asistencia","✓","Asistencia"],["ninos","☺","Niños"],["retiros","➜","Retiros"],["avisos","✉","Avisos"],["equipo","★","Equipo"],["planes","☰","Planificaciones"]],
   mon:[["midia","⌂","Mi día"],["asistencia","✓","Asistencia"],["miplan","☰","Planificación"],["avisos","✉","Avisos internos"]],
   dir:[["resumen","⌂","Resumen"],["horario","▦","Horario"],["avisos","✉","Avisos enviados"]],
   fam:[["mihijo","☺","Mi hijo"],["avisos","✉","Avisos"]]
@@ -346,9 +347,15 @@ function vRetiros(){
     (list.length>30?'<p class="muted">Mostrando 30 de '+list.length+'. Usa el buscador.</p>':'')+'</div></div>';
   return h;
 }
+function mailHref(a){
+  var to=[];
+  if(a.dest==="mon")TALLERES.forEach(function(t){mons(t).forEach(function(m){if(m.email)to.push(m.email);});});
+  var body=a.text+"\n\n"+"Coordinación École de Jeu · Lycée Claude Gay";
+  return "mailto:?"+(to.length?"bcc="+encodeURIComponent(to.join(","))+"&":"")+"subject="+encodeURIComponent("École de Jeu: "+a.title)+"&body="+encodeURIComponent(body);
+}
 function avisoCard(a,compact){
   var h='<div class="aviso"><div class="row between"><b>'+esc(a.title)+'</b><span class="pill p-info">'+a.tipo+'</span></div><p class="meta">'+destLabel(a.dest)+' · '+a.date+(S.role==="coord"&&a.dest!=="mon"&&a.dest!=="dir"?' · leído por '+a.reads+' familias':'')+'</p><p>'+esc(a.text)+'</p>';
-  if(S.role==="coord"&&!compact)h+='<div class="row"><button class="btn small" data-a="copy" data-v="'+a.id+'">Copiar para WhatsApp</button><button class="btn small" data-a="copy" data-v="'+a.id+'">Copiar para Schooltrack / Colegium</button></div>';
+  if(S.role==="coord"&&!compact)h+='<div class="row"><a class="btn small" href="'+mailHref(a)+'">Enviar por correo</a><button class="btn small" data-a="copy" data-v="'+a.id+'">Copiar para WhatsApp</button><button class="btn small" data-a="copy" data-v="'+a.id+'">Copiar para Schooltrack / Colegium</button></div>';
   return h+'</div>';
 }
 function vAvisos(){
@@ -360,7 +367,7 @@ function vAvisos(){
   var h=top(S.role==="dir"?"Avisos enviados":S.role==="mon"?"Avisos internos":"Avisos",S.role==="coord"?"Redacta una vez y copia a cada canal":"Información de la École de Jeu");
   if(S.role==="coord"){
     var opts=[["all","Todas las familias"]].concat(["Petite Section","Moyenne Section","Grande Section"].map(function(l){return ["lvl:"+l,"Familias de "+l];})).concat(GROUPS.map(function(g){return [g.id,"Familias de "+g.name];})).concat([["mon","Monitores"],["dir","Dirección"]]);
-    h+='<div class="card"><h2>Nuevo aviso</h2><form id="avForm" class="list" style="gap:12px"><div class="field"><label for="avT">Título</label><input type="text" id="avT" required></div><div class="field"><label for="avX">Mensaje</label><textarea id="avX" required></textarea></div><div class="row"><div class="field" style="flex:1;min-width:200px"><label for="avD">Para</label><select id="avD">'+opts.map(function(o){return '<option value="'+o[0]+'">'+o[1]+'</option>';}).join("")+'</select></div><div class="field" style="flex:1;min-width:160px"><label for="avK">Tipo</label><select id="avK"><option>General</option><option>Qué traer</option><option>Urgente</option><option>Interno</option></select></div></div><div class="row"><button class="btn primary" type="submit">Publicar y enviar por correo</button><span class="muted">El correo se simula en este prototipo.</span></div></form></div>';
+    h+='<div class="card"><h2>Nuevo aviso</h2><form id="avForm" class="list" style="gap:12px"><div class="field"><label for="avT">Título</label><input type="text" id="avT" required></div><div class="field"><label for="avX">Mensaje</label><textarea id="avX" required></textarea></div><div class="row"><div class="field" style="flex:1;min-width:200px"><label for="avD">Para</label><select id="avD">'+opts.map(function(o){return '<option value="'+o[0]+'">'+o[1]+'</option>';}).join("")+'</select></div><div class="field" style="flex:1;min-width:160px"><label for="avK">Tipo</label><select id="avK"><option>General</option><option>Qué traer</option><option>Urgente</option><option>Interno</option></select></div></div><div class="row"><button class="btn primary" type="submit">Publicar aviso</button><span class="muted">Después puedes enviarlo por correo o copiarlo para WhatsApp y Schooltrack.</span></div></form></div>';
   }
   h+='<div class="card"><h2>'+(mine.length)+' avisos</h2><div class="list" style="gap:10px">'+(mine.length?mine.map(function(a){return avisoCard(a,false);}).join(""):'<p class="empty">No hay avisos.</p>')+'</div></div>';
   return h;
@@ -429,9 +436,6 @@ function modalHtml(){
     body='<p class="muted">'+wkLabel(parts[1])+' · '+(monName(t)||"Monitor por definir")+'</p><h2>'+t.name+'</h2><h3>Objetivo</h3><p>'+esc(p.obj)+'</p><h3>Actividades</h3><p class="plan-txt">'+esc(p.act)+'</p>'+(p.mat?'<h3>Materiales</h3><p>'+esc(p.mat)+'</p>':'')+(p.file?'<p class="muted">Adjunto: '+esc(p.file)+'</p>':'');}
   return '<div class="modal-bg" data-a="close"><div class="modal" role="dialog" aria-modal="true" aria-label="Detalle"><button class="x" data-a="close" aria-label="Cerrar">×</button>'+body+'</div></div>';
 }
-function vAcademie(){
-  return top("Académie","Sección reservada")+'<div class="card"><h2>Los niños de Académie tendrán su propia propuesta</h2><p>Esta sección queda lista para sumarlos como un programa aparte, con sus grupos, horarios y responsables, cuando se defina la propuesta al final del proyecto.</p><div class="row"><span class="pill p-warn">Pendiente de definición</span></div><p class="muted">Mientras tanto se coordinan con Académie los espacios de la tarde, el comedor y la salida de las 16:00.</p></div>';
-}
 /* ---------- Monitor ---------- */
 function vMiDia(){
   var ti=S.monT,t=TALLERES[ti];
@@ -495,14 +499,14 @@ function parseRows(rows,defG,replace){
   KIDS=S.kids;S.att={};S.taken={};S.out={};
   return added.length;
 }
-var VIEWS={grupos:vGrupos,talleres:vTalleres,inicio:vInicio,horario:vHorario,asistencia:vAsistencia,ninos:vNinos,retiros:vRetiros,avisos:vAvisos,equipo:vEquipo,planes:vPlanes,academie:vAcademie,midia:vMiDia,miplan:vMiPlan,resumen:vResumen,mihijo:vMiHijo};
+var VIEWS={grupos:vGrupos,talleres:vTalleres,inicio:vInicio,horario:vHorario,asistencia:vAsistencia,ninos:vNinos,retiros:vRetiros,avisos:vAvisos,equipo:vEquipo,planes:vPlanes,midia:vMiDia,miplan:vMiPlan,resumen:vResumen,mihijo:vMiHijo};
 function render(){
   applyTx();
   var nav=NAV[S.role];
   if(!nav.some(function(x){return x[0]===S.view;}))S.view=nav[0][0];
   document.getElementById("roleSel").value=S.role;
   document.getElementById("nav").innerHTML=nav.map(function(x){return '<button data-a="go" data-v="'+x[0]+'"'+(S.view===x[0]?' aria-current="page"':'')+'><span class="ico" aria-hidden="true">'+x[1]+'</span>'+x[2]+'</button>';}).join("")+(S.role==="coord"?'<button data-a="reset"><span class="ico" aria-hidden="true">↺</span>Restablecer demo</button>':'');
-  document.getElementById("main").innerHTML=VIEWS[S.view]()+modalHtml();
+  document.getElementById("main").innerHTML=(VIEWS[S.view]||VIEWS.inicio)()+modalHtml();
   var mx=document.querySelector(".modal .x");if(mx)mx.focus();
   var tf=document.getElementById("tForm");
   if(tf)tf.addEventListener("submit",function(e){e.preventDefault();var nm=document.getElementById("tN").value.trim();if(!nm){toast("El taller necesita un nombre.");return;}
@@ -534,7 +538,7 @@ function render(){
   if(kq){kq.addEventListener("input",function(){S.kidQ=kq.value;var pos=kq.selectionStart;save();render();var n2=document.getElementById("kq");n2.focus();try{n2.setSelectionRange(pos,pos);}catch(e){}});}
   var f=document.getElementById("avForm");
   if(f)f.addEventListener("submit",function(e){e.preventDefault();var t=document.getElementById("avT").value.trim(),x=document.getElementById("avX").value.trim();if(!t||!x)return;
-    S.avisos.unshift({id:Date.now(),title:t,text:x,dest:document.getElementById("avD").value,tipo:document.getElementById("avK").value,date:"hoy",reads:0});save();render();toast("Aviso publicado. El envío por correo se simula en el prototipo.");});
+    S.avisos.unshift({id:Date.now(),title:t,text:x,dest:document.getElementById("avD").value,tipo:document.getElementById("avK").value,date:"hoy",reads:0});save();render();toast("Aviso publicado. Usa «Enviar por correo» para mandarlo desde tu correo.");});
 }
 document.getElementById("roleSel").addEventListener("change",function(e){S.role=e.target.value;S.view=NAV[S.role][0][0];save();render();window.scrollTo(0,0);});
 document.addEventListener("click",function(e){
