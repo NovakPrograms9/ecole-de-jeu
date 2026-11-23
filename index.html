@@ -146,6 +146,7 @@ thead th{border-top:0;font-size:12px;text-transform:uppercase;letter-spacing:.05
 }
 @media (prefers-reduced-motion:no-preference){.chip,.att,.btn,.nav button{transition:background .15s,color .15s}}
 a.btn{color:inherit;text-decoration:none;display:inline-flex;align-items:center}
+.notif{border:2px solid #2F7DE1;background:#EEF4FF}.alert.info{background:#fff;border-radius:12px;padding:10px 12px}.nbadge{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:#E5484D;color:#fff;font-size:12px;font-weight:800;margin-left:auto}
 </style>
 </head>
 <body>
@@ -270,10 +271,14 @@ function board(di,hlG){
 }
 
 /* ---------- Coordinador ---------- */
+function newPickups(){var l=[];DAYS.forEach(function(d){(S.early[d.k]||[]).forEach(function(r){if(r.src==="fam"&&!r.seen)l.push([d,r]);});});return l;}
 function vInicio(){
   var abs=absCount(),tk=takenCount(),pend=6-tk;
   var ear=(S.early[dk()]||[]).length;
   var h=top("Inicio",DAYS[S.day].name+" · resumen del día")+'<div class="card">'+dayChips()+'</div>';
+  var np=newPickups();
+  if(np.length)h+='<div class="card notif" role="status"><div class="row between"><h2>🔔 '+(np.length===1?'Nuevo aviso de retiro':np.length+' nuevos avisos de retiro')+'</h2><div class="row"><button class="btn small" data-a="go" data-v="retiros">Ver en Retiros</button><button class="btn small" data-a="seenPick">Marcar como visto</button></div></div><div class="list" style="gap:8px">'+
+    np.map(function(x){var r=x[1],k=kidById(r.kid);return '<div class="alert info"><span><b>'+esc(k?k.name:"")+'</b> ('+(k?GROUPS[k.g].name:"")+') se retira el <b>'+x[0].name.toLowerCase()+' a las '+esc(r.time)+'</b>. Lo retira '+esc(r.by)+' ('+esc(r.rel)+') · '+esc(r.tel)+(r.motivo?' · '+esc(r.motivo):'')+'. Avisó: '+esc(r.reg)+'.</span></div>';}).join("")+'</div></div>';
   h+='<div class="tiles"><div class="tile ok"><b>'+(KIDS.length-abs)+'</b><span>Presentes de '+KIDS.length+'</span></div><div class="tile'+(abs?' bad':'')+'"><b>'+abs+'</b><span>Ausentes</span></div><div class="tile'+(pend?' warn':'')+'"><b>'+tk+'/6</b><span>Grupos con asistencia</span></div><div class="tile"><b>'+ear+'</b><span>Retiros anticipados hoy</span></div></div>';
   h+='<div class="card"><h2>Alertas</h2><div class="list" style="gap:8px">';
   var al=[];
@@ -530,7 +535,7 @@ function render(){
   var nav=NAV[S.role];
   if(!nav.some(function(x){return x[0]===S.view;}))S.view=nav[0][0];
   document.getElementById("roleSel").value=S.role;
-  document.getElementById("nav").innerHTML=nav.map(function(x){return '<button data-a="go" data-v="'+x[0]+'"'+(S.view===x[0]?' aria-current="page"':'')+'><span class="ico" aria-hidden="true">'+x[1]+'</span>'+x[2]+'</button>';}).join("")+(S.role==="coord"?'<button data-a="reset"><span class="ico" aria-hidden="true">↺</span>Restablecer demo</button>':'');
+  document.getElementById("nav").innerHTML=nav.map(function(x){return '<button data-a="go" data-v="'+x[0]+'"'+(S.view===x[0]?' aria-current="page"':'')+'><span class="ico" aria-hidden="true">'+x[1]+'</span>'+x[2]+(S.role==="coord"&&x[0]==="retiros"&&newPickups().length?' <span class="nbadge" aria-label="'+newPickups().length+' avisos nuevos">'+newPickups().length+'</span>':'')+'</button>';}).join("")+(S.role==="coord"?'<button data-a="reset"><span class="ico" aria-hidden="true">↺</span>Restablecer demo</button>':'');
   document.getElementById("main").innerHTML=(VIEWS[S.view]||VIEWS.inicio)()+modalHtml();
   var mx=document.querySelector(".modal .x");if(mx)mx.focus();
   var tf=document.getElementById("tForm");
@@ -574,6 +579,7 @@ document.getElementById("roleSel").addEventListener("change",function(e){S.role=
 document.addEventListener("click",function(e){
   var el=e.target.closest("[data-a]");if(!el)return;
   var a=el.getAttribute("data-a"),v=el.getAttribute("data-v");
+  if(a==="seenPick"){DAYS.forEach(function(d){(S.early[d.k]||[]).forEach(function(r){if(r.src==="fam")r.seen=true;});});save();render();toast("Avisos marcados como vistos.");return;}
   if(a==="go"){S.view=v;if(v==="talleres")S.tview="list";if(v==="grupos")S.gview="list";window.scrollTo(0,0);}
   else if(a==="day")S.day=+v;
   else if(a==="hview")S.hview=v;
