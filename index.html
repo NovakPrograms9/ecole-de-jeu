@@ -244,7 +244,7 @@ var S={wk:0,cal:{"2026-12-08":{tipo:"Feriado",nota:"Inmaculada Concepción"},"20
   modal:null
 };
 S.casos=[{id:202,kid:"k3",date:dateOf(2,-2),tipo:"Salud",text:"Se golpeó la rodilla en Psicomotricidad. Se aplicó frío y se avisó a la familia.",acts:[{t:"Llamar al apoderado",done:true,at:"15:10"}],rec:dateOf(2,-2),closed:true,seg:[{date:dateOf(2,-2),h:"15:10",t:"Llamada realizada",n:"La mamá quedó informada."}]},{id:201,kid:"k10",date:todayISO(),tipo:"Conducta",text:"Empujó a un compañero en el recreo y le costó calmarse. Se conversó y pidió disculpas.",acts:[{t:"Citar al apoderado",done:false},{t:"Notificar a Dirección",done:true,at:"hoy, 14:30"}],rec:todayISO(),seg:[{date:todayISO(),h:"14:30",t:"Se informó a Dirección",n:"Se conversó con Mme. Sonia."}]}];
-KIDS[5].sal={modo:"furgon",fn:"Furgón Tío Juan",ft:"+56 9 7777 1111"};KIDS[30].sal={modo:"furgon",fn:"Furgón Tío Juan",ft:"+56 9 7777 1111"};KIDS[48].sal={modo:"academie"};
+
 S.repA=[{id:301,date:dateOf(S.day,0),tid:"mus",rid:"r1",motivo:"Licencia médica",read:false}];
 S.faltas=[{id:401,tid:"rit",date:dateOf((S.day+1)%4,S.day===3?1:0),motivo:"Trámite personal",at:"09:40"}];
 (function(){var nd=dateOf((S.day+1)%4,S.day===3?1:0);S.abs[nd]={k12:{motivo:"Viaje familiar",reg:KIDS[12].aut[0].name,at:"08:15"}};S.att[nd]={k12:false};S.absN=[{kid:"k12",date:nd,motivo:"Viaje familiar",reg:KIDS[12].aut[0].name,at:"08:15"}];})();
@@ -276,10 +276,10 @@ S.plans[TALLERES[3].id+"|"+wkKey(0)]={obj:"Fabricar títeres de calcetín y pres
 var seedDay=dateOf(S.day,0);
 S.att[seedDay]={k4:false,k22:false,k41:false,k77:false};
 S.taken[seedDay]={0:true,1:true,2:true,4:true,5:true};
-try{var sv=JSON.parse(localStorage.getItem("edj-proto-v7")||"null");if(sv){for(var key in sv){S[key]=sv[key];}}}catch(e){}
+try{var sv=JSON.parse(localStorage.getItem("edj-proto-v8")||"null");if(sv){for(var key in sv){S[key]=sv[key];}}}catch(e){}
 if(!S.kids||!S.kids.length)S.kids=KIDS;KIDS=S.kids;
 S.modal=null;
-function save(){try{localStorage.setItem("edj-proto-v7",JSON.stringify(S));}catch(e){}}
+function save(){try{localStorage.setItem("edj-proto-v8",JSON.stringify(S));}catch(e){}}
 
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
 function dk(){return dateOf(S.day,S.wk||0);}
@@ -294,7 +294,7 @@ function perMon(d){var p=d.slice(4).split("|"),t=TALLERES.filter(function(x){ret
 function destLabel(d){if(d.indexOf("tal:")===0){var tt=TALLERES.filter(function(x){return x.id===d.slice(4);})[0];return tt?"Monitor de "+tt.name:d;}if(d.indexOf("per:")===0){var pm=perMon(d);return pm&&pm.m?pm.m.name+" (personal)":"Monitor (personal)";}if(d==="all")return "Todas las familias";if(d==="mon")return "Monitores";if(d==="dir")return "Dirección";if(d.indexOf("lvl:")===0)return d.slice(4);var g=GROUPS.filter(function(x){return x.id===d;})[0];return g?"Familias de "+g.name:d;}
 
 var NAV={
-  coord:[["inicio","⌂","Inicio"],["horario","▦","Horario"],["calendario","▣","Calendario"],["talleres","◉","Talleres"],["grupos","▤","Grupos"],["asistencia","✓","Asistencia"],["ninos","☺","Niños"],["apoderados","✎","Apoderados"],["retiros","➜","Retiros"],["salida","⏏","Salida 16:00"],["avisos","✉","Avisos"],["equipo","★","Equipo"],["planes","☰","Planificaciones"],["informes","▤","Informes"]],
+  coord:[["inicio","⌂","Inicio"],["horario","▦","Horario"],["calendario","▣","Calendario"],["talleres","◉","Talleres"],["grupos","▤","Grupos"],["asistencia","✓","Asistencia"],["ninos","☺","Niños"],["apoderados","✎","Apoderados"],["retiros","➜","Retiros"],["avisos","✉","Avisos"],["equipo","★","Equipo"],["planes","☰","Planificaciones"],["informes","▤","Informes"]],
   mon:[["midia","⌂","Mi día"],["asistencia","✓","Asistencia"],["miplan","☰","Planificación"],["avisos","✉","Avisos internos"]],
   dir:[["resumen","⌂","Resumen"],["horario","▦","Horario"],["calendario","▣","Calendario"],["apoderados","✎","Apoderados"],["avisos","✉","Avisos enviados"]],
   rep:[["reemplazos","⇄","Mis reemplazos"],["midia","⌂","Día del taller"],["asistencia","✓","Asistencia"]],
@@ -323,7 +323,6 @@ function homeAlerts(){
   var al=[];
   for(var g=0;g<6&&!blocked(dk());g++){if(!(S.taken[dk()]||{})[g]){var t=tallerAt(g,S.day,0);al.push('<div class="alert warn">⚠ <span><b>'+GROUPS[g].name+'</b> no tiene asistencia registrada (módulo 1 en '+t.name+').</span></div>');}}
   (S.early[dk()]||[]).forEach(function(r){if(!r.ok){var k=kidById(r.kid);if(k)al.push('<div class="alert bad">⛔ <span>Retiro anticipado de <b>'+esc(k.name)+'</b> por una persona no autorizada ('+esc(r.by)+', '+r.time+').</span></div>');}});
-  if(dk()===todayISO()&&!blocked(dk())&&nowHM()>="16:15"){var sp=salPending(dk()).length;if(sp)al.push('<div class="alert bad">⛔ <span><b>'+sp+' niños</b> siguen sin retirar después de las 16:15. <button class="btn small" data-a="go" data-v="salida">Ver salida</button></span></div>');}
   var sinAut=KIDS.filter(function(k){return !k.aut||!k.aut.length;}).length;
   if(sinAut)al.push('<div class="alert warn">⚠ <span>'+sinAut+' niños no tienen personas autorizadas registradas. <button class="btn small" data-a="go" data-v="retiros">Revisar</button></span></div>');
   TALLERES.forEach(function(t){if(!monName(t))al.push('<div class="alert warn">⚠ <span><b>'+t.name+'</b> no tiene monitor inscrito. <button class="btn small" data-a="go" data-v="equipo">Inscribir</button></span></div>');});
@@ -431,27 +430,13 @@ var CALT=["Feriado","Suspensión de clases","Vacaciones","Jornada especial"];
 function vCalendario(){
   var edit=S.role==="coord",t=todayISO();
   var h=top("Calendario","Feriados, suspensiones y vacaciones");
-  if(edit)h+='<div class="card"><h2>Bloquear días</h2><p class="muted">Los días bloqueados no tienen asistencia, retiros ni salida, y las familias los ven en su vista.</p><form id="calForm" class="list" style="gap:12px"><div class="row"><div class="field" style="width:180px"><label for="cdA">Desde</label><input type="date" id="cdA" required></div><div class="field" style="width:180px"><label for="cdB">Hasta (opcional)</label><input type="date" id="cdB"></div><div class="field" style="flex:1;min-width:180px"><label for="cdT">Tipo</label><select id="cdT">'+CALT.map(function(x){return '<option>'+x+'</option>';}).join("")+'</select></div></div><div class="field"><label for="cdN">Nota</label><input type="text" id="cdN" placeholder="Ej.: Fiestas Patrias"></div><div class="row"><button class="btn primary" type="submit">Agregar al calendario</button></div></form></div>';
+  if(edit)h+='<div class="card"><h2>Bloquear días</h2><p class="muted">Los días bloqueados no tienen asistencia ni retiros, y las familias los ven en su vista.</p><form id="calForm" class="list" style="gap:12px"><div class="row"><div class="field" style="width:180px"><label for="cdA">Desde</label><input type="date" id="cdA" required></div><div class="field" style="width:180px"><label for="cdB">Hasta (opcional)</label><input type="date" id="cdB"></div><div class="field" style="flex:1;min-width:180px"><label for="cdT">Tipo</label><select id="cdT">'+CALT.map(function(x){return '<option>'+x+'</option>';}).join("")+'</select></div></div><div class="field"><label for="cdN">Nota</label><input type="text" id="cdN" placeholder="Ej.: Fiestas Patrias"></div><div class="row"><button class="btn primary" type="submit">Agregar al calendario</button></div></form></div>';
   var ks=Object.keys(S.cal||{}).sort(),up=ks.filter(function(x){return x>=t;}),past=ks.filter(function(x){return x<t;});
   var row=function(iso){var c=S.cal[iso];return '<div class="item"><div class="grow"><b>'+dayLabel(iso)+'</b><span class="muted" style="display:block">'+esc(c.tipo)+(c.nota?' · '+esc(c.nota):'')+'</span></div><span class="pill '+(c.tipo==="Jornada especial"?'p-info':'p-warn')+'">'+(c.tipo==="Jornada especial"?'Con École de Jeu':'Sin École de Jeu')+'</span>'+(edit?'<button class="btn small" data-a="calDel" data-v="'+iso+'" aria-label="Quitar '+dayLabel(iso)+'">Quitar</button>':'')+'</div>';};
   h+='<div class="card"><h2>Próximos días marcados</h2><div class="list">'+(up.length?up.map(row).join(""):'<p class="empty">No hay días marcados.</p>')+'</div>'+(past.length?'<h3 style="margin-top:14px">Ya pasaron</h3><div class="list">'+past.map(row).join("")+'</div>':'')+'</div>';
   return h;
 }
-/* ---------- Salida 16:00 ---------- */
-function salMode(k){var m=(k.sal||{}).modo||"familia";return m==="furgon"?'<span class="pill p-info">🚐 '+esc(k.sal.fn||"Furgón")+(k.sal.ft?' · '+esc(k.sal.ft):'')+'</span>':m==="academie"?'<span class="pill p-info">Se queda en Académie</span>':'<span class="pill">Lo retira la familia</span>';}
 function earlyIds(iso){var o={};(S.early[iso]||[]).forEach(function(r){if(r.status!=="no")o[r.kid]=r.time;});return o;}
-function salPending(iso){var e=earlyIds(iso),a=S.att[iso]||{},sv=S.sal[iso]||{};return KIDS.filter(function(k){return a[k.id]!==false&&!e[k.id]&&!sv[k.id]&&((k.sal||{}).modo||"familia")!=="academie";});}
-function vSalida(){
-  var iso=dk(),h=top("Salida 16:00",dayLabel(iso))+'<div class="card">'+dayChips()+'</div>';
-  if(blocked(iso))return h+blockBanner(iso);
-  var e=earlyIds(iso),a=S.att[iso]||{},sv=S.sal[iso]||{},pend=salPending(iso);
-  h+='<div class="tiles"><div class="tile ok"><b>'+Object.keys(sv).length+'</b><span>Entregados</span></div><div class="tile'+(pend.length?' warn':'')+'"><b>'+pend.length+'</b><span>Por entregar</span></div></div>';
-  h+='<div class="card"><p class="muted">Marca a cada niño cuando se va. A las 16:15, si queda alguno sin retirar, te aparece una alerta en el Inicio.</p></div><div class="grid3">';
-  for(var g=0;g<6;g++){h+='<div class="card"><h2>'+GROUPS[g].name+'</h2><div class="list">'+kidsOf(g).map(function(k){
-    var st=a[k.id]===false?'<span class="pill">Ausente</span>':e[k.id]?'<span class="pill p-ok">Retiro anticipado '+e[k.id]+'</span>':sv[k.id]?'<button class="btn small" data-a="salOk" data-v="'+k.id+'" aria-pressed="true">✓ '+sv[k.id]+'</button>':'<button class="btn small primary" data-a="salOk" data-v="'+k.id+'">Entregado</button>';
-    return '<div class="item" style="flex-wrap:wrap"><div class="grow"><b>'+esc(k.name)+'</b><span style="display:block;margin-top:4px">'+salMode(k)+'</span></div>'+st+'</div>';}).join("")+'</div></div>';}
-  return h+'</div>';
-}
 function inPer(iso){var t=todayISO();return iso<=t&&(S.iper==="todo"||iso.slice(0,7)===t.slice(0,7));}
 function kidStats(k){var d=0,a=0,av=0,r=0;Object.keys(S.taken||{}).forEach(function(iso){if(inPer(iso)&&S.taken[iso][k.g]){d++;if((S.att[iso]||{})[k.id]===false){a++;if((S.abs[iso]||{})[k.id])av++;}}});
   Object.keys(S.early||{}).forEach(function(iso){if(inPer(iso))(S.early[iso]||[]).forEach(function(x){if(x.kid===k.id&&x.status!=="no"&&x.status!=="pend")r++;});});
@@ -462,7 +447,7 @@ function statTiles(o,withKids){return '<div class="tiles">'+(withKids?'<div clas
 function casosPorTipo(cs){var m={};cs.forEach(function(c){m[c.tipo]=(m[c.tipo]||0)+1;});var ks=Object.keys(m);return ks.length?'<div class="row" style="gap:6px">'+ks.map(function(t){return '<span class="pill p-info">'+esc(t)+': '+m[t]+'</span>';}).join("")+'</div>':'<p class="muted">Sin situaciones registradas en el período.</p>';}
 function kidTable(ks){return '<div class="scroll"><table><thead><tr><th>Niño</th><th>Grupo</th><th>Asistencia</th><th>Ausencias</th><th>Retiros</th><th>Situaciones</th><th></th></tr></thead><tbody>'+ks.map(function(k){var x=kidStats(k);return '<tr><td><b>'+esc(k.name)+'</b></td><td>'+GROUPS[k.g].name+'</td><td style="font-variant-numeric:tabular-nums">'+pctTxt(x.pct)+'</td><td>'+x.a+'</td><td>'+x.r+'</td><td>'+(x.c.length||'')+'</td><td class="noprint"><button class="btn small" data-a="hoja" data-v="'+k.id+'">Hoja de vida</button></td></tr>';}).join("")+'</tbody></table></div>';}
 function hojaDeVida(k){
-  var x=kidStats(k),h='<div class="card"><p class="muted">Hoja de vida · 🔒 coordinador y Dirección</p><p class="kidname">'+esc(k.name)+'</p><p>'+GROUPS[k.g].name+' · '+GROUPS[k.g].lvl+' · '+salMode(k)+'</p><h3>Apoderados y autorizados</h3><div class="list">'+k.aut.map(function(a){return '<div class="item"><div class="grow"><b>'+esc(a.name)+'</b><span class="muted" style="display:block">'+esc(a.rel)+' · '+esc(a.tel)+'</span></div></div>';}).join("")+'</div></div>';
+  var x=kidStats(k),h='<div class="card"><p class="muted">Hoja de vida · 🔒 coordinador y Dirección</p><p class="kidname">'+esc(k.name)+'</p><p>'+GROUPS[k.g].name+' · '+GROUPS[k.g].lvl+'</p><h3>Apoderados y autorizados</h3><div class="list">'+k.aut.map(function(a){return '<div class="item"><div class="grow"><b>'+esc(a.name)+'</b><span class="muted" style="display:block">'+esc(a.rel)+' · '+esc(a.tel)+'</span></div></div>';}).join("")+'</div></div>';
   h+=statTiles(x,false);
   var ev=[];
   Object.keys(S.taken||{}).forEach(function(iso){if(inPer(iso)&&S.taken[iso][k.g]&&(S.att[iso]||{})[k.id]===false){var av=(S.abs[iso]||{})[k.id];ev.push({d:iso,h:"",t:av?"Inasistencia avisada por la familia"+(av.motivo?": "+av.motivo:""):"Inasistencia sin aviso",c:"warn"});}});
@@ -525,7 +510,7 @@ function earlyLog(){
     return '<div class="item"><div class="grow"><b>'+esc(k?k.name:"(niño eliminado)")+'</b><span class="muted">'+r.time+' · '+esc(r.by)+(r.motivo?' · '+esc(r.motivo):'')+' · registrado por '+r.reg+'</span></div><span class="pill '+(r.ok?'p-ok':'p-bad')+'">'+(r.ok?'Autorizado':'No autorizado')+'</span></div>';}).join(""):'<p class="empty">Sin retiros anticipados este día.</p>')+'</div>';
 }
 function vRetiros(){
-  var h=top("Retiros","Retiros anticipados y personas autorizadas")+'<div class="card"><p>La salida normal de las 16:00 la hacen las familias con el equipo como siempre. Aquí se registra solo cuando <b>un niño se va antes</b>. Las familias avisan desde su cuenta quién lo retira, su parentesco y su contacto; el coordinador también puede registrarlo.</p>'+dayChips()+'</div>';
+  var h=top("Retiros","Retiros anticipados y personas autorizadas")+'<div class="card"><p>La salida normal de las 16:00 la hace el coordinador en la puerta. Aquí se registra solo cuando <b>un niño se va antes</b>. Las familias avisan desde su cuenta quién lo retira, su parentesco y su contacto; el coordinador también puede registrarlo.</p>'+dayChips()+'</div>';
   h+='<div class="grid2"><div class="card"><h2>Registrar retiro anticipado</h2>'+earlyForm(S.rgroup,true)+'</div><div class="card"><h2>Retiros de '+DAYS[S.day].name.toLowerCase()+'</h2>'+earlyLog()+'</div></div>';
   var q=S.rq.toLowerCase(),list=KIDS.filter(function(k){return !q||k.name.toLowerCase().indexOf(q)>=0;});
   h+='<div class="card"><div class="row between"><h2>Personas autorizadas</h2><span class="lock">🔒 Teléfonos visibles solo para el coordinador</span></div><input type="text" id="rq" placeholder="Buscar niño" aria-label="Buscar niño" value="'+esc(S.rq)+'"><div class="list">'+
@@ -653,7 +638,7 @@ function modalHtml(){
   var m=S.modal;if(!m)return "";
   var body="";
   if(m.type==="kid"){var k=KIDS.filter(function(x){return x.id===m.id;})[0];if(!k)return "";
-    body='<p class="muted">Ficha del niño · 🔒 solo coordinador</p><p class="kidname">'+esc(k.name)+'</p><p>'+GROUPS[k.g].name+' · '+GROUPS[k.g].lvl+'</p><p class="muted">Hoy: '+(present(k)?'presente':'ausente')+'</p><h3>Autorizados a retirar</h3><div class="list">'+k.aut.map(function(a){return '<div class="item"><div class="grow"><b>'+esc(a.name)+'</b><span class="muted">'+a.rel+' · '+a.tel+'</span></div></div>';}).join("")+'</div><div class="row"><button class="btn small primary" data-a="hoja" data-v="'+k.id+'">Ver hoja de vida</button></div><h3>Salida de las 16:00</h3><form id="salForm" data-id="'+k.id+'" class="list" style="gap:10px"><div class="field"><label for="sfM">Cómo se va normalmente</label><select id="sfM"><option value="familia"'+(((k.sal||{}).modo||"familia")==="familia"?' selected':'')+'>Lo retira la familia</option><option value="furgon"'+((k.sal||{}).modo==="furgon"?' selected':'')+'>Se va en furgón</option><option value="academie"'+((k.sal||{}).modo==="academie"?' selected':'')+'>Se queda en Académie</option></select></div><div class="row"><div class="field" style="flex:1;min-width:150px"><label for="sfN">Furgón (nombre)</label><input type="text" id="sfN" value="'+esc((k.sal||{}).fn||"")+'"></div><div class="field" style="flex:1;min-width:150px"><label for="sfT">Teléfono del furgón</label><input type="text" id="sfT" value="'+esc((k.sal||{}).ft||"")+'"></div></div><button class="btn small primary" type="submit">Guardar salida</button></form>';}
+    body='<p class="muted">Ficha del niño · 🔒 solo coordinador</p><p class="kidname">'+esc(k.name)+'</p><p>'+GROUPS[k.g].name+' · '+GROUPS[k.g].lvl+'</p><p class="muted">Hoy: '+(present(k)?'presente':'ausente')+'</p><h3>Autorizados a retirar</h3><div class="list">'+k.aut.map(function(a){return '<div class="item"><div class="grow"><b>'+esc(a.name)+'</b><span class="muted">'+a.rel+' · '+a.tel+'</span></div></div>';}).join("")+'</div><div class="row"><button class="btn small primary" data-a="hoja" data-v="'+k.id+'">Ver hoja de vida</button></div>';}
   if(m.type==="aut"){var ka=kidById(m.id);if(!ka)return "";
     body='<p class="muted">Nueva persona autorizada</p><h2>'+esc(ka.name)+'</h2><form id="autForm" class="list" style="gap:12px"><div class="field"><label for="aN">Nombre y apellido</label><input type="text" id="aN" required></div><div class="row"><div class="field" style="flex:1;min-width:140px"><label for="aR">Parentesco</label><input type="text" id="aR" placeholder="Ej.: Abuela"></div><div class="field" style="flex:1;min-width:160px"><label for="aT">Teléfono</label><input type="text" id="aT" placeholder="+56 9 …"></div></div><button class="btn primary" type="submit">Guardar autorizado</button></form>';}
   if(m.type==="early"){
@@ -742,7 +727,7 @@ function parseRows(rows,defG,replace){
   KIDS=S.kids;S.att={};S.taken={};S.out={};
   return added.length;
 }
-var VIEWS={grupos:vGrupos,talleres:vTalleres,inicio:vInicio,horario:vHorario,asistencia:vAsistencia,ninos:vNinos,informes:vInformes,calendario:vCalendario,salida:vSalida,reemplazos:vReemplazos,apoderados:vApoderados,retiros:vRetiros,avisos:vAvisos,equipo:vEquipo,planes:vPlanes,midia:vMiDia,miplan:vMiPlan,resumen:vResumen,mihijo:vMiHijo};
+var VIEWS={grupos:vGrupos,talleres:vTalleres,inicio:vInicio,horario:vHorario,asistencia:vAsistencia,ninos:vNinos,informes:vInformes,calendario:vCalendario,reemplazos:vReemplazos,apoderados:vApoderados,retiros:vRetiros,avisos:vAvisos,equipo:vEquipo,planes:vPlanes,midia:vMiDia,miplan:vMiPlan,resumen:vResumen,mihijo:vMiHijo};
 function render(){
   applyTx();
   var nav=NAV[S.role];
@@ -772,9 +757,6 @@ function render(){
     if(!schoolDay(d)){toast("Ese día no hay École de Jeu.");return;}var who=(k.aut[0]?k.aut[0].name:"Apoderado");
     S.abs[d]=S.abs[d]||{};S.abs[d][k.id]={motivo:m,reg:who,at:nowHM()};S.att[d]=S.att[d]||{};S.att[d][k.id]=false;
     S.absN=S.absN||[];S.absN.unshift({kid:k.id,date:d,motivo:m,reg:who,at:nowHM()});save();render();toast("Aviso enviado. El monitor lo verá como ausente avisado.");});
-  var salf=document.getElementById("salForm");
-  if(salf)salf.addEventListener("submit",function(e){e.preventDefault();var k=kidById(salf.getAttribute("data-id"));if(!k)return;
-    k.sal={modo:document.getElementById("sfM").value,fn:document.getElementById("sfN").value.trim(),ft:document.getElementById("sfT").value.trim()};save();render();toast("Salida guardada.");});
   var rf=document.getElementById("repForm");
   if(rf)rf.addEventListener("submit",function(e){e.preventDefault();var d=document.getElementById("raD").value,ti=document.getElementById("raT").value,ri=document.getElementById("raR").value,mo=document.getElementById("raM").value.trim();
     if(!schoolDay(d)){toast("Ese día no hay École de Jeu.");return;}
@@ -841,7 +823,6 @@ document.addEventListener("click",function(e){
   if(a==="print"){window.print();return;}
   if(a==="hoja"){var hk=kidById(v);if(hk){S.itab="personal";S.cgroup=hk.g;S.ckid=hk.id;S.view="informes";S.modal=null;}save();render();window.scrollTo(0,0);return;}
   if(a==="calDel"){delete S.cal[v];save();render();toast("Día quitado del calendario.");return;}
-  if(a==="salOk"){var dd=dk();S.sal[dd]=S.sal[dd]||{};if(S.sal[dd][v])delete S.sal[dd][v];else S.sal[dd][v]=nowHM();save();render();return;}
   if(a==="clearAbsN"){S.absN=[];save();render();return;}
   if(a==="repPre"){var f=(S.faltas||[]).filter(function(x){return String(x.id)===v;})[0];if(f)S.repPre={date:f.date,tid:f.tid,motivo:f.motivo,fid:f.id};S.view="equipo";save();render();var el=document.getElementById("reemplazos");if(el)el.scrollIntoView();return;}
   if(a==="repPreT"){S.repPre={tid:v};save();render();var el2=document.getElementById("reemplazos");if(el2)el2.scrollIntoView();return;}
@@ -899,7 +880,7 @@ document.addEventListener("click",function(e){
     return;
   }
   else if(a==="toast"){toast(v);return;}
-  else if(a==="reset"){try{localStorage.removeItem("edj-proto-v7");}catch(err){}location.reload();return;}
+  else if(a==="reset"){try{localStorage.removeItem("edj-proto-v8");}catch(err){}location.reload();return;}
   save();render();
 });
 document.addEventListener("change",function(e){
