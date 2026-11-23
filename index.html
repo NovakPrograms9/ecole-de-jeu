@@ -146,7 +146,7 @@ thead th{border-top:0;font-size:12px;text-transform:uppercase;letter-spacing:.05
 }
 @media (prefers-reduced-motion:no-preference){.chip,.att,.btn,.nav button{transition:background .15s,color .15s}}
 a.btn{color:inherit;text-decoration:none;display:inline-flex;align-items:center}
-.notif{border:2px solid #2F7DE1;background:#EEF4FF}.alert.info{background:#fff;border-radius:12px;padding:10px 12px}.nbadge{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:#E5484D;color:#fff;font-size:12px;font-weight:800;margin-left:auto}
+.notif{border:2px solid #2F7DE1;background:#EEF4FF}.alert.info{background:#fff;border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}.nbadge{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:#E5484D;color:#fff;font-size:12px;font-weight:800;margin-left:auto}
 </style>
 </head>
 <body>
@@ -271,14 +271,16 @@ function board(di,hlG){
 }
 
 /* ---------- Coordinador ---------- */
-function newPickups(){var l=[];DAYS.forEach(function(d){(S.early[d.k]||[]).forEach(function(r){if(r.src==="fam"&&!r.seen)l.push([d,r]);});});return l;}
+function pickStatus(r){var st=r.status||"pend";return st==="ok"?'<span class="pill p-ok">Aprobado</span>':st==="no"?'<span class="pill p-bad">Rechazado</span>':'<span class="pill p-warn">Pendiente</span>';}
+function pickBtns(r){return '<div class="row" style="gap:6px"><button class="btn small primary" data-a="pickOk" data-v="'+r.id+'">✓ Aprobar</button><button class="btn small" data-a="pickNo" data-v="'+r.id+'">✕ Rechazar</button></div>';}
+function newPickups(){var l=[];DAYS.forEach(function(d){(S.early[d.k]||[]).forEach(function(r){if(r.src==="fam"&&(r.status||"pend")==="pend")l.push([d,r]);});});return l;}
 function vInicio(){
   var abs=absCount(),tk=takenCount(),pend=6-tk;
   var ear=(S.early[dk()]||[]).length;
   var h=top("Inicio",DAYS[S.day].name+" · resumen del día")+'<div class="card">'+dayChips()+'</div>';
   var np=newPickups();
-  if(np.length)h+='<div class="card notif" role="status"><div class="row between"><h2>🔔 '+(np.length===1?'Nuevo aviso de retiro':np.length+' nuevos avisos de retiro')+'</h2><div class="row"><button class="btn small" data-a="go" data-v="retiros">Ver en Retiros</button><button class="btn small" data-a="seenPick">Marcar como visto</button></div></div><div class="list" style="gap:8px">'+
-    np.map(function(x){var r=x[1],k=kidById(r.kid);return '<div class="alert info"><span><b>'+esc(k?k.name:"")+'</b> ('+(k?GROUPS[k.g].name:"")+') se retira el <b>'+x[0].name.toLowerCase()+' a las '+esc(r.time)+'</b>. Lo retira '+esc(r.by)+' ('+esc(r.rel)+') · '+esc(r.tel)+(r.motivo?' · '+esc(r.motivo):'')+'. Avisó: '+esc(r.reg)+'.</span></div>';}).join("")+'</div></div>';
+  if(np.length)h+='<div class="card notif" role="status"><div class="row between"><h2>🔔 '+(np.length===1?'1 retiro por aprobar':np.length+' retiros por aprobar')+'</h2><button class="btn small" data-a="go" data-v="retiros">Ver en Retiros</button></div><div class="list" style="gap:8px">'+
+    np.map(function(x){var r=x[1],k=kidById(r.kid);return '<div class="alert info"><span><b>'+esc(k?k.name:"")+'</b> ('+(k?GROUPS[k.g].name:"")+') se retira el <b>'+x[0].name.toLowerCase()+' a las '+esc(r.time)+'</b>. Lo retira '+esc(r.by)+' ('+esc(r.rel)+') · '+esc(r.tel)+(r.motivo?' · '+esc(r.motivo):'')+'. Avisó: '+esc(r.reg)+'.</span>'+pickBtns(r)+'</div>';}).join("")+'</div></div>';
   h+='<div class="tiles"><div class="tile ok"><b>'+(KIDS.length-abs)+'</b><span>Presentes de '+KIDS.length+'</span></div><div class="tile'+(abs?' bad':'')+'"><b>'+abs+'</b><span>Ausentes</span></div><div class="tile'+(pend?' warn':'')+'"><b>'+tk+'/6</b><span>Grupos con asistencia</span></div><div class="tile"><b>'+ear+'</b><span>Retiros anticipados hoy</span></div></div>';
   h+='<div class="card"><h2>Alertas</h2><div class="list" style="gap:8px">';
   var al=[];
@@ -352,12 +354,12 @@ function famPickup(k){
    '<div class="field"><label for="fpM">Motivo (opcional)</label><input type="text" id="fpM" placeholder="Ej.: control médico"></div>'+
    '<div class="field"><label for="fpS">Quién avisa</label><input type="text" id="fpS" value="'+esc(ap)+'" required></div>'+
    '<div class="row"><button class="btn primary" type="submit">Enviar aviso de retiro</button></div></form>';
-  if(mine.length)h+='<h2 style="margin-top:18px">Mis avisos</h2><div class="list">'+mine.map(function(x){var r=x[1];return '<div class="item"><div class="grow"><b>'+x[0].name+' · '+r.time+'</b><span class="muted">Lo retira '+esc(r.by)+' ('+esc(r.rel)+') · '+esc(r.tel)+'</span></div><span class="pill p-info">Enviado</span></div>';}).join("")+'</div>';
+  if(mine.length)h+='<h2 style="margin-top:18px">Mis avisos</h2><div class="list">'+mine.map(function(x){var r=x[1];return '<div class="item"><div class="grow"><b>'+x[0].name+' · '+r.time+'</b><span class="muted">Lo retira '+esc(r.by)+' ('+esc(r.rel)+') · '+esc(r.tel)+'</span></div>'+pickStatus(r)+'</div>';}).join("")+'</div>';
   return h+'</div>';
 }
 function earlyLog(){
   var l=S.early[dk()]||[];
-  return '<div class="list">'+(l.length?l.map(function(r){var k=kidById(r.kid);if(r.src==="fam")return '<div class="item"><div class="grow"><b>'+esc(k?k.name:"(niño eliminado)")+' · '+r.time+'</b><span class="muted" style="display:block">Lo retira: '+esc(r.by)+' ('+esc(r.rel)+') · '+esc(r.tel)+'</span>'+(r.motivo?'<span class="muted" style="display:block">Motivo: '+esc(r.motivo)+'</span>':'')+'<span class="muted" style="display:block">Avisó: '+esc(r.reg)+'</span></div><span class="pill p-info">Aviso de la familia</span></div>';
+  return '<div class="list">'+(l.length?l.map(function(r){var k=kidById(r.kid);if(r.src==="fam")return '<div class="item"><div class="grow"><b>'+esc(k?k.name:"(niño eliminado)")+' · '+r.time+'</b><span class="muted" style="display:block">Lo retira: '+esc(r.by)+' ('+esc(r.rel)+') · '+esc(r.tel)+'</span>'+(r.motivo?'<span class="muted" style="display:block">Motivo: '+esc(r.motivo)+'</span>':'')+'<span class="muted" style="display:block">Avisó: '+esc(r.reg)+'</span>'+((r.status||"pend")==="pend"?pickBtns(r):'')+'</div><div class="list" style="gap:6px;align-items:flex-end"><span class="pill p-info">Aviso de la familia</span>'+pickStatus(r)+'</div></div>';
     return '<div class="item"><div class="grow"><b>'+esc(k?k.name:"(niño eliminado)")+'</b><span class="muted">'+r.time+' · '+esc(r.by)+(r.motivo?' · '+esc(r.motivo):'')+' · registrado por '+r.reg+'</span></div><span class="pill '+(r.ok?'p-ok':'p-bad')+'">'+(r.ok?'Autorizado':'No autorizado')+'</span></div>';}).join(""):'<p class="empty">Sin retiros anticipados este día.</p>')+'</div>';
 }
 function vRetiros(){
@@ -552,8 +554,8 @@ function render(){
   var fpf=document.getElementById("famPickForm");
   if(fpf)fpf.addEventListener("submit",function(e){e.preventDefault();var k=famKid(),g=function(id){return document.getElementById(id).value.trim();};
     var di=+document.getElementById("fpD").value,d=DAYS[di].k;
-    var r={kid:k.id,src:"fam",ok:true,time:g("fpH"),by:g("fpN"),rel:g("fpR"),tel:g("fpT"),motivo:g("fpM"),reg:g("fpS")+" (familia)"};
-    S.early[d]=S.early[d]||[];S.early[d].unshift(r);save();render();toast("Aviso enviado. El coordinador ya lo ve en Retiros.");});
+    var r={id:Date.now(),status:"pend",kid:k.id,src:"fam",ok:true,time:g("fpH"),by:g("fpN"),rel:g("fpR"),tel:g("fpT"),motivo:g("fpM"),reg:g("fpS")+" (familia)"};
+    S.early[d]=S.early[d]||[];S.early[d].unshift(r);save();render();toast("Aviso enviado. El coordinador lo revisará y te confirmará.");});
   var af=document.getElementById("autForm");
   if(af)af.addEventListener("submit",function(e){e.preventDefault();var k=kidById(S.modal.id),nm=document.getElementById("aN").value.trim();if(!k||!nm)return;k.aut.push({name:nm,rel:document.getElementById("aR").value.trim()||"Autorizado",tel:document.getElementById("aT").value.trim()||"Sin teléfono"});S.modal=null;save();render();toast("Autorizado agregado.");});
   var rqI=document.getElementById("rq");
@@ -579,7 +581,7 @@ document.getElementById("roleSel").addEventListener("change",function(e){S.role=
 document.addEventListener("click",function(e){
   var el=e.target.closest("[data-a]");if(!el)return;
   var a=el.getAttribute("data-a"),v=el.getAttribute("data-v");
-  if(a==="seenPick"){DAYS.forEach(function(d){(S.early[d.k]||[]).forEach(function(r){if(r.src==="fam")r.seen=true;});});save();render();toast("Avisos marcados como vistos.");return;}
+  if(a==="pickOk"||a==="pickNo"){DAYS.forEach(function(d){(S.early[d.k]||[]).forEach(function(r){if(String(r.id)===v)r.status=(a==="pickOk"?"ok":"no");});});save();render();toast(a==="pickOk"?"Retiro aprobado. La familia ve que está confirmado.":"Retiro rechazado. Comunícate con la familia.");return;}
   if(a==="go"){S.view=v;if(v==="talleres")S.tview="list";if(v==="grupos")S.gview="list";window.scrollTo(0,0);}
   else if(a==="day")S.day=+v;
   else if(a==="hview")S.hview=v;
