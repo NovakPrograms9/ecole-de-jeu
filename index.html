@@ -334,12 +334,29 @@ function earlyForm(gi,showTel){
    '<div class="field"><label for="rw">Quién lo retira</label><select id="rw">'+(k&&k.aut.length?k.aut.map(function(a,i){return '<option value="'+i+'">'+esc(a.name)+' · '+a.rel+(showTel?' · '+a.tel:'')+'</option>';}).join(""):'<option value="" disabled>Sin autorizados registrados</option>')+'<option value="x">Otra persona (no está autorizada)</option></select></div>'+
    '<div class="row"><div class="field" style="width:130px"><label for="rt">Hora</label><input type="text" id="rt" value="'+nowHM()+'"></div><div class="field" style="flex:1;min-width:200px"><label for="rm">Motivo</label><input type="text" id="rm" placeholder="Ej.: control médico"></div></div><div class="row"><button class="btn primary" type="submit">Registrar retiro anticipado</button></div></form>';
 }
+function famPickup(k){
+  var mine=[];DAYS.forEach(function(d){(S.early[d.k]||[]).forEach(function(r){if(r.kid===k.id&&r.src==="fam")mine.push([d,r]);});});
+  var ap=k.aut[0]?k.aut[0].name:"";
+  var h='<div class="card"><h2>Avisar un retiro anticipado</h2><p class="muted">Si tu hijo se va antes de las 16:00, avísalo aquí. El coordinador recibe el aviso con todos los datos.</p>'+
+   '<form id="famPickForm" class="list" style="gap:12px">'+
+   '<div class="row"><div class="field" style="flex:1;min-width:140px"><label for="fpD">Día</label><select id="fpD">'+DAYS.map(function(d,i){return '<option value="'+i+'"'+(i===S.day?" selected":"")+'>'+d.name+'</option>';}).join("")+'</select></div>'+
+   '<div class="field" style="width:130px"><label for="fpH">Hora</label><input type="text" id="fpH" placeholder="15:00" required></div></div>'+
+   '<div class="field"><label for="fpN">Quién lo retira</label><input type="text" id="fpN" placeholder="Nombre y apellido" required></div>'+
+   '<div class="row"><div class="field" style="flex:1;min-width:160px"><label for="fpR">Parentesco</label><input type="text" id="fpR" placeholder="Ej.: abuela, tío, papá" required></div>'+
+   '<div class="field" style="flex:1;min-width:160px"><label for="fpT">Teléfono de contacto</label><input type="text" inputmode="tel" id="fpT" placeholder="+56 9 ..." required></div></div>'+
+   '<div class="field"><label for="fpM">Motivo (opcional)</label><input type="text" id="fpM" placeholder="Ej.: control médico"></div>'+
+   '<div class="field"><label for="fpS">Quién avisa</label><input type="text" id="fpS" value="'+esc(ap)+'" required></div>'+
+   '<div class="row"><button class="btn primary" type="submit">Enviar aviso de retiro</button></div></form>';
+  if(mine.length)h+='<h2 style="margin-top:18px">Mis avisos</h2><div class="list">'+mine.map(function(x){var r=x[1];return '<div class="item"><div class="grow"><b>'+x[0].name+' · '+r.time+'</b><span class="muted">Lo retira '+esc(r.by)+' ('+esc(r.rel)+') · '+esc(r.tel)+'</span></div><span class="pill p-info">Enviado</span></div>';}).join("")+'</div>';
+  return h+'</div>';
+}
 function earlyLog(){
   var l=S.early[dk()]||[];
-  return '<div class="list">'+(l.length?l.map(function(r){var k=kidById(r.kid);return '<div class="item"><div class="grow"><b>'+esc(k?k.name:"(niño eliminado)")+'</b><span class="muted">'+r.time+' · '+esc(r.by)+(r.motivo?' · '+esc(r.motivo):'')+' · registrado por '+r.reg+'</span></div><span class="pill '+(r.ok?'p-ok':'p-bad')+'">'+(r.ok?'Autorizado':'No autorizado')+'</span></div>';}).join(""):'<p class="empty">Sin retiros anticipados este día.</p>')+'</div>';
+  return '<div class="list">'+(l.length?l.map(function(r){var k=kidById(r.kid);if(r.src==="fam")return '<div class="item"><div class="grow"><b>'+esc(k?k.name:"(niño eliminado)")+' · '+r.time+'</b><span class="muted" style="display:block">Lo retira: '+esc(r.by)+' ('+esc(r.rel)+') · '+esc(r.tel)+'</span>'+(r.motivo?'<span class="muted" style="display:block">Motivo: '+esc(r.motivo)+'</span>':'')+'<span class="muted" style="display:block">Avisó: '+esc(r.reg)+'</span></div><span class="pill p-info">Aviso de la familia</span></div>';
+    return '<div class="item"><div class="grow"><b>'+esc(k?k.name:"(niño eliminado)")+'</b><span class="muted">'+r.time+' · '+esc(r.by)+(r.motivo?' · '+esc(r.motivo):'')+' · registrado por '+r.reg+'</span></div><span class="pill '+(r.ok?'p-ok':'p-bad')+'">'+(r.ok?'Autorizado':'No autorizado')+'</span></div>';}).join(""):'<p class="empty">Sin retiros anticipados este día.</p>')+'</div>';
 }
 function vRetiros(){
-  var h=top("Retiros","Retiros anticipados y personas autorizadas")+'<div class="card"><p>La salida normal de las 16:00 la hacen las familias con el equipo como siempre. Aquí se registra solo cuando <b>un niño se va antes</b>, y quién está autorizado a llevárselo.</p>'+dayChips()+'</div>';
+  var h=top("Retiros","Retiros anticipados y personas autorizadas")+'<div class="card"><p>La salida normal de las 16:00 la hacen las familias con el equipo como siempre. Aquí se registra solo cuando <b>un niño se va antes</b>. Las familias avisan desde su cuenta quién lo retira, su parentesco y su contacto; el coordinador también puede registrarlo.</p>'+dayChips()+'</div>';
   h+='<div class="grid2"><div class="card"><h2>Registrar retiro anticipado</h2>'+earlyForm(S.rgroup,true)+'</div><div class="card"><h2>Retiros de '+DAYS[S.day].name.toLowerCase()+'</h2>'+earlyLog()+'</div></div>';
   var q=S.rq.toLowerCase(),list=KIDS.filter(function(k){return !q||k.name.toLowerCase().indexOf(q)>=0;});
   h+='<div class="card"><div class="row between"><h2>Personas autorizadas</h2><span class="lock">🔒 Teléfonos visibles solo para el coordinador</span></div><input type="text" id="rq" placeholder="Buscar niño" aria-label="Buscar niño" value="'+esc(S.rq)+'"><div class="list">'+
@@ -458,6 +475,7 @@ function vMiHijo(){
   var nd=(S.day+1)%4;
   var h=top("Mi hijo","Vista de familia")+'<div class="card"><div class="field"><label for="fk">Demo: elige la familia</label><select id="fk" data-c="famKid">'+KIDS.map(function(x){return '<option value="'+x.id+'"'+(x.id===k.id?" selected":"")+'>'+esc(x.name)+' ('+GROUPS[x.g].name+')</option>';}).join("")+'</select></div></div>';
   h+='<div class="card"><p class="kidname">'+esc(k.name)+'</p><p>Grupo <b>'+GROUPS[gi].name+'</b> · '+GROUPS[gi].lvl+'</p></div>';
+  h+=famPickup(k);
   var tr=[];for(var m=0;m<3;m++){var x=traerFor(tallerAt(gi,nd,m),nd);if(x&&tr.indexOf(x)<0)tr.push(x);}
   h+='<div class="card t-art" style="border:0"><h2>Qué traer el '+DAYS[nd].name.toLowerCase()+'</h2><p>Colación y botella de agua'+(tr.length?', '+tr.join(", "):'')+'.</p></div>';
   h+='<div class="card"><h2>Semana de '+GROUPS[gi].name+'</h2><div class="scroll"><div class="week"><div></div>'+MODS.map(function(mm){return '<div class="muted" style="font-weight:800">'+mm.h+'</div>';}).join("");
@@ -519,6 +537,11 @@ function render(){
     var r={kid:k.id,time:document.getElementById("rt").value||nowHM(),motivo:document.getElementById("rm").value.trim(),reg:S.role==="mon"?"monitor":"coordinador"};
     if(w==="x"){r.by="Persona no autorizada";r.ok=false;}else{r.by=k.aut[+w].name+" ("+k.aut[+w].rel+")";r.ok=true;}
     var d=dk();S.early[d]=S.early[d]||[];S.early[d].unshift(r);S.modal=null;save();render();toast(r.ok?"Retiro anticipado registrado.":"Alerta: no está autorizada. Se avisa al coordinador.");});
+  var fpf=document.getElementById("famPickForm");
+  if(fpf)fpf.addEventListener("submit",function(e){e.preventDefault();var k=famKid(),g=function(id){return document.getElementById(id).value.trim();};
+    var di=+document.getElementById("fpD").value,d=DAYS[di].k;
+    var r={kid:k.id,src:"fam",ok:true,time:g("fpH"),by:g("fpN"),rel:g("fpR"),tel:g("fpT"),motivo:g("fpM"),reg:g("fpS")+" (familia)"};
+    S.early[d]=S.early[d]||[];S.early[d].unshift(r);save();render();toast("Aviso enviado. El coordinador ya lo ve en Retiros.");});
   var af=document.getElementById("autForm");
   if(af)af.addEventListener("submit",function(e){e.preventDefault();var k=kidById(S.modal.id),nm=document.getElementById("aN").value.trim();if(!k||!nm)return;k.aut.push({name:nm,rel:document.getElementById("aR").value.trim()||"Autorizado",tel:document.getElementById("aT").value.trim()||"Sin teléfono"});S.modal=null;save();render();toast("Autorizado agregado.");});
   var rqI=document.getElementById("rq");
