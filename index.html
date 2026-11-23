@@ -63,7 +63,7 @@ button{cursor:pointer}
 .nav button .ico{width:20px;text-align:center}
 .role{padding:12px;border:1px dashed var(--line);border-radius:12px;display:flex;flex-direction:column;gap:6px}
 .role label{font-size:12px;font-weight:700;color:var(--soft);text-transform:uppercase;letter-spacing:.06em}
-select,input[type=text],textarea{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 11px;width:100%;min-height:40px}
+select,input[type=text],input[type=date],textarea{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 11px;width:100%;min-height:40px}
 textarea{min-height:110px;resize:vertical}
 .main{padding:24px 28px 60px;display:flex;flex-direction:column;gap:18px;min-width:0;max-width:1180px}
 .top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
@@ -213,9 +213,9 @@ var startDay=({1:0,2:1,4:2,5:3})[dow];
 var S={role:"coord",view:"inicio",day:startDay===undefined?2:startDay,hview:"dia",hgroup:0,htaller:0,agroup:0,kidQ:"",kidG:-1,kidSel:null,sgroup:0,monT:0,famKid:"k3",
   att:{},taken:{},out:{},
   avisos:[
-    {id:1,title:"Jueves: Exploradores sale al patio",text:"Este jueves Pequeños Exploradores trabaja en el patio. Por favor enviar botas y parka marcadas con el nombre.",dest:"all",tipo:"Qué traer",date:"16 nov",reads:71},
+    {id:1,title:"Jueves: Exploradores sale al patio",text:"Este jueves Pequeños Exploradores trabaja en el patio. Por favor enviar botas y parka marcadas con el nombre.",dest:"all",tipo:"Qué traer",when:"2026-11-19",date:"16 nov",reads:71},
     {id:2,title:"Bienvenida a la École de Jeu 2027",text:"Les damos la bienvenida a la École de Jeu. Cada día su hijo o hija participa en 3 talleres. Revisen aquí el horario de su grupo y qué traer cada día.",dest:"all",tipo:"General",date:"11 nov",reads:94},
-    {id:3,title:"Reunión de monitores",text:"Reunión de planificación el miércoles a las 15:00 en la sala de profesores.",dest:"mon",tipo:"Interno",date:"10 nov",reads:6}
+    {id:3,title:"Reunión de monitores",text:"Reunión de planificación el miércoles a las 15:00 en la sala de profesores.",dest:"mon",tipo:"Interno",when:"2026-11-18",date:"10 nov",reads:6}
   ],
   noShow:{},
   early:{},rgroup:0,rkid:"",rq:"",
@@ -364,14 +364,21 @@ function vRetiros(){
     (list.length>30?'<p class="muted">Mostrando 30 de '+list.length+'. Usa el buscador.</p>':'')+'</div></div>';
   return h;
 }
+function whenLabel(a){
+  if(!a.when)return "";
+  var p=a.when.split("-");var d=new Date(+p[0],+p[1]-1,+p[2]);
+  var dn=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"][d.getDay()];
+  var mn=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"][d.getMonth()];
+  return dn+" "+d.getDate()+" de "+mn;
+}
 function mailHref(a){
   var to=[];
   if(a.dest==="mon")TALLERES.forEach(function(t){mons(t).forEach(function(m){if(m.email)to.push(m.email);});});
-  var body=a.text+"\n\n"+"Coordinación École de Jeu · Lycée Claude Gay";
+  var body=(a.when?"Para el "+whenLabel(a)+"\n\n":"")+a.text+"\n\n"+"Coordinación École de Jeu · Lycée Claude Gay";
   return "mailto:?"+(to.length?"bcc="+encodeURIComponent(to.join(","))+"&":"")+"subject="+encodeURIComponent("École de Jeu: "+a.title)+"&body="+encodeURIComponent(body);
 }
 function avisoCard(a,compact){
-  var h='<div class="aviso"><div class="row between"><b>'+esc(a.title)+'</b><span class="pill p-info">'+a.tipo+'</span></div><p class="meta">'+destLabel(a.dest)+' · '+a.date+(S.role==="coord"&&a.dest!=="mon"&&a.dest!=="dir"?' · leído por '+a.reads+' familias':'')+'</p><p>'+esc(a.text)+'</p>';
+  var h='<div class="aviso"><div class="row between"><b>'+esc(a.title)+'</b><span class="pill p-info">'+a.tipo+'</span></div>'+(a.when?'<p class="meta" style="font-weight:700;color:var(--ink)">📅 Para el '+whenLabel(a)+'</p>':'')+'<p class="meta">'+destLabel(a.dest)+' · '+a.date+(S.role==="coord"&&a.dest!=="mon"&&a.dest!=="dir"?' · leído por '+a.reads+' familias':'')+'</p><p>'+esc(a.text)+'</p>';
   if(S.role==="coord"&&!compact)h+='<div class="row"><a class="btn small" href="'+mailHref(a)+'">Enviar por correo</a><button class="btn small" data-a="copy" data-v="'+a.id+'">Copiar para WhatsApp</button><button class="btn small" data-a="copy" data-v="'+a.id+'">Copiar para Schooltrack / Colegium</button></div>';
   return h+'</div>';
 }
@@ -384,7 +391,7 @@ function vAvisos(){
   var h=top(S.role==="dir"?"Avisos enviados":S.role==="mon"?"Avisos internos":"Avisos",S.role==="coord"?"Redacta una vez y copia a cada canal":"Información de la École de Jeu");
   if(S.role==="coord"){
     var opts=[["all","Todas las familias"]].concat(["Petite Section","Moyenne Section","Grande Section"].map(function(l){return ["lvl:"+l,"Familias de "+l];})).concat(GROUPS.map(function(g){return [g.id,"Familias de "+g.name];})).concat([["mon","Monitores"],["dir","Dirección"]]);
-    h+='<div class="card"><h2>Nuevo aviso</h2><form id="avForm" class="list" style="gap:12px"><div class="field"><label for="avT">Título</label><input type="text" id="avT" required></div><div class="field"><label for="avX">Mensaje</label><textarea id="avX" required></textarea></div><div class="row"><div class="field" style="flex:1;min-width:200px"><label for="avD">Para</label><select id="avD">'+opts.map(function(o){return '<option value="'+o[0]+'">'+o[1]+'</option>';}).join("")+'</select></div><div class="field" style="flex:1;min-width:160px"><label for="avK">Tipo</label><select id="avK"><option>General</option><option>Qué traer</option><option>Urgente</option><option>Interno</option></select></div></div><div class="row"><button class="btn primary" type="submit">Publicar aviso</button><span class="muted">Después puedes enviarlo por correo o copiarlo para WhatsApp y Schooltrack.</span></div></form></div>';
+    h+='<div class="card"><h2>Nuevo aviso</h2><form id="avForm" class="list" style="gap:12px"><div class="field"><label for="avT">Título</label><input type="text" id="avT" required></div><div class="field"><label for="avX">Mensaje</label><textarea id="avX" required></textarea></div><div class="row"><div class="field" style="flex:1;min-width:200px"><label for="avD">Para</label><select id="avD">'+opts.map(function(o){return '<option value="'+o[0]+'">'+o[1]+'</option>';}).join("")+'</select></div><div class="field" style="flex:1;min-width:160px"><label for="avF">Para cuándo</label><input type="date" id="avF"></div><div class="field" style="flex:1;min-width:160px"><label for="avK">Tipo</label><select id="avK"><option>General</option><option>Qué traer</option><option>Urgente</option><option>Interno</option></select></div></div><div class="row"><button class="btn primary" type="submit">Publicar aviso</button><span class="muted">Después puedes enviarlo por correo o copiarlo para WhatsApp y Schooltrack.</span></div></form></div>';
   }
   h+='<div class="card"><h2>'+(mine.length)+' avisos</h2><div class="list" style="gap:10px">'+(mine.length?mine.map(function(a){return avisoCard(a,false);}).join(""):'<p class="empty">No hay avisos.</p>')+'</div></div>';
   return h;
@@ -561,7 +568,7 @@ function render(){
   if(kq){kq.addEventListener("input",function(){S.kidQ=kq.value;var pos=kq.selectionStart;save();render();var n2=document.getElementById("kq");n2.focus();try{n2.setSelectionRange(pos,pos);}catch(e){}});}
   var f=document.getElementById("avForm");
   if(f)f.addEventListener("submit",function(e){e.preventDefault();var t=document.getElementById("avT").value.trim(),x=document.getElementById("avX").value.trim();if(!t||!x)return;
-    S.avisos.unshift({id:Date.now(),title:t,text:x,dest:document.getElementById("avD").value,tipo:document.getElementById("avK").value,date:"hoy",reads:0});save();render();toast("Aviso publicado. Usa «Enviar por correo» para mandarlo desde tu correo.");});
+    S.avisos.unshift({id:Date.now(),title:t,text:x,dest:document.getElementById("avD").value,tipo:document.getElementById("avK").value,when:document.getElementById("avF").value,date:"hoy",reads:0});save();render();toast("Aviso publicado. Usa «Enviar por correo» para mandarlo desde tu correo.");});
 }
 document.getElementById("roleSel").addEventListener("change",function(e){S.role=e.target.value;S.view=NAV[S.role][0][0];save();render();window.scrollTo(0,0);});
 document.addEventListener("click",function(e){
@@ -606,7 +613,7 @@ document.addEventListener("click",function(e){
   else if(a==="monEarly"){S.rgroup=+v;S.rkid="";S.modal={type:"early"};}
   else if(a==="copy"){
     var av=S.avisos.filter(function(x){return String(x.id)===v;})[0];if(!av)return;
-    var txt="*École de Jeu* · "+av.title+"\n\n"+av.text+"\n\nCoordinación École de Jeu";
+    var txt="*École de Jeu* · "+av.title+(av.when?"\n📅 Para el "+whenLabel(av):"")+"\n\n"+av.text+"\n\nCoordinación École de Jeu";
     try{navigator.clipboard.writeText(txt).then(function(){toast("Texto copiado.");},function(){toast("No se pudo copiar; selecciona el texto del aviso.");});}catch(err){toast("No se pudo copiar; selecciona el texto del aviso.");}
     return;
   }
