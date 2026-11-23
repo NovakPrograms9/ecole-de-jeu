@@ -294,9 +294,9 @@ function perMon(d){var p=d.slice(4).split("|"),t=TALLERES.filter(function(x){ret
 function destLabel(d){if(d.indexOf("tal:")===0){var tt=TALLERES.filter(function(x){return x.id===d.slice(4);})[0];return tt?"Monitor de "+tt.name:d;}if(d.indexOf("per:")===0){var pm=perMon(d);return pm&&pm.m?pm.m.name+" (personal)":"Monitor (personal)";}if(d==="all")return "Todas las familias";if(d==="mon")return "Monitores";if(d==="dir")return "Dirección";if(d.indexOf("lvl:")===0)return d.slice(4);var g=GROUPS.filter(function(x){return x.id===d;})[0];return g?"Familias de "+g.name:d;}
 
 var NAV={
-  coord:[["inicio","⌂","Inicio"],["horario","▦","Horario"],["calendario","▣","Calendario"],["talleres","◉","Talleres"],["grupos","▤","Grupos"],["asistencia","✓","Asistencia"],["ninos","☺","Niños"],["apoderados","✎","Apoderados"],["retiros","➜","Retiros"],["avisos","✉","Avisos"],["equipo","★","Equipo"],["planes","☰","Planificaciones"],["informes","▤","Informes"]],
+  coord:[["inicio","⌂","Inicio"],["horario","▦","Horario"],["calendario","▣","Calendario"],["talleres","◉","Talleres"],["grupos","▤","Grupos"],["asistencia","✓","Asistencia"],["ninos","☺","Niños"],["apoderados","✎","Registro de conducta"],["retiros","➜","Retiros"],["avisos","✉","Avisos"],["equipo","★","Equipo"],["planes","☰","Planificaciones"],["informes","▤","Informes"]],
   mon:[["midia","⌂","Mi día"],["asistencia","✓","Asistencia"],["miplan","☰","Planificación"],["avisos","✉","Avisos internos"]],
-  dir:[["resumen","⌂","Resumen"],["horario","▦","Horario"],["calendario","▣","Calendario"],["apoderados","✎","Apoderados"],["avisos","✉","Avisos enviados"]],
+  dir:[["resumen","⌂","Resumen"],["horario","▦","Horario"],["calendario","▣","Calendario"],["apoderados","✎","Registro de conducta"],["avisos","✉","Avisos enviados"]],
   rep:[["reemplazos","⇄","Mis reemplazos"],["midia","⌂","Día del taller"],["asistencia","✓","Asistencia"]],
   fam:[["mihijo","☺","Mi hijo"],["avisos","✉","Avisos"]]
 };
@@ -350,7 +350,7 @@ function vInicio(){
   h+='<div class="tiles"><div class="tile ok"><b>'+(KIDS.length-abs)+'</b><span>Presentes de '+KIDS.length+'</span></div><div class="tile'+(abs?' bad':'')+'"><b>'+abs+'</b><span>Ausentes</span></div><div class="tile'+(pend?' warn':'')+'"><b>'+tk+'/6</b><span>Grupos con asistencia</span></div><div class="tile"><b>'+ear+'</b><span>Retiros anticipados hoy</span></div></div>';
   if(blocked(dk()))h+=blockBanner(dk());
   var due=dueActs();
-  if(due.length)h+='<div class="card notif rec" role="status"><div class="row between"><h2>📌 '+(due.length===1?'1 recordatorio':due.length+' recordatorios')+'</h2><button class="btn small" data-a="go" data-v="apoderados">Ver Apoderados</button></div><div class="list" style="gap:8px">'+due.map(function(x){var c=x[0],k=kidById(c.kid);return '<div class="alert info"><span><b>'+esc(x[1].t)+'</b> · '+esc(k?k.name:"")+' ('+(k?GROUPS[k.g].name:"")+') · '+esc(c.tipo)+': '+esc(c.text)+'</span><div class="row"><button class="btn small primary" data-a="actDone" data-v="'+c.id+'|'+x[2]+'">✓ Hecho</button></div></div>';}).join("")+'</div></div>';
+  if(due.length)h+='<div class="card notif rec" role="status"><div class="row between"><h2>📌 '+(due.length===1?'1 recordatorio':due.length+' recordatorios')+'</h2><button class="btn small" data-a="go" data-v="apoderados">Ver registro</button></div><div class="list" style="gap:8px">'+due.map(function(x){var c=x[0],k=kidById(c.kid);return '<div class="alert info"><span><b>'+esc(x[1].t)+'</b> · '+esc(k?k.name:"")+' ('+(k?GROUPS[k.g].name:"")+') · '+esc(c.tipo)+': '+esc(c.text)+'</span><div class="row"><button class="btn small primary" data-a="actDone" data-v="'+c.id+'|'+x[2]+'">✓ Hecho</button></div></div>';}).join("")+'</div></div>';
   var alc=homeAlerts().length;
   h+='<div class="card"><h2>Alertas'+(alc?' <span class="nbadge" style="margin-left:6px">'+alc+'</span>':'')+'</h2><div class="list" style="gap:8px">';
   var al=homeAlerts();
@@ -409,7 +409,7 @@ function casoCard(c,kk,pend){
 }
 function vApoderados(){
   var gi=S.cgroup||0,ks=kidsOf(gi),k=kidById(S.ckid);if(!k||k.g!==gi)k=ks[0];
-  var h=top("Apoderados","Registro de situaciones y seguimiento con las familias")+'<div class="card"><p>'+(S.role==="coord"?'Registra aquí cualquier situación con un niño (conducta, salud, un accidente) y lo que tienes que hacer después. El sistema te recuerda en el Inicio cuando llegue la fecha.':'Registros del coordinador sobre situaciones con los niños y su seguimiento. Vista de solo lectura.')+'</p><span class="lock">🔒 Visible solo para el coordinador y la Dirección. Monitores y familias no tienen acceso.</span></div>';
+  var h=top("Registro de conducta","Situaciones con los niños y seguimiento con las familias")+'<div class="card"><p>'+(S.role==="coord"?'Registra aquí cualquier situación con un niño (conducta, salud, un accidente) y lo que tienes que hacer después. El sistema te recuerda en el Inicio cuando llegue la fecha.':'Registros del coordinador sobre situaciones con los niños y su seguimiento. Vista de solo lectura.')+'</p><span class="lock">🔒 Visible solo para el coordinador y la Dirección. Monitores y familias no tienen acceso.</span></div>';
   if(S.role==="coord")h+='<div class="card"><h2>Registrar situación</h2><form id="casoForm" class="list" style="gap:12px">'+
    '<div class="row"><div class="field" style="flex:1;min-width:140px"><label for="cg">Grupo</label><select id="cg" data-c="cgroup">'+GROUPS.map(function(g,i){return '<option value="'+i+'"'+(i===gi?" selected":"")+'>'+g.name+'</option>';}).join("")+'</select></div>'+
    '<div class="field" style="flex:2;min-width:200px"><label for="ck">Niño</label><select id="ck" data-c="ckid">'+ks.map(function(x){return '<option value="'+x.id+'"'+(k&&x.id===k.id?" selected":"")+'>'+esc(x.name)+'</option>';}).join("")+'</select></div>'+
