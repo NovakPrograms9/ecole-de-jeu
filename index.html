@@ -150,6 +150,7 @@ a.btn{color:inherit;text-decoration:none;display:inline-flex;align-items:center}
 .notif.pur{border-color:#7B4FD6;background:#F3EEFF}.notif.pur .btn.primary{background:#7B4FD6;border-color:#7B4FD6}.nbadge.pur{background:#7B4FD6}
 .notif.rec{border-color:#F27A1A;background:#FFF3E8}.notif.rec .btn.primary{background:#C25A0E;border-color:#C25A0E}.nbadge.rec{background:#C25A0E}
 @media (prefers-color-scheme: dark){.notif{background:#1B2644;border-color:#5B8FE8}.notif.pur{background:#271F42;border-color:#9C7BE8}.notif.rec{background:#33231A;border-color:#E08A3C}.alert.info{background:rgba(255,255,255,.06)}.notif.pur .btn.primary{background:#8E66E6;border-color:#8E66E6;color:#fff}.notif.rec .btn.primary{background:#D9772E;border-color:#D9772E;color:#fff}}
+.theme{display:flex;gap:6px;margin:0 0 14px}.theme button{flex:1;font:inherit;font-size:13px;font-weight:700;padding:8px 6px;border-radius:10px;border:1px solid var(--line,#E2DFEA);background:transparent;color:inherit;cursor:pointer;min-height:40px}.theme button[aria-pressed="true"]{background:var(--ink,#1F2340);color:var(--bg,#fff);border-color:transparent}
 </style>
 </head>
 <body>
@@ -166,6 +167,10 @@ a.btn{color:inherit;text-decoration:none;display:inline-flex;align-items:center}
         <option value="dir">Dirección</option>
         <option value="fam">Familia</option>
       </select>
+    </div>
+    <div class="theme" role="group" aria-label="Apariencia">
+      <button type="button" id="thLight" aria-pressed="true">☀️ Claro</button>
+      <button type="button" id="thDark" aria-pressed="false">🌙 Oscuro</button>
     </div>
     <nav class="nav" id="nav" aria-label="Secciones"></nav>
   </aside>
@@ -737,6 +742,16 @@ document.addEventListener("change",function(e){
   else if(c==="famKid")S.famKid=val;else if(c==="rkid")S.rkid=val;else if(c==="ckid")S.ckid=val;else{S[c]=+val;if(c==="rgroup")S.rkid="";if(c==="cgroup")S.ckid="";}
   save();render();
 });
+function applyTheme(t){
+  try{localStorage.setItem("edj-theme",t);}catch(e){}
+  for(var i=0;i<document.styleSheets.length;i++){var rs;try{rs=document.styleSheets[i].cssRules;}catch(e){continue;}
+    for(var j=0;j<rs.length;j++){var r=rs[j];if(r.media&&r.conditionText!==undefined){if(!r._orig)r._orig=r.media.mediaText;if(/prefers-color-scheme:\s*dark/.test(r._orig))r.media.mediaText=(t==="dark"?"all":"not all");}}}
+  document.documentElement.style.colorScheme=t;
+  document.getElementById("thLight").setAttribute("aria-pressed",t!=="dark");document.getElementById("thDark").setAttribute("aria-pressed",t==="dark");
+}
+document.getElementById("thLight").addEventListener("click",function(){applyTheme("light");});
+document.getElementById("thDark").addEventListener("click",function(){applyTheme("dark");});
+(function(){var t="light";try{t=localStorage.getItem("edj-theme")||"light";}catch(e){}applyTheme(t);})();
 document.addEventListener("keydown",function(e){if(e.key==="Escape"&&S.modal){S.modal=null;save();render();}});
 render();
 })();
