@@ -146,6 +146,17 @@ thead th{border-top:0;font-size:12px;text-transform:uppercase;letter-spacing:.05
 }
 @media (prefers-reduced-motion:no-preference){.chip,.att,.btn,.nav button{transition:background .15s,color .15s}}
 a.btn{color:inherit;text-decoration:none;display:inline-flex;align-items:center}
+.lg{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(160deg,#2F3A73,#3E4C93)}
+.lgbox{background:#FFFDF8;color:#1F2340;border-radius:20px;padding:32px 28px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:14px}
+.lgbox h1{font-size:26px;margin:0}.lgbox .dots{margin:2px 0 4px}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:#1F1F1F;font-weight:700;font-size:15px;cursor:pointer}
+.gbtn:hover{background:#F5F5F5}.gbtn svg{width:20px;height:20px}
+.lgsep{display:flex;align-items:center;gap:10px;color:var(--soft);font-size:13px}.lgsep:before,.lgsep:after{content:"";flex:1;height:1px;background:var(--line)}
+.acc{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;border:1px solid #E2DFEA;border-radius:12px;background:#fff;color:#1F2340;text-align:left;cursor:pointer}
+.acc:hover{background:#F1EEF9}.lgbox .muted,.acc small{color:#5A5F78}.lgbox input{background:#fff;color:#1F2340;border:1px solid #D6D3E0;padding:11px 12px;border-radius:10px;font-size:15px;width:100%;box-sizing:border-box}.lgbox .mail{background:#FFF8EF;border-color:#E2DFEA}.lgsep{color:#5A5F78}.lgsep:before,.lgsep:after{background:#E2DFEA}.av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex:none}
+.acc small{display:block;color:var(--soft)}
+.mail{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--bg)}
+.ubox b{display:block}.ubox span{font-size:13px;color:var(--soft)}.ubox .av{color:#fff;font-size:13px;width:34px;height:34px}
 .notif{border:2px solid #2F7DE1;background:#EEF4FF}.alert.info{background:#fff;border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}.nbadge{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:#E5484D;color:#fff;font-size:12px;font-weight:800;margin-left:auto}
 .notif.pur{border-color:#7B4FD6;background:#F3EEFF}.notif.pur .btn.primary{background:#7B4FD6;border-color:#7B4FD6}.nbadge.pur{background:#7B4FD6}
 .notif.rec{border-color:#F27A1A;background:#FFF3E8}.notif.rec .btn.primary{background:#C25A0E;border-color:#C25A0E}.nbadge.rec{background:#C25A0E}
@@ -157,20 +168,13 @@ a.btn{color:inherit;text-decoration:none;display:inline-flex;align-items:center}
 </style>
 </head>
 <body>
+<div id="login" hidden></div>
 <div class="app">
   <aside class="side">
     <div class="brand"><b>École de Jeu</b><span>Lycée Claude Gay · 2027</span>
       <div class="dots"><i class="s-psi"></i><i class="s-mus"></i><i class="s-rit"></i><i class="s-art"></i><i class="s-exp"></i><i class="s-con"></i></div>
     </div>
-    <div class="role">
-      <label for="roleSel">Ver como</label>
-      <select id="roleSel">
-        <option value="coord">Coordinador</option>
-        <option value="mon">Monitor</option>
-        <option value="dir">Dirección</option>
-        <option value="fam">Familia</option>
-      </select>
-    </div>
+    <div class="role" id="userBox"></div>
     <div class="theme" role="group" aria-label="Apariencia">
       <button type="button" id="thLight" aria-pressed="true">☀️ Claro</button>
       <button type="button" id="thDark" aria-pressed="false">🌙 Oscuro</button>
@@ -275,10 +279,10 @@ S.att[seedDay]={k4:false,k22:false,k41:false,k77:false};
 S.taken[seedDay]={0:true,1:true,2:true,4:true,5:true};
 S.props=[{id:501,tid:"art",by:"Tomás Fuentes",title:"Traer ropa vieja para pintar",text:"La próxima semana en Arte pintamos con témpera. Por favor enviar una polera vieja o delantal marcado con el nombre.",dest:"all",when:dateOf(1,1),status:"pend",at:"hoy, 10:15"}];
 S.monAbs[dateOf(1,-1)]={"tomas.fuentes@gmail.com":true};S.monAbs[dateOf(3,-2)]={"camila.rojas@gmail.com":true};
-try{var sv=JSON.parse(localStorage.getItem("edj-proto-v10")||"null");if(sv){for(var key in sv){S[key]=sv[key];}}}catch(e){}
+try{var sv=JSON.parse(localStorage.getItem("edj-proto-v11")||"null");if(sv){for(var key in sv){S[key]=sv[key];}}}catch(e){}
 if(!S.kids||!S.kids.length)S.kids=KIDS;KIDS=S.kids;
 S.modal=null;
-function save(){try{localStorage.setItem("edj-proto-v10",JSON.stringify(S));}catch(e){}}
+function save(){try{localStorage.setItem("edj-proto-v11",JSON.stringify(S));}catch(e){}}
 
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
 function dk(){return dateOf(S.day,S.wk||0);}
@@ -629,7 +633,7 @@ function vPlanes(){
 }
 function vMiPlan(){
   var t=TALLERES[S.monT],key=S.pweek||wkKey(0),p=planFor(t,key)||{};
-  var h=top("Planificación semanal",t.name+(monName(t)?' · '+esc(monName(t)):''))+'<div class="card"><div class="field"><label for="mt2">Demo: elige el taller del monitor</label><select id="mt2" data-c="monT">'+TALLERES.map(function(x,i){return '<option value="'+i+'"'+(S.monT===i?" selected":"")+'>'+x.name+'</option>';}).join("")+'</select></div><div class="chips" role="group" aria-label="Semana">'+[0,1].map(function(o){var k=wkKey(o);return '<button class="chip" data-a="pweek" data-v="'+k+'" aria-pressed="'+(key===k)+'">'+(o?'Próxima semana':'Esta semana')+'</button>';}).join("")+'</div></div>';
+  var h=top("Planificación semanal",t.name+(monName(t)?' · '+esc(monName(t)):''))+(S.user?'<div hidden>':'<div class="card">')+'<div class="field"><label for="mt2">Demo: elige el taller del monitor</label><select id="mt2" data-c="monT">'+TALLERES.map(function(x,i){return '<option value="'+i+'"'+(S.monT===i?" selected":"")+'>'+x.name+'</option>';}).join("")+'</select></div><div class="chips" role="group" aria-label="Semana">'+[0,1].map(function(o){var k=wkKey(o);return '<button class="chip" data-a="pweek" data-v="'+k+'" aria-pressed="'+(key===k)+'">'+(o?'Próxima semana':'Esta semana')+'</button>';}).join("")+'</div></div>';
   h+='<div class="card"><div class="row between"><h2>'+wkLabel(key)+'</h2>'+(p.obj?'<span class="pill p-ok">Entregada · '+esc(p.date)+'</span>':'<span class="pill p-warn">Pendiente</span>')+'</div>'+(t.parts?'<p class="muted">Recuerda: '+t.parts[0]+' lunes y martes, '+t.parts[1]+' jueves y viernes.</p>':'')+
     '<form id="planForm" class="list" style="gap:12px"><div class="field"><label for="pObj">Objetivo de la semana</label><input type="text" id="pObj" value="'+esc(p.obj||"")+'" required></div><div class="field"><label for="pAct">Actividades</label><textarea id="pAct" placeholder="Qué harán cada día o por nivel" required>'+esc(p.act||"")+'</textarea></div><div class="field"><label for="pMat">Materiales</label><input type="text" id="pMat" value="'+esc(p.mat||"")+'"></div><div class="field"><label for="pFile">Adjuntar archivo (opcional)</label><input type="file" id="pFile">'+(p.file?'<span class="muted">Adjunto actual: '+esc(p.file)+'</span>':'')+'</div><div class="row"><button class="btn primary" type="submit">'+(p.obj?'Actualizar planificación':'Enviar planificación')+'</button></div></form></div>';
   return h;
@@ -651,7 +655,7 @@ function modalHtml(){
 function monAvisos(t){return S.avisos.filter(function(a){return (a.dest==="mon"||a.dest==="tal:"+t.id||a.dest.indexOf("per:"+t.id+"|")===0)&&!(a.readBy&&a.readBy[t.id]);});}
 function vMiDia(){
   var ti=S.monT,t=TALLERES[ti];
-  var h=top("Mi día",(monName(t)?esc(monName(t))+" · ":"")+"Monitor de "+t.name)+'<div class="card"><div class="field"><label for="mt">Demo: elige el taller del monitor</label><select id="mt" data-c="monT">'+TALLERES.map(function(x,i){return '<option value="'+i+'"'+(ti===i?" selected":"")+'>'+x.name+'</option>';}).join("")+'</select></div>'+dayChips()+'</div>';
+  var h=top("Mi día",(monName(t)?esc(monName(t))+" · ":"")+"Monitor de "+t.name)+(S.user?'<div hidden>':'<div class="card">')+'<div class="field"><label for="mt">Demo: elige el taller del monitor</label><select id="mt" data-c="monT">'+TALLERES.map(function(x,i){return '<option value="'+i+'"'+(ti===i?" selected":"")+'>'+x.name+'</option>';}).join("")+'</select></div>'+dayChips()+'</div>';
   if(blocked(dk()))return h+blockBanner(dk());
   var ma=monAvisos(t);
   if(ma.length)h+='<div class="card notif pur" role="status"><h2>🔔 '+(ma.length===1?'Tienes un aviso nuevo':'Tienes '+ma.length+' avisos nuevos')+'</h2><div class="list" style="gap:8px">'+ma.map(function(a){return '<div class="alert info"><span><b>'+esc(a.title)+'</b>'+(a.when?' · 📅 '+whenLabel(a):'')+(a.dest.indexOf("per:")===0?' · <i>personal</i>':'')+'</span><span>'+esc(a.text)+'</span><div class="row"><button class="btn small primary" data-a="readAv" data-v="'+a.id+'|'+t.id+'">✓ Entendido</button></div></div>';}).join("")+'</div></div>';
@@ -675,7 +679,7 @@ function famKid(){return KIDS.filter(function(k){return k.id===S.famKid;})[0]||K
 function vMiHijo(){
   var k=famKid(),gi=k.g;
   var nd=(S.day+1)%4;
-  var h=top("Mi hijo","Vista de familia")+'<div class="card"><div class="field"><label for="fk">Demo: elige la familia</label><select id="fk" data-c="famKid">'+KIDS.map(function(x){return '<option value="'+x.id+'"'+(x.id===k.id?" selected":"")+'>'+esc(x.name)+' ('+GROUPS[x.g].name+')</option>';}).join("")+'</select></div></div>';
+  var h=top("Mi hijo","Vista de familia")+(S.user?'<div hidden>':'<div class="card">')+'<div class="field"><label for="fk">Demo: elige la familia</label><select id="fk" data-c="famKid">'+KIDS.map(function(x){return '<option value="'+x.id+'"'+(x.id===k.id?" selected":"")+'>'+esc(x.name)+' ('+GROUPS[x.g].name+')</option>';}).join("")+'</select></div></div>';
   h+='<div class="card"><p class="kidname">'+esc(k.name)+'</p><p>Grupo <b>'+GROUPS[gi].name+'</b> · '+GROUPS[gi].lvl+'</p></div>';
   var fa=[];Object.keys(S.abs||{}).sort().forEach(function(d){if(d>=todayISO()&&S.abs[d][k.id])fa.push([d,S.abs[d][k.id]]);});
   h+='<div class="card"><h2>Avisar que no viene</h2><p class="muted">Si tu hijo no asistirá un día, avísalo aquí. El monitor lo verá como ausente avisado.</p><form id="absForm" class="row" style="gap:8px;align-items:flex-end"><div class="field" style="width:180px"><label for="abD">Día</label><input type="date" id="abD" value="'+dk()+'" required></div><div class="field" style="flex:1;min-width:180px"><label for="abM">Motivo (opcional)</label><input type="text" id="abM" placeholder="Ej.: está resfriado"></div><button class="btn primary" type="submit">Enviar aviso</button></form>'+(fa.length?'<div class="list" style="margin-top:10px">'+fa.map(function(x){return '<div class="item"><div class="grow"><b>No viene el '+dayLabel(x[0])+'</b><span class="muted" style="display:block">'+esc(x[1].motivo||"")+'</span></div><span class="pill p-ok">Avisado</span></div>';}).join("")+'</div>':'')+'</div>';
@@ -724,11 +728,41 @@ function parseRows(rows,defG,replace){
   return added.length;
 }
 var VIEWS={grupos:vGrupos,talleres:vTalleres,inicio:vInicio,horario:vHorario,asistencia:vAsistencia,ninos:vNinos,informes:vInformes,calendario:vCalendario,apoderados:vApoderados,retiros:vRetiros,avisos:vAvisos,equipo:vEquipo,planes:vPlanes,midia:vMiDia,miplan:vMiPlan,resumen:vResumen,mihijo:vMiHijo};
+
+/* ---------- Login de prueba ---------- */
+function slug(t){return t.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z ]/g,"").trim().replace(/\s+/g,".");}
+function famEmail(k){return k.aut&&k.aut[0]?slug(k.aut[0].name)+"@gmail.com":"";}
+var ROLEL={coord:"Coordinador",dir:"Dirección",mon:"Monitor",fam:"Familia"};
+function staffAccounts(){var o=[{role:"coord",name:"Nicolás Novakovic Pinochet",email:"nicolas.novakovic@gmail.com"},{role:"dir",name:"Dirección Lycée Claude Gay",email:"direccion.ejemplo@gmail.com"}];
+  TALLERES.forEach(function(t,i){mons(t).forEach(function(m){o.push({role:"mon",name:m.name,email:m.email||"",monT:i,sub:t.name});});});return o;}
+var GSVG='<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>';
+function avatar(n,c){return '<span class="av" style="background:'+c+'">'+esc(n.split(" ").map(function(w){return w[0];}).slice(0,2).join(""))+'</span>';}
+var AVC={coord:"#2F3A73",dir:"#1F63BF",mon:"#2E9E5B",fam:"#C25A0E"};
+function vLogin(){var L=S.lg||{},h='<div class="lg"><div class="lgbox"><div><h1>École de Jeu</h1><p class="muted" style="margin:2px 0 0">Lycée Claude Gay · Osorno · 2027</p><div class="dots"><i class="s-psi"></i><i class="s-mus"></i><i class="s-rit"></i><i class="s-art"></i><i class="s-exp"></i><i class="s-con"></i></div></div>';
+  if(L.step==="google"){h+='<div class="row" style="gap:8px;align-items:center">'+GSVG.replace('<svg','<svg style="width:22px;height:22px"')+'<b>Elige una cuenta</b></div><p class="muted" style="margin:0">para continuar a École de Jeu</p><div class="list" style="gap:8px">'+staffAccounts().map(function(a,i){return '<button class="acc" data-a="lgPick" data-v="'+i+'">'+avatar(a.name,AVC[a.role])+'<span><b>'+esc(a.name)+'</b><small>'+esc(a.email)+' · '+ROLEL[a.role]+(a.sub?' · '+esc(a.sub):'')+'</small></span></button>';}).join("")+'</div><button class="btn small" data-a="lgBack">← Volver</button>';}
+  else if(L.step==="sent"){var k=kidById(L.kid);h+='<h2 style="margin:0">Revisa tu correo</h2><p style="margin:0">Enviamos un link de acceso a <b>'+esc(L.email)+'</b>. Es válido por 1 hora y no necesitas contraseña.</p><div class="mail"><p class="muted" style="margin:0 0 6px">📧 Así se ve el correo (simulación)</p><p style="margin:0 0 4px"><b>De:</b> École de Jeu</p><p style="margin:0 0 10px"><b>Asunto:</b> Tu acceso a École de Jeu</p><p style="margin:0 0 12px">Hola '+esc(k.aut[0].name.split(" ")[0])+', haz clic para entrar y ver la información de '+esc(k.name.split(" ")[0])+'.</p><button class="btn primary" data-a="lgLink">Entrar a École de Jeu</button></div><button class="btn small" data-a="lgBack">← Usar otro correo</button>';}
+  else{h+='<h2 style="margin:0">Iniciar sesión</h2><p class="muted" style="margin:0">Coordinación, Dirección y monitores</p><button class="gbtn" data-a="lgGoogle">'+GSVG+'Continuar con Google</button><div class="lgsep">Familias</div><form id="lgForm" class="list" style="gap:10px"><div class="field"><label for="lgE">Correo del apoderado</label><input type="email" id="lgE" required placeholder="nombre@correo.com" value="'+esc(L.email||"")+'"></div>'+(L.err?'<div class="alert bad" role="alert"><span>'+L.err+'</span></div>':'')+'<button class="btn primary" type="submit">Recibir link de acceso</button></form><p class="muted" style="margin:0;font-size:13px">Solo entran los correos invitados por el coordinador. No hay registro abierto.</p><p class="muted" style="margin:0;font-size:12px;border-top:1px dashed var(--line);padding-top:10px">Prototipo: no hay contraseñas ni se envían correos de verdad. Familia de prueba: <b>'+esc(famEmail(famKid()))+'</b></p>';}
+  return h+'</div></div>';}
+function doLogin(u){S.user=u;S.role=u.role;if(u.role==="mon")S.monT=u.monT;if(u.role==="fam")S.famKid=u.kid;S.view=NAV[S.role][0][0];S.lg=null;}
+function userBox(){var u=S.user;return '<div class="ubox row" style="gap:10px;align-items:center;flex-wrap:nowrap">'+avatar(u.name,AVC[u.role])+'<div class="grow" style="min-width:0"><b style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(u.name)+'</b><span>'+ROLEL[u.role]+(u.sub?' · '+esc(u.sub):'')+'</span></div></div><button class="btn small" data-a="logout">Cerrar sesión</button>';}
 function render(){
+  var lg=document.getElementById("login"),app=document.querySelector(".app");
+  if(!S.user){lg.hidden=false;app.style.display="none";lg.innerHTML=vLogin();
+    var lf=document.getElementById("lgForm");
+    if(lf)lf.addEventListener("submit",function(e){e.preventDefault();var em=document.getElementById("lgE").value.trim().toLowerCase();
+      var k=KIDS.filter(function(x){return famEmail(x)===em;})[0];
+      if(k)S.lg={step:"sent",email:em,kid:k.id};
+      else if(staffAccounts().some(function(a){return a.email===em;}))S.lg={email:em,err:"Las cuentas del equipo entran con <b>Continuar con Google</b>."};
+      else S.lg={email:em,err:"Este correo no está invitado. Pídele acceso al coordinador."};
+      save();render();});
+    return;}
+  lg.hidden=true;lg.innerHTML="";app.style.display="";
+  document.getElementById("userBox").innerHTML=userBox();
+  renderApp();}
+function renderApp(){
   applyTx();
   var nav=NAV[S.role];
   if(!nav.some(function(x){return x[0]===S.view;}))S.view=nav[0][0];
-  document.getElementById("roleSel").value=S.role;
   document.getElementById("nav").innerHTML=nav.map(function(x){return '<button data-a="go" data-v="'+x[0]+'"'+(S.view===x[0]?' aria-current="page"':'')+'><span class="ico" aria-hidden="true">'+x[1]+'</span>'+x[2]+(S.role==="coord"&&x[0]==="inicio"&&alertTotal()?' <span class="nbadge" aria-label="'+alertTotal()+' alertas">'+alertTotal()+'</span>':'')+(S.role==="coord"&&x[0]==="apoderados"&&dueActs().length?' <span class="nbadge rec" aria-label="'+dueActs().length+' recordatorios">'+dueActs().length+'</span>':'')+(S.role==="coord"&&x[0]==="avisos"&&propPend().length?' <span class="nbadge rec" aria-label="'+propPend().length+' avisos por aprobar">'+propPend().length+'</span>':'')+(S.role==="coord"&&x[0]==="avisos"&&(S.readN||[]).length?' <span class="nbadge pur" aria-label="'+S.readN.length+' confirmaciones">'+S.readN.length+'</span>':'')+(S.role==="coord"&&x[0]==="retiros"&&newPickups().length?' <span class="nbadge" aria-label="'+newPickups().length+' avisos nuevos">'+newPickups().length+'</span>':'')+'</button>';}).join("")+(S.role==="coord"?'<button data-a="reset"><span class="ico" aria-hidden="true">↺</span>Restablecer demo</button>':'');
   document.getElementById("main").innerHTML=(VIEWS[S.view]||VIEWS.inicio)()+modalHtml();
   var mx=document.querySelector(".modal .x");if(mx)mx.focus();
@@ -804,7 +838,6 @@ function render(){
     S.avisos.unshift({id:Date.now(),title:t,text:x,dest:document.getElementById("avD").value,tipo:document.getElementById("avK").value,when:document.getElementById("avF").value,date:"hoy",reads:0});
     if(S.propEdit){(S.props||[]).forEach(function(p){if(p.id===S.propEdit){p.status="ok";S.avisos[0].from=p.by;}});S.propEdit=null;}save();render();toast("Aviso publicado. Usa «Enviar por correo» para mandarlo desde tu correo.");});
 }
-document.getElementById("roleSel").addEventListener("change",function(e){S.role=e.target.value;S.view=NAV[S.role][0][0];save();render();window.scrollTo(0,0);});
 document.addEventListener("click",function(e){
   var el=e.target.closest("[data-a]");if(!el)return;
   var a=el.getAttribute("data-a"),v=el.getAttribute("data-v");
@@ -819,6 +852,11 @@ document.addEventListener("click",function(e){
   if(a==="cClose"){(S.casos||[]).forEach(function(c){if(String(c.id)===v)c.closed=!c.closed;});save();render();toast("Listo.");return;}
   if(a==="actDone"){var pp=v.split("|");(S.casos||[]).forEach(function(c){if(String(c.id)===pp[0]){var x=c.acts[+pp[1]];if(x){x.done=!x.done;x.at=x.done?fmtDate(todayISO())+", "+nowHM():"";}}});save();render();return;}
   if(a==="monAbs"){var di=S.eqDate||todayISO();S.monAbs=S.monAbs||{};S.monAbs[di]=S.monAbs[di]||{};if(S.monAbs[di][v])delete S.monAbs[di][v];else S.monAbs[di][v]=true;save();render();return;}
+  if(a==="lgGoogle"){S.lg={step:"google"};save();render();return;}
+  if(a==="lgBack"){S.lg=null;save();render();return;}
+  if(a==="lgPick"){var ac=staffAccounts()[+v];if(ac){doLogin(ac);save();render();window.scrollTo(0,0);toast("Hola, "+ac.name.split(" ")[0]+".");}return;}
+  if(a==="lgLink"){var kk=kidById(S.lg&&S.lg.kid);if(kk){doLogin({role:"fam",name:kk.aut[0].name,email:S.lg.email,kid:kk.id,sub:"Apoderado de "+kk.name.split(" ")[0]});save();render();window.scrollTo(0,0);}return;}
+  if(a==="logout"){S.user=null;S.lg=null;save();render();window.scrollTo(0,0);return;}
   if(a==="propOk"){(S.props||[]).forEach(function(p){if(String(p.id)===v&&p.status==="pend"){p.status="ok";S.avisos.unshift({id:Date.now(),title:p.title,text:p.text,dest:p.dest,tipo:"General",when:p.when,date:"hoy",reads:0,from:p.by});}});save();render();toast("Aviso aprobado y publicado.");return;}
   if(a==="propEdit"){S.propEdit=+v;save();render();var fe=document.getElementById("avForm");if(fe)fe.scrollIntoView();toast("Edita el aviso y publícalo.");return;}
   if(a==="propNo"){(S.props||[]).forEach(function(p){if(String(p.id)===v)p.status="no";});save();render();toast("El monitor verá que no se aprobó.");return;}
@@ -870,7 +908,7 @@ document.addEventListener("click",function(e){
     return;
   }
   else if(a==="toast"){toast(v);return;}
-  else if(a==="reset"){try{localStorage.removeItem("edj-proto-v10");}catch(err){}location.reload();return;}
+  else if(a==="reset"){try{localStorage.removeItem("edj-proto-v11");}catch(err){}location.reload();return;}
   save();render();
 });
 document.addEventListener("change",function(e){
