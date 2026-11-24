@@ -273,11 +273,12 @@ S.plans[TALLERES[3].id+"|"+wkKey(0)]={obj:"Fabricar títeres de calcetín y pres
 var seedDay=dateOf(S.day,0);
 S.att[seedDay]={k4:false,k22:false,k41:false,k77:false};
 S.taken[seedDay]={0:true,1:true,2:true,4:true,5:true};
+S.props=[{id:501,tid:"art",by:"Tomás Fuentes",title:"Traer ropa vieja para pintar",text:"La próxima semana en Arte pintamos con témpera. Por favor enviar una polera vieja o delantal marcado con el nombre.",dest:"all",when:dateOf(1,1),status:"pend",at:"hoy, 10:15"}];
 S.monAbs[dateOf(1,-1)]={"tomas.fuentes@gmail.com":true};S.monAbs[dateOf(3,-2)]={"camila.rojas@gmail.com":true};
-try{var sv=JSON.parse(localStorage.getItem("edj-proto-v9")||"null");if(sv){for(var key in sv){S[key]=sv[key];}}}catch(e){}
+try{var sv=JSON.parse(localStorage.getItem("edj-proto-v10")||"null");if(sv){for(var key in sv){S[key]=sv[key];}}}catch(e){}
 if(!S.kids||!S.kids.length)S.kids=KIDS;KIDS=S.kids;
 S.modal=null;
-function save(){try{localStorage.setItem("edj-proto-v9",JSON.stringify(S));}catch(e){}}
+function save(){try{localStorage.setItem("edj-proto-v10",JSON.stringify(S));}catch(e){}}
 
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
 function dk(){return dateOf(S.day,S.wk||0);}
@@ -293,7 +294,7 @@ function destLabel(d){if(d.indexOf("tal:")===0){var tt=TALLERES.filter(function(
 
 var NAV={
   coord:[["inicio","⌂","Inicio"],["horario","▦","Horario"],["calendario","▣","Calendario"],["talleres","◉","Talleres"],["grupos","▤","Grupos"],["asistencia","✓","Asistencia"],["ninos","☺","Niños"],["apoderados","✎","Registro de conducta"],["retiros","➜","Retiros"],["avisos","✉","Avisos"],["equipo","★","Equipo"],["planes","☰","Planificaciones"],["informes","▤","Informes"]],
-  mon:[["midia","⌂","Mi día"],["asistencia","✓","Asistencia"],["miplan","☰","Planificación"],["avisos","✉","Avisos internos"]],
+  mon:[["midia","⌂","Mi día"],["asistencia","✓","Asistencia"],["miplan","☰","Planificación"],["avisos","✉","Avisos"]],
   dir:[["resumen","⌂","Resumen"],["horario","▦","Horario"],["calendario","▣","Calendario"],["apoderados","✎","Registro de conducta"],["avisos","✉","Avisos enviados"]],
   fam:[["mihijo","☺","Mi hijo"],["avisos","✉","Avisos"]]
 };
@@ -330,13 +331,15 @@ function homeAlerts(){
 function todayISO(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
 function fmtDate(iso){if(!iso)return "";var p=iso.split("-");return (+p[2])+" de "+MESES[+p[1]-1];}
 function dueActs(){var l=[],t=todayISO();(S.casos||[]).forEach(function(c){if(!c.closed&&c.rec&&c.rec<=t)c.acts.forEach(function(a,i){if(!a.done)l.push([c,a,i]);});});return l;}
-function alertTotal(){return homeAlerts().length+newPickups().length+(S.readN||[]).length+dueActs().length+(S.absN||[]).length;}
+function alertTotal(){return homeAlerts().length+newPickups().length+(S.readN||[]).length+dueActs().length+(S.absN||[]).length+propPend().length;}
 function vInicio(){
   var abs=absCount(),tk=takenCount(),pend=6-tk;
   var ear=(S.early[dk()]||[]).length;
   var h=top("Inicio",DAYS[S.day].name+" · resumen del día")+'<div class="card">'+dayChips()+'</div>';
   var an=S.absN||[];
   if(an.length)h+='<div class="card notif absn" role="status"><div class="row between"><h2>📝 '+(an.length===1?'1 inasistencia avisada':an.length+' inasistencias avisadas')+'</h2><button class="btn small" data-a="clearAbsN">OK, visto</button></div><div class="list" style="gap:8px">'+an.map(function(x){var k=kidById(x.kid);return '<div class="alert info"><span><b>'+esc(k?k.name:"")+'</b> ('+(k?GROUPS[k.g].name:"")+') no viene el <b>'+dayLabel(x.date)+'</b>'+(x.motivo?' · '+esc(x.motivo):'')+'. Avisó: '+esc(x.reg)+' a las '+x.at+'.</span></div>';}).join("")+'</div></div>';
+  var pp=propPend();
+  if(pp.length)h+='<div class="card notif rec" role="status"><div class="row between"><h2>✉ '+(pp.length===1?'1 aviso de un monitor por aprobar':pp.length+' avisos de monitores por aprobar')+'</h2><button class="btn small primary" data-a="go" data-v="avisos">Revisar</button></div><div class="list" style="gap:8px">'+pp.map(function(x){return '<div class="alert info"><span><b>'+esc(x.title)+'</b> · '+esc(x.by)+' ('+tById(x.tid).name+') · '+destLabel(x.dest)+'</span></div>';}).join("")+'</div></div>';
   var rn=S.readN||[];
   if(rn.length)h+='<div class="card notif pur" role="status"><div class="row between"><h2>📬 '+(rn.length===1?'Un monitor leyó tu aviso':rn.length+' confirmaciones de lectura')+'</h2><button class="btn small" data-a="clearReadN">OK, visto</button></div><div class="list" style="gap:8px">'+rn.map(function(r){return '<div class="alert info"><span>✓ <b>'+esc(r.who)+'</b> marcó como entendido «'+esc(r.title)+'» a las '+r.time+'.</span></div>';}).join("")+'</div></div>';
   var np=newPickups();
@@ -536,21 +539,32 @@ function mailHref(a){
   return "mailto:"+(personal?encodeURIComponent(personal):"")+"?"+(to.length?"bcc="+encodeURIComponent(to.join(","))+"&":"")+"subject="+encodeURIComponent("École de Jeu: "+a.title)+"&body="+encodeURIComponent(body);
 }
 function avisoCard(a,compact){
-  var h='<div class="aviso"><div class="row between"><b>'+esc(a.title)+'</b><span class="pill p-info">'+a.tipo+'</span></div>'+(a.when?'<p class="meta" style="font-weight:700;color:var(--ink)">📅 Para el '+whenLabel(a)+'</p>':'')+'<p class="meta">'+destLabel(a.dest)+' · '+a.date+(S.role==="coord"&&!isStaff(a.dest)?' · leído por '+a.reads+' familias':'')+(S.role==="coord"&&isStaff(a.dest)&&a.dest!=="dir"?' · '+(a.readBy&&Object.keys(a.readBy).length?'✓ leído':'sin leer'):'')+'</p><p>'+esc(a.text)+'</p>';
+  var h='<div class="aviso"><div class="row between"><b>'+esc(a.title)+'</b><span class="pill p-info">'+a.tipo+'</span></div>'+(a.when?'<p class="meta" style="font-weight:700;color:var(--ink)">📅 Para el '+whenLabel(a)+'</p>':'')+'<p class="meta">'+(a.from?'Propuesto por '+esc(a.from)+' · ':'')+destLabel(a.dest)+' · '+a.date+(S.role==="coord"&&!isStaff(a.dest)?' · leído por '+a.reads+' familias':'')+(S.role==="coord"&&isStaff(a.dest)&&a.dest!=="dir"?' · '+(a.readBy&&Object.keys(a.readBy).length?'✓ leído':'sin leer'):'')+'</p><p>'+esc(a.text)+'</p>';
   if(S.role==="coord"&&!compact)h+='<div class="row"><a class="btn small" href="'+mailHref(a)+'">Enviar por correo</a><button class="btn small" data-a="copy" data-v="'+a.id+'">Copiar para WhatsApp</button><button class="btn small" data-a="copy" data-v="'+a.id+'">Copiar para Schooltrack / Colegium</button></div>';
   return h+'</div>';
 }
+function propPend(){return (S.props||[]).filter(function(x){return x.status==="pend";});}
+var FAMDEST=[["all","Todas las familias"]].concat(["Petite Section","Moyenne Section","Grande Section"].map(function(l){return ["lvl:"+l,"Familias de "+l];}));
+function propCard(x,coord){var st=x.status==="pend"?'<span class="pill p-warn">Esperando aprobación</span>':x.status==="ok"?'<span class="pill p-ok">Aprobado y publicado</span>':'<span class="pill p-bad">No aprobado</span>';
+  var h='<div class="aviso"><div class="row between"><b>'+esc(x.title)+'</b>'+st+'</div><p class="meta">'+(coord?'De '+esc(x.by)+' · '+tById(x.tid).name+' · ':'')+'Para: '+destLabel(x.dest)+(x.when?' · 📅 '+whenLabel(x):'')+' · enviado '+x.at+'</p><p>'+esc(x.text)+'</p>'+(x.nota?'<p class="meta"><b>Nota del coordinador:</b> '+esc(x.nota)+'</p>':'');
+  if(coord&&x.status==="pend")h+='<div class="row"><button class="btn small primary" data-a="propOk" data-v="'+x.id+'">Aprobar y publicar</button><button class="btn small" data-a="propEdit" data-v="'+x.id+'">Editar antes de publicar</button><button class="btn small" data-a="propNo" data-v="'+x.id+'">No aprobar</button></div>';
+  return h+'</div>';}
 function vAvisos(){
   var mine=S.avisos.filter(function(a){
     if(S.role==="coord"||S.role==="dir")return true;
     if(S.role==="mon"){var mt=TALLERES[S.monT];return a.dest==="mon"||a.dest==="tal:"+mt.id||a.dest.indexOf("per:"+mt.id+"|")===0;}
     var k=famKid();return a.dest==="all"||a.dest===GROUPS[k.g].id||a.dest==="lvl:"+GROUPS[k.g].lvl;
   });
-  var h=top(S.role==="dir"?"Avisos enviados":S.role==="mon"?"Avisos internos":"Avisos",S.role==="coord"?"Redacta una vez y copia a cada canal":"Información de la École de Jeu");
+  var h=top(S.role==="dir"?"Avisos enviados":"Avisos",S.role==="coord"?"Redacta una vez y copia a cada canal":"Información de la École de Jeu");
   if(S.role==="coord"){
+    var pp=propPend(),done=(S.props||[]).filter(function(x){return x.status!=="pend";});
+    if(pp.length)h+='<div class="card notif rec"><h2>✉ Avisos de monitores por aprobar ('+pp.length+')</h2><p class="muted">Los monitores proponen avisos y tú decides si se publican. Al aprobar, el aviso se publica con su nombre y puedes enviarlo por correo como siempre.</p><div class="list" style="gap:10px">'+pp.map(function(x){return propCard(x,true);}).join("")+'</div></div>';
     var opts=[["all","Todas las familias"]].concat(["Petite Section","Moyenne Section","Grande Section"].map(function(l){return ["lvl:"+l,"Familias de "+l];})).concat(GROUPS.map(function(g){return [g.id,"Familias de "+g.name];})).concat([["mon","Todos los monitores"]]).concat(TALLERES.map(function(t){return ["tal:"+t.id,"Monitor de "+t.name];})).concat([].concat.apply([],TALLERES.map(function(t){return mons(t).map(function(m,i){return ["per:"+t.id+"|"+i,"Personal: "+m.name+" ("+t.name+")"];});}))).concat([["dir","Dirección"]]);
     h+='<div class="card"><h2>Nuevo aviso</h2><form id="avForm" class="list" style="gap:12px"><div class="field"><label for="avT">Título</label><input type="text" id="avT" required></div><div class="field"><label for="avX">Mensaje</label><textarea id="avX" required></textarea></div><div class="row"><div class="field" style="flex:1;min-width:200px"><label for="avD">Para</label><select id="avD">'+opts.map(function(o){return '<option value="'+o[0]+'">'+o[1]+'</option>';}).join("")+'</select></div><div class="field" style="flex:1;min-width:160px"><label for="avF">Para cuándo</label><input type="date" id="avF"></div><div class="field" style="flex:1;min-width:160px"><label for="avK">Tipo</label><select id="avK"><option>General</option><option>Qué traer</option><option>Urgente</option><option>Interno</option></select></div></div><div class="row"><button class="btn primary" type="submit">Publicar aviso</button><span class="muted">Después puedes enviarlo por correo o copiarlo para WhatsApp y Schooltrack.</span></div></form></div>';
   }
+  if(S.role==="mon"){var mt=TALLERES[S.monT],myp=(S.props||[]).filter(function(x){return x.tid===mt.id;});
+    var mopts=FAMDEST.concat(GROUPS.map(function(g){return [g.id,"Familias de "+g.name];}));
+    h+='<div class="card"><h2>Proponer un aviso</h2><p class="muted">Tu aviso le llega primero al coordinador. Él lo revisa y decide si se publica.</p><form id="propForm" class="list" style="gap:12px"><div class="field"><label for="ppT">Título</label><input type="text" id="ppT" required placeholder="Ej.: Traer ropa vieja para pintar"></div><div class="field"><label for="ppX">Mensaje</label><textarea id="ppX" required></textarea></div><div class="row"><div class="field" style="flex:1;min-width:200px"><label for="ppD">Para</label><select id="ppD">'+mopts.map(function(o){return '<option value="'+o[0]+'">'+o[1]+'</option>';}).join("")+'</select></div><div class="field" style="flex:1;min-width:160px"><label for="ppF">Para cuándo</label><input type="date" id="ppF"></div></div><div class="row"><button class="btn primary" type="submit">Enviar al coordinador</button></div></form>'+(myp.length?'<h3 style="margin-top:16px">Mis propuestas</h3><div class="list" style="gap:10px">'+myp.map(function(x){return propCard(x,false);}).join("")+'</div>':'')+'</div>';}
   h+='<div class="card"><h2>'+(mine.length)+' avisos</h2><div class="list" style="gap:10px">'+(mine.length?mine.map(function(a){return avisoCard(a,false);}).join(""):'<p class="empty">No hay avisos.</p>')+'</div></div>';
   return h;
 }
@@ -715,7 +729,7 @@ function render(){
   var nav=NAV[S.role];
   if(!nav.some(function(x){return x[0]===S.view;}))S.view=nav[0][0];
   document.getElementById("roleSel").value=S.role;
-  document.getElementById("nav").innerHTML=nav.map(function(x){return '<button data-a="go" data-v="'+x[0]+'"'+(S.view===x[0]?' aria-current="page"':'')+'><span class="ico" aria-hidden="true">'+x[1]+'</span>'+x[2]+(S.role==="coord"&&x[0]==="equipo"&&(S.faltas||[]).filter(function(f){return !f.done&&!repToday(f.tid,f.date);}).length?' <span class="nbadge rec">'+(S.faltas||[]).filter(function(f){return !f.done&&!repToday(f.tid,f.date);}).length+'</span>':'')+(S.role==="coord"&&x[0]==="inicio"&&alertTotal()?' <span class="nbadge" aria-label="'+alertTotal()+' alertas">'+alertTotal()+'</span>':'')+(S.role==="coord"&&x[0]==="apoderados"&&dueActs().length?' <span class="nbadge rec" aria-label="'+dueActs().length+' recordatorios">'+dueActs().length+'</span>':'')+(S.role==="coord"&&x[0]==="avisos"&&(S.readN||[]).length?' <span class="nbadge pur" aria-label="'+S.readN.length+' confirmaciones">'+S.readN.length+'</span>':'')+(S.role==="coord"&&x[0]==="retiros"&&newPickups().length?' <span class="nbadge" aria-label="'+newPickups().length+' avisos nuevos">'+newPickups().length+'</span>':'')+'</button>';}).join("")+(S.role==="coord"?'<button data-a="reset"><span class="ico" aria-hidden="true">↺</span>Restablecer demo</button>':'');
+  document.getElementById("nav").innerHTML=nav.map(function(x){return '<button data-a="go" data-v="'+x[0]+'"'+(S.view===x[0]?' aria-current="page"':'')+'><span class="ico" aria-hidden="true">'+x[1]+'</span>'+x[2]+(S.role==="coord"&&x[0]==="inicio"&&alertTotal()?' <span class="nbadge" aria-label="'+alertTotal()+' alertas">'+alertTotal()+'</span>':'')+(S.role==="coord"&&x[0]==="apoderados"&&dueActs().length?' <span class="nbadge rec" aria-label="'+dueActs().length+' recordatorios">'+dueActs().length+'</span>':'')+(S.role==="coord"&&x[0]==="avisos"&&propPend().length?' <span class="nbadge rec" aria-label="'+propPend().length+' avisos por aprobar">'+propPend().length+'</span>':'')+(S.role==="coord"&&x[0]==="avisos"&&(S.readN||[]).length?' <span class="nbadge pur" aria-label="'+S.readN.length+' confirmaciones">'+S.readN.length+'</span>':'')+(S.role==="coord"&&x[0]==="retiros"&&newPickups().length?' <span class="nbadge" aria-label="'+newPickups().length+' avisos nuevos">'+newPickups().length+'</span>':'')+'</button>';}).join("")+(S.role==="coord"?'<button data-a="reset"><span class="ico" aria-hidden="true">↺</span>Restablecer demo</button>':'');
   document.getElementById("main").innerHTML=(VIEWS[S.view]||VIEWS.inicio)()+modalHtml();
   var mx=document.querySelector(".modal .x");if(mx)mx.focus();
   var tf=document.getElementById("tForm");
@@ -781,9 +795,14 @@ function render(){
     save();render();toast("Planificación enviada al coordinador.");});
   var kq=document.getElementById("kq");
   if(kq){kq.addEventListener("input",function(){S.kidQ=kq.value;var pos=kq.selectionStart;save();render();var n2=document.getElementById("kq");n2.focus();try{n2.setSelectionRange(pos,pos);}catch(e){}});}
+  var pf=document.getElementById("propForm");
+  if(pf)pf.addEventListener("submit",function(e){e.preventDefault();var t=document.getElementById("ppT").value.trim(),x=document.getElementById("ppX").value.trim();if(!t||!x)return;var mt=TALLERES[S.monT];
+    S.props=S.props||[];S.props.unshift({id:Date.now(),tid:mt.id,by:monName(mt)||"Monitor de "+mt.name,title:t,text:x,dest:document.getElementById("ppD").value,when:document.getElementById("ppF").value,status:"pend",at:"hoy, "+nowHM()});save();render();toast("Aviso enviado al coordinador para su aprobación.");});
   var f=document.getElementById("avForm");
+  if(f&&S.propEdit){var pe=(S.props||[]).filter(function(x){return x.id===S.propEdit;})[0];if(pe){document.getElementById("avT").value=pe.title;document.getElementById("avX").value=pe.text;document.getElementById("avD").value=pe.dest;document.getElementById("avF").value=pe.when||"";}}
   if(f)f.addEventListener("submit",function(e){e.preventDefault();var t=document.getElementById("avT").value.trim(),x=document.getElementById("avX").value.trim();if(!t||!x)return;
-    S.avisos.unshift({id:Date.now(),title:t,text:x,dest:document.getElementById("avD").value,tipo:document.getElementById("avK").value,when:document.getElementById("avF").value,date:"hoy",reads:0});save();render();toast("Aviso publicado. Usa «Enviar por correo» para mandarlo desde tu correo.");});
+    S.avisos.unshift({id:Date.now(),title:t,text:x,dest:document.getElementById("avD").value,tipo:document.getElementById("avK").value,when:document.getElementById("avF").value,date:"hoy",reads:0});
+    if(S.propEdit){(S.props||[]).forEach(function(p){if(p.id===S.propEdit){p.status="ok";S.avisos[0].from=p.by;}});S.propEdit=null;}save();render();toast("Aviso publicado. Usa «Enviar por correo» para mandarlo desde tu correo.");});
 }
 document.getElementById("roleSel").addEventListener("change",function(e){S.role=e.target.value;S.view=NAV[S.role][0][0];save();render();window.scrollTo(0,0);});
 document.addEventListener("click",function(e){
@@ -800,6 +819,9 @@ document.addEventListener("click",function(e){
   if(a==="cClose"){(S.casos||[]).forEach(function(c){if(String(c.id)===v)c.closed=!c.closed;});save();render();toast("Listo.");return;}
   if(a==="actDone"){var pp=v.split("|");(S.casos||[]).forEach(function(c){if(String(c.id)===pp[0]){var x=c.acts[+pp[1]];if(x){x.done=!x.done;x.at=x.done?fmtDate(todayISO())+", "+nowHM():"";}}});save();render();return;}
   if(a==="monAbs"){var di=S.eqDate||todayISO();S.monAbs=S.monAbs||{};S.monAbs[di]=S.monAbs[di]||{};if(S.monAbs[di][v])delete S.monAbs[di][v];else S.monAbs[di][v]=true;save();render();return;}
+  if(a==="propOk"){(S.props||[]).forEach(function(p){if(String(p.id)===v&&p.status==="pend"){p.status="ok";S.avisos.unshift({id:Date.now(),title:p.title,text:p.text,dest:p.dest,tipo:"General",when:p.when,date:"hoy",reads:0,from:p.by});}});save();render();toast("Aviso aprobado y publicado.");return;}
+  if(a==="propEdit"){S.propEdit=+v;save();render();var fe=document.getElementById("avForm");if(fe)fe.scrollIntoView();toast("Edita el aviso y publícalo.");return;}
+  if(a==="propNo"){(S.props||[]).forEach(function(p){if(String(p.id)===v)p.status="no";});save();render();toast("El monitor verá que no se aprobó.");return;}
   if(a==="clearReadN"){S.readN=[];save();render();return;}
   if(a==="readAv"){var pr=v.split("|");S.avisos.forEach(function(x){if(String(x.id)===pr[0]){x.readBy=x.readBy||{};x.readBy[pr[1]]=true;var tt=TALLERES.filter(function(y){return y.id===pr[1];})[0];S.readN=S.readN||[];S.readN.unshift({id:Date.now(),title:x.title,who:(tt&&monName(tt)?monName(tt):"Monitor")+(tt?" ("+tt.name+")":""),time:nowHM()});}});save();render();toast("Aviso marcado como leído.");return;}
   if(a==="pickOk"||a==="pickNo"){Object.keys(S.early).forEach(function(dd){var d={name:dayLabel(dd),k:dd};(S.early[dd]||[]).forEach(function(r){if(String(r.id)===v)r.status=(a==="pickOk"?"ok":"no");});});save();render();toast(a==="pickOk"?"Retiro aprobado. La familia ve que está confirmado.":"Retiro rechazado. Comunícate con la familia.");return;}
@@ -848,7 +870,7 @@ document.addEventListener("click",function(e){
     return;
   }
   else if(a==="toast"){toast(v);return;}
-  else if(a==="reset"){try{localStorage.removeItem("edj-proto-v9");}catch(err){}location.reload();return;}
+  else if(a==="reset"){try{localStorage.removeItem("edj-proto-v10");}catch(err){}location.reload();return;}
   save();render();
 });
 document.addEventListener("change",function(e){
