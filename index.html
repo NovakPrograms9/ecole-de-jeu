@@ -99,8 +99,9 @@ thead th{border-top:0;font-size:12px;text-transform:uppercase;letter-spacing:.05
 .tname{display:flex;align-items:center;gap:10px;font-weight:800;padding:10px;border-radius:12px}
 .sw{width:12px;height:36px;border-radius:6px;flex:none}
 .cell{border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;border:2px solid transparent}
-.cell b{font-family:var(--display);font-size:20px;font-weight:600}
+.cell .prof{font-size:12px;opacity:.9;margin-top:2px}.cell b{font-family:var(--display);font-size:20px;font-weight:600}
 .cell span{font-size:12px;font-weight:700}
+.cell .prof{font-weight:600;opacity:.9}
 .t-psi{background:var(--psi-t);color:var(--psi-i)} .t-mus{background:var(--mus-t);color:var(--mus-i)} .t-rit{background:var(--rit-t);color:var(--rit-i)}
 .t-art{background:var(--art-t);color:var(--art-i)} .t-exp{background:var(--exp-t);color:var(--exp-i)} .t-con{background:var(--con-t);color:var(--con-i)}
 .s-psi{background:var(--psi)} .s-mus{background:var(--mus)} .s-rit{background:var(--rit)} .s-art{background:var(--art)} .s-exp{background:var(--exp)} .s-con{background:var(--con)}
@@ -315,7 +316,7 @@ function board(di,hlG){
   var h='<div class="scroll"><div class="board"><div class="hd">Taller</div>'+MODS.map(function(m){return '<div class="hd">'+m.n+'<small>'+m.h+'</small></div>';}).join("");
   TALLERES.forEach(function(t,ti){
     h+='<div class="tname t-'+t.id+'"><span class="sw s-'+t.id+'"></span><span>'+t.name+(t.parts?'<br><span class="muted" style="color:inherit;opacity:.85">Hoy: '+partName(t,di)+'</span>':'')+'</span></div>';
-    for(var m=0;m<3;m++){var g=groupAt(ti,di,m);h+='<div class="cell t-'+t.id+(hlG===g?' hl':'')+'"><b>'+GROUPS[g].name+'</b><span>'+t.sala+'</span></div>';}
+    for(var m=0;m<3;m++){var g=groupAt(ti,di,m);h+='<div class="cell t-'+t.id+(hlG===g?' hl':'')+'"><b>'+GROUPS[g].name+'</b><span>'+t.sala+'</span><span class="prof">👤 '+esc(monName(t)||"Por definir")+'</span></div>';}
   });
   return h+'</div></div>';
 }
@@ -370,11 +371,11 @@ function vHorario(){
   if(S.hview==="dia"){h+=dayChips()+'<p class="muted">En cada módulo, cada grupo está en un taller distinto. Lunes y jueves comparten rotación, igual que martes y viernes.</p>'+board(S.day,-1);}
   else if(S.hview==="grupo"){
     var gi=S.hgroup;h+=groupSel("hg",gi,"hgroup")+'<div class="scroll"><div class="week"><div></div>'+MODS.map(function(m){return '<div class="muted" style="font-weight:800">'+m.n+'<br>'+m.h+'</div>';}).join("");
-    DAYS.forEach(function(d,di){h+='<div style="font-weight:800;align-self:center">'+d.name+'</div>';for(var m=0;m<3;m++){var t=tallerAt(gi,di,m);h+='<div class="cell t-'+t.id+'"><b style="font-size:16px">'+partName(t,di)+'</b><span>'+t.sala+'</span></div>';}});
+    DAYS.forEach(function(d,di){h+='<div style="font-weight:800;align-self:center">'+d.name+'</div>';for(var m=0;m<3;m++){var t=tallerAt(gi,di,m);h+='<div class="cell t-'+t.id+'"><b style="font-size:16px">'+partName(t,di)+'</b><span>'+t.sala+'</span><span class="prof">👤 '+esc(monName(t)||"Por definir")+'</span></div>';}});
     h+='</div></div>';
   } else {
     var ti=S.htaller,t=TALLERES[ti];
-    h+='<select data-c="htaller" aria-label="Taller">'+TALLERES.map(function(x,i){return '<option value="'+i+'"'+(ti===i?" selected":"")+'>'+x.name+'</option>';}).join("")+'</select><p class="muted">'+t.sala+' · Monitor por definir'+(t.parts?' · Alterna: '+t.parts[0]+' (lun y mar) / '+t.parts[1]+' (jue y vie)':'')+'</p>';
+    h+='<select data-c="htaller" aria-label="Taller">'+TALLERES.map(function(x,i){return '<option value="'+i+'"'+(ti===i?" selected":"")+'>'+x.name+'</option>';}).join("")+'</select><p class="muted">'+t.sala+' · 👤 '+esc(monName(t)||"Monitor por definir")+(t.parts?' · Alterna: '+t.parts[0]+' (lun y mar) / '+t.parts[1]+' (jue y vie)':'')+'</p>';
     h+='<div class="scroll"><table><thead><tr><th>Día</th>'+MODS.map(function(m){return '<th>'+m.h+'</th>';}).join("")+'</tr></thead><tbody>'+DAYS.map(function(d,di){return '<tr><td><b>'+d.name+'</b><br><span class="muted">'+partName(t,di)+'</span></td>'+[0,1,2].map(function(m){return '<td>'+GROUPS[groupAt(ti,di,m)].name+'</td>';}).join("")+'</tr>';}).join("")+'</tbody></table></div>';
   }
   return h+'</div>';
