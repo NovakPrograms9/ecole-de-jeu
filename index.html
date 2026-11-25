@@ -236,7 +236,7 @@ var TALLERES=[
  {id:"mus",name:"Pequeños Músicos",parts:null,sala:"Sala de música",traer:[null,null]},
  {id:"rit",name:"Ritmo y Deporte",parts:null,sala:"Patio techado",traer:["zapatillas","zapatillas"]},
  {id:"art",name:"Arte y Teatro",parts:["Arte","Teatro"],sala:"Sala de arte",traer:["delantal",null]},
- {id:"exp",name:"Pequeños Exploradores",parts:null,sala:"Patio",traer:["botas y parka","botas y parka"]},
+ {id:"exp",name:"Pequeños Exploradores",parts:["Exploradores","Pequeños Científicos"],sala:"Patio",traer:["botas y parka","botas y parka"]},
  {id:"con",name:"Juega y Construye",parts:["Construcción","Juegos del Mundo"],sala:"Sala 4",traer:[null,null]}
 ];
 var DEF_T=JSON.parse(JSON.stringify(TALLERES));
@@ -322,13 +322,13 @@ S.att[seedDay]={k4:false,k22:false,k41:false,k77:false};
 S.taken[seedDay]={0:true,1:true,2:true,4:true,5:true};
 S.props=[{id:501,tid:"art",by:"Tomás Fuentes",title:"Traer ropa vieja para pintar",text:"La próxima semana en Arte pintamos con témpera. Por favor enviar una polera vieja o delantal marcado con el nombre.",dest:"all",when:dateOf(1,1),status:"pend",at:"hoy, 10:15"}];
 S.monAbs[dateOf(1,-1)]={"tomas.fuentes@gmail.com":true};S.monAbs[dateOf(3,-2)]={"camila.rojas@gmail.com":true};
-try{var sv=JSON.parse(localStorage.getItem("edj-proto-v15")||"null");if(sv){for(var key in sv){S[key]=sv[key];}}}catch(e){}
+try{var sv=JSON.parse(localStorage.getItem("edj-proto-v16")||"null");if(sv){for(var key in sv){S[key]=sv[key];}}}catch(e){}
 if(!S.kids||!S.kids.length)S.kids=KIDS;KIDS=S.kids;
 if(!S.coordP)S.coordP={name:"Nicolás Novakovic Pinochet",email:"nicolas.novakovic@gmail.com",tel:"",cargo:"Coordinador École de Jeu",photo:""};
 if(!S.dirUsers)S.dirUsers=[{name:"Dirección Lycée Claude Gay",email:"direccion.ejemplo@gmail.com"}];
 if(!S.famUsers){S.famUsers=KIDS.filter(function(k){return k.aut&&k.aut[0];}).map(function(k,i){return {id:"f"+i,kid:k.id,name:k.aut[0].name,rel:k.aut[0].rel,email:famEmail(k)};});S.famUsers.forEach(function(u){if(u.kid===S.famKid)u.pw=pwHash("ecole2027");});}
 S.modal=null;
-function save(){try{localStorage.setItem("edj-proto-v15",JSON.stringify(S));}catch(e){}}
+function save(){try{localStorage.setItem("edj-proto-v16",JSON.stringify(S));}catch(e){}}
 
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
 function dk(){return dateOf(S.day,S.wk||0);}
@@ -1034,7 +1034,7 @@ document.addEventListener("click",function(e){
     return;
   }
   else if(a==="toast"){toast(v);return;}
-  else if(a==="reset"){try{localStorage.removeItem("edj-proto-v15");}catch(err){}location.reload();return;}
+  else if(a==="reset"){try{localStorage.removeItem("edj-proto-v16");}catch(err){}location.reload();return;}
   save();render();
 });
 document.addEventListener("change",function(e){
