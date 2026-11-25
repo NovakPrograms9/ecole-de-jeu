@@ -162,7 +162,7 @@ a.btn{color:inherit;text-decoration:none;display:inline-flex;align-items:center}
 .notif.pur{border-color:#7B4FD6;background:#F3EEFF}.notif.pur .btn.primary{background:#7B4FD6;border-color:#7B4FD6}.nbadge.pur{background:#7B4FD6}
 .notif.rec{border-color:#F27A1A;background:#FFF3E8}.notif.rec .btn.primary{background:#C25A0E;border-color:#C25A0E}.nbadge.rec{background:#C25A0E}
 @media (prefers-color-scheme: dark){.notif{background:#1B2644;border-color:#5B8FE8}.notif.pur{background:#271F42;border-color:#9C7BE8}.notif.rec{background:#33231A;border-color:#E08A3C}.alert.info{background:rgba(255,255,255,.06)}.notif.pur .btn.primary{background:#8E66E6;border-color:#8E66E6;color:#fff}.notif.rec .btn.primary{background:#D9772E;border-color:#D9772E;color:#fff}}
-.theme{display:flex;gap:6px;margin:0 0 14px}.theme button{flex:1;font:inherit;font-size:13px;font-weight:700;padding:8px 6px;border-radius:10px;border:1px solid var(--line,#E2DFEA);background:transparent;color:inherit;cursor:pointer;min-height:40px}.theme button[aria-pressed="true"]{background:var(--ink,#1F2340);color:var(--bg,#fff);border-color:transparent}
+.theme{display:flex;gap:6px;margin:auto 0 0;padding-top:14px;border-top:1px solid var(--line,#E2DFEA)}.theme button{flex:1;font:inherit;font-size:13px;font-weight:700;padding:8px 6px;border-radius:10px;border:1px solid var(--line,#E2DFEA);background:transparent;color:inherit;cursor:pointer;min-height:40px}.theme button[aria-pressed="true"]{background:var(--ink,#1F2340);color:var(--bg,#fff);border-color:transparent}
 .notif.absn{border-color:#2E9E5B;background:#EAF7EF}.tile.warn b{color:#B4560E}@media (prefers-color-scheme: dark){.notif.absn{background:#16301F;border-color:#4CC07A}}
 .item .pill{white-space:normal}.print-head{display:none}
 @media print{.app{display:block!important}.side,aside,.noprint,.demo,#toast,.toast,.modal-bg{display:none!important}.main{margin:0!important;padding:0!important;max-width:none!important}.print-head{display:block;margin:0 0 12px}.card{break-inside:avoid;box-shadow:none}body{background:#fff!important;color:#000!important}}
@@ -176,11 +176,11 @@ a.btn{color:inherit;text-decoration:none;display:inline-flex;align-items:center}
       <div class="dots"><i class="s-psi"></i><i class="s-mus"></i><i class="s-rit"></i><i class="s-art"></i><i class="s-exp"></i><i class="s-con"></i></div>
     </div>
     <div class="role" id="userBox"></div>
+    <nav class="nav" id="nav" aria-label="Secciones"></nav>
     <div class="theme" role="group" aria-label="Apariencia">
       <button type="button" id="thLight" aria-pressed="true">☀️ Claro</button>
       <button type="button" id="thDark" aria-pressed="false">🌙 Oscuro</button>
     </div>
-    <nav class="nav" id="nav" aria-label="Secciones"></nav>
   </aside>
   <main class="main" id="main"></main>
 </div>
