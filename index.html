@@ -6,12 +6,12 @@
 <title>École de Jeu · Sistema</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 /* Plan: barra lateral de navegación en PC, pestañas desplazables en celular; el tablero de rotación coloreado por taller es la pieza central. */
 :root{
-  --ink:#1F2340; --soft:#5A5F78; --line:#E4DFD4; --bg:#FFF8EF; --surface:#FFFDF8; --surface2:#F4F1FF;
-  --accent:#1F63BF; --accent-ink:#FFFDF8;
+  --ink:#1A2233; --soft:#5B6475; --line:#D9DDE3; --bg:#F3F4F6; --surface:#FFFFFF; --surface2:#EEF1F6;
+  --accent:#14284B; --accent-ink:#FFFFFF; --navy:#14284B; --gold:#B8955A;
   --psi:#2F7DE1; --psi-t:#E1EDFF; --psi-i:#1F63BF;
   --mus:#E5484D; --mus-t:#FFE3E3; --mus-i:#B42532;
   --rit:#F27A1A; --rit-t:#FFE8D4; --rit-i:#9E4508;
@@ -19,14 +19,14 @@
   --exp:#2E9E5B; --exp-t:#E3F5EA; --exp-i:#1E7A43;
   --con:#7B4FD6; --con-t:#EEE6FF; --con-i:#6A3FC4;
   --ok:#1E7A43; --ok-t:#E3F5EA; --bad:#B42532; --bad-t:#FFE3E3; --warn:#9E4508; --warn-t:#FFE8D4;
-  --display:"Fredoka","Trebuchet MS",sans-serif;
-  --body:"Nunito Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --display:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --body:"Source Sans 3","Segoe UI",system-ui,-apple-system,sans-serif;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --ink:#ECEEF8; --soft:#A9AEC6; --line:#323752; --bg:#14172A; --surface:#1C2036; --surface2:#232844;
-    --accent:#7FB0FF; --accent-ink:#0F1324;
+    --accent:#9DB8E8; --accent-ink:#0F1324; --navy:#0C1730;
     --psi-t:#1C2B4A; --psi-i:#8DB8FF; --mus-t:#3D1C22; --mus-i:#FF9AA0; --rit-t:#3B2414; --rit-i:#FFB27A;
     --art-t:#3A3014; --art-i:#F5CF5A; --exp-t:#163223; --exp-i:#7FD6A3; --con-t:#2A2147; --con-i:#BCA4FF;
     --ok:#7FD6A3; --ok-t:#163223; --bad:#FF9AA0; --bad-t:#3D1C22; --warn:#FFB27A; --warn-t:#3B2414;
@@ -35,7 +35,7 @@
 }
 :root[data-theme="dark"]{
   --ink:#ECEEF8; --soft:#A9AEC6; --line:#323752; --bg:#14172A; --surface:#1C2036; --surface2:#232844;
-  --accent:#7FB0FF; --accent-ink:#0F1324;
+  --accent:#9DB8E8; --accent-ink:#0F1324; --navy:#0C1730;
   --psi-t:#1C2B4A; --psi-i:#8DB8FF; --mus-t:#3D1C22; --mus-i:#FF9AA0; --rit-t:#3B2414; --rit-i:#FFB27A;
   --art-t:#3A3014; --art-i:#F5CF5A; --exp-t:#163223; --exp-i:#7FD6A3; --con-t:#2A2147; --con-i:#BCA4FF;
   --ok:#7FD6A3; --ok-t:#163223; --bad:#FF9AA0; --bad-t:#3D1C22; --warn:#FFB27A; --warn-t:#3B2414;
@@ -166,15 +166,56 @@ a.btn{color:inherit;text-decoration:none;display:inline-flex;align-items:center}
 .notif.absn{border-color:#2E9E5B;background:#EAF7EF}.tile.warn b{color:#B4560E}@media (prefers-color-scheme: dark){.notif.absn{background:#16301F;border-color:#4CC07A}}
 .item .pill{white-space:normal}.print-head{display:none}
 @media print{.app{display:block!important}.side,aside,.noprint,.demo,#toast,.toast,.modal-bg{display:none!important}.main{margin:0!important;padding:0!important;max-width:none!important}.print-head{display:block;margin:0 0 12px}.card{break-inside:avoid;box-shadow:none}body{background:#fff!important;color:#000!important}}
+
+/* ===== Estilo institucional ===== */
+h1{font-size:26px;letter-spacing:-.01em}
+.side{background:var(--navy);color:#E8ECF4;border-right:0}
+.brand{flex-direction:row!important;align-items:center;gap:12px!important}
+.brand .logo{width:52px;height:52px;flex:none;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 0 0 2px var(--gold)}
+.brand .logo img{width:100%;height:100%;object-fit:contain}
+.brand .logo .mono{font-family:var(--display);font-weight:700;color:var(--navy);font-size:15px;letter-spacing:.02em}
+.brand .bt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.brand b{font-family:var(--display);font-weight:600;font-size:20px;color:#fff}
+.brand span{color:#AEB8CC;text-transform:uppercase;letter-spacing:.06em;font-size:10px;white-space:nowrap}
+.side-dots{margin:-8px 8px 0}
+.nav button{color:#C9D1E0;border-radius:4px;font-weight:600}
+.nav button:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav button[aria-current="page"]{background:rgba(255,255,255,.12);color:#fff;box-shadow:inset 3px 0 0 var(--gold)}
+.role{border:1px solid rgba(255,255,255,.18)!important;border-radius:6px!important;background:rgba(255,255,255,.04)}
+.ubox b{color:#fff}.ubox span{color:#AEB8CC}
+.side .btn{background:transparent;border-color:rgba(255,255,255,.3);color:#fff}
+.theme{border-top-color:rgba(255,255,255,.15)!important}
+.theme button{border-color:rgba(255,255,255,.3)!important;color:#E8ECF4!important;border-radius:4px!important}
+.theme button[aria-pressed="true"]{background:#fff!important;color:var(--navy)!important}
+.top{border-bottom:1px solid var(--line);padding-bottom:14px}
+.demo{border-radius:4px}
+.card,.tile{border-radius:6px;box-shadow:0 1px 2px rgba(20,40,75,.05)}
+.tile b{font-family:var(--display);font-weight:600}
+.btn{border-radius:4px;font-weight:600}
+.pill,.nbadge{border-radius:4px}
+select,input[type=text],input[type=date],input[type=email],input[type=month],input[type=password],textarea{border-radius:4px!important}
+.cell,.tname{border-radius:4px!important}
+.cell b{font-family:var(--display);font-weight:600}
+.notif{border-radius:6px;border-width:1px!important;border-left-width:5px!important}
+.chips button{border-radius:4px!important}
+.modal{border-radius:8px}
+.lg{background:#14284B!important}
+.lgbox{border-radius:8px!important;border-top:4px solid #B8955A}
+.lgbox .lgh{display:flex;align-items:center;gap:14px}
+.lgbox .logo{width:64px;height:64px;flex:none;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 0 0 2px #B8955A}
+.lgbox .logo img{width:100%;height:100%;object-fit:contain}.lgbox .logo .mono{font-family:var(--display);font-weight:700;color:#14284B;font-size:18px}
+.lgbox h1{font-family:var(--display);font-weight:600}
+.gbtn,.acc,.lgbox input{border-radius:4px!important}
+@media (max-width:900px){.brand .logo{width:40px;height:40px}.brand .bt{flex-direction:row;align-items:baseline;gap:8px}}
 </style>
 </head>
 <body>
 <div id="login" hidden></div>
 <div class="app">
   <aside class="side">
-    <div class="brand"><b>École de Jeu</b><span>Lycée Claude Gay · 2027</span>
-      <div class="dots"><i class="s-psi"></i><i class="s-mus"></i><i class="s-rit"></i><i class="s-art"></i><i class="s-exp"></i><i class="s-con"></i></div>
+    <div class="brand"><div class="logo" id="lgLogo1"><span class="mono">LCG</span></div><div class="bt"><b>École de Jeu</b><span>Lycée Claude Gay · 2027</span></div>
     </div>
+    <div class="dots side-dots"><i class="s-psi"></i><i class="s-mus"></i><i class="s-rit"></i><i class="s-art"></i><i class="s-exp"></i><i class="s-con"></i></div>
     <div class="role" id="userBox"></div>
     <nav class="nav" id="nav" aria-label="Secciones"></nav>
     <div class="theme" role="group" aria-label="Apariencia">
@@ -770,7 +811,8 @@ function staffAccounts(){var o=[{role:"coord",name:S.coordP.name,email:S.coordP.
 var GSVG='<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>';
 function avatar(n,c){return '<span class="av" style="background:'+c+'">'+esc(n.split(" ").map(function(w){return w[0];}).slice(0,2).join(""))+'</span>';}
 var AVC={coord:"#2F3A73",dir:"#1F63BF",mon:"#2E9E5B",fam:"#C25A0E"};
-function vLogin(){var L=S.lg||{},h='<div class="lg"><div class="lgbox"><div><h1>École de Jeu</h1><p class="muted" style="margin:2px 0 0">Lycée Claude Gay · Osorno · 2027</p><div class="dots"><i class="s-psi"></i><i class="s-mus"></i><i class="s-rit"></i><i class="s-art"></i><i class="s-exp"></i><i class="s-con"></i></div></div>';
+var LOGO_SRC="";var LOGO='<div class="logo">'+(LOGO_SRC?'<img src="'+LOGO_SRC+'" alt="Logo Lycée Claude Gay">':'<span class="mono">LCG</span>')+'</div>';
+function vLogin(){var L=S.lg||{},h='<div class="lg"><div class="lgbox"><div class="lgh">'+LOGO+'<div><h1>École de Jeu</h1><p class="muted" style="margin:2px 0 0">Lycée Claude Gay · Osorno · 2027</p></div></div><div><div class="dots"><i class="s-psi"></i><i class="s-mus"></i><i class="s-rit"></i><i class="s-art"></i><i class="s-exp"></i><i class="s-con"></i></div></div>';
   if(L.step==="google"){h+='<div class="row" style="gap:8px;align-items:center">'+GSVG.replace('<svg','<svg style="width:22px;height:22px"')+'<b>Elige una cuenta</b></div><p class="muted" style="margin:0">para continuar a École de Jeu</p><div class="list" style="gap:8px">'+staffAccounts().map(function(a,i){return '<button class="acc" data-a="lgPick" data-v="'+i+'">'+(a.photo?monPic(a,36):avatar(a.name,AVC[a.role]))+'<span><b>'+esc(a.name)+'</b><small>'+esc(a.email)+' · '+ROLEL[a.role]+(a.sub?' · '+esc(a.sub):'')+'</small></span></button>';}).join("")+'</div><button class="btn small" data-a="lgBack">← Volver</button>';}
   else if(L.step==="sent"){var k=kidById(L.kid);h+='<h2 style="margin:0">Revisa tu correo</h2><p style="margin:0">Enviamos un link a <b>'+esc(L.email)+'</b> para crear tu contraseña. Es válido por 1 hora.</p><div class="mail"><p class="muted" style="margin:0 0 6px">📧 Así se ve el correo (simulación)</p><p style="margin:0 0 4px"><b>De:</b> École de Jeu</p><p style="margin:0 0 10px"><b>Asunto:</b> Crea tu contraseña de École de Jeu</p><p style="margin:0 0 12px">Hola '+esc((L.name||"").split(" ")[0])+', haz clic para crear tu contraseña y ver la información de '+esc(k.name.split(" ")[0])+'.</p><button class="btn primary" data-a="lgLink">Crear mi contraseña</button></div><button class="btn small" data-a="lgBack">← Volver</button>';}
   else if(L.step==="newpw"){h+='<h2 style="margin:0">Crea tu contraseña</h2><p class="muted" style="margin:0">Cuenta: <b>'+esc(L.email)+'</b></p><form id="lgPw" class="list" style="gap:10px"><div class="field"><label for="pw1">Contraseña nueva</label><input type="password" id="pw1" required minlength="8" autocomplete="new-password"></div><div class="field"><label for="pw2">Repite la contraseña</label><input type="password" id="pw2" required autocomplete="new-password"></div><p class="muted" style="margin:0;font-size:13px">Mínimo 8 caracteres.</p>'+(L.err?'<div class="alert bad" role="alert"><span>'+L.err+'</span></div>':'')+'<button class="btn primary" type="submit">Guardar y entrar</button></form>';}
