@@ -330,8 +330,8 @@ function homeAlerts(){
   var sinAut=KIDS.filter(function(k){return !k.aut||!k.aut.length;}).length;
   if(sinAut)al.push('<div class="alert warn">⚠ <span>'+sinAut+' niños no tienen personas autorizadas registradas. <button class="btn small" data-a="go" data-v="retiros">Revisar</button></span></div>');
   TALLERES.forEach(function(t){if(!monName(t))al.push('<div class="alert warn">⚠ <span><b>'+t.name+'</b> no tiene monitor inscrito. <button class="btn small" data-a="go" data-v="equipo">Inscribir</button></span></div>');});
-  var pendP=TALLERES.filter(function(t){return !S.plans[t.id+"|"+wkKey(0)];}).length;
-  if(pendP)al.push('<div class="alert warn">⚠ <span>'+pendP+' de 6 talleres no han subido su planificación de esta semana.</span></div>');
+  var pendT=TALLERES.filter(function(t){return !S.plans[t.id+"|"+wkKey(0)];});
+  if(pendT.length)al.push('<div class="alert warn">⚠ <span>Falta la planificación de esta semana ('+pendT.length+' de 6): <b>'+pendT.map(function(t){return t.name;}).join(", ")+'</b>. <button class="btn small" data-a="go" data-v="planes">Ver</button></span></div>');
   return al;
 }
 function todayISO(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
