@@ -476,10 +476,19 @@ function vInformes(){
   if(tab==="personal"){var gi2=S.cgroup||0,k2=kidById(S.ckid);if(!k2||k2.g!==gi2)k2=kidsOf(gi2)[0];h+=hojaDeVida(k2);}
   return h;
 }
+function inscForm(){
+  if(S.role!=="coord")return "";
+  if(!S.inscOpen)return '<div class="card"><div class="row between"><div><h2 style="margin:0">Inscribir un niño</h2><p class="muted" style="margin:4px 0 0">Para ir sumando niños de a uno, a medida que se inscriben.</p></div><button class="btn primary" data-a="inscOpen">+ Inscribir un niño</button></div></div>';
+  return '<div class="card"><h2>Inscribir un niño</h2><form id="inscForm" class="list" style="gap:12px">'+
+  '<div class="row"><div class="field" style="flex:2;min-width:200px"><label for="inN">Nombre y apellido del niño</label><input type="text" id="inN" required></div><div class="field" style="flex:1;min-width:150px"><label for="inG">Grupo</label><select id="inG">'+GROUPS.map(function(g,i){return '<option value="'+i+'">'+g.name+' · '+g.lvl+' ('+kidsOf(i).length+')</option>';}).join("")+'</select></div></div>'+
+  '<h3 style="margin:4px 0 0">Apoderado</h3><div class="row"><div class="field" style="flex:2;min-width:180px"><label for="inA">Nombre</label><input type="text" id="inA" required></div><div class="field" style="flex:1;min-width:140px"><label for="inR">Parentesco</label><select id="inR"><option>Madre</option><option>Padre</option><option>Apoderado/a</option><option>Abuelo/a</option><option>Otro</option></select></div></div>'+
+  '<div class="row"><div class="field" style="flex:1;min-width:160px"><label for="inT">Teléfono</label><input type="text" id="inT" placeholder="+56 9 ..."></div><div class="field" style="flex:1;min-width:180px"><label for="inE">Correo</label><input type="email" id="inE" placeholder="nombre@correo.com"></div></div>'+
+  '<label class="row" style="gap:8px;font-weight:600"><input type="checkbox" id="inI" checked style="width:20px;height:20px"> Darle acceso al sistema (le llega una invitación al correo)</label>'+
+  '<div class="row"><button class="btn primary" type="submit">Inscribir</button><button class="btn" type="button" data-a="inscClose">Cancelar</button></div></form></div>';}
 function vNinos(){
   var q=S.kidQ.toLowerCase();
   var list=KIDS.filter(function(k){return (S.kidG<0||k.g===S.kidG)&&(!q||k.name.toLowerCase().indexOf(q)>=0);});
-  var h=top("Niños","Nómina de la École de Jeu · "+KIDS.length+" niños")+'<div class="card"><div class="row"><div style="flex:2;min-width:200px"><input type="text" id="kq" placeholder="Buscar por nombre" aria-label="Buscar por nombre" value="'+esc(S.kidQ)+'"></div><div style="flex:1;min-width:160px"><select data-c="kidG" aria-label="Filtrar por grupo"><option value="-1">Todos los grupos</option>'+GROUPS.map(function(g,i){return '<option value="'+i+'"'+(S.kidG===i?" selected":"")+'>'+g.name+'</option>';}).join("")+'</select></div><button class="btn" data-a="go" data-v="grupos">Agregar lista</button></div><span class="lock">🔒 Contactos y autorizados visibles solo para el coordinador</span></div>';
+  var h=top("Niños","Nómina de la École de Jeu · "+KIDS.length+" niños")+inscForm()+'<div class="card"><div class="row"><div style="flex:2;min-width:200px"><input type="text" id="kq" placeholder="Buscar por nombre" aria-label="Buscar por nombre" value="'+esc(S.kidQ)+'"></div><div style="flex:1;min-width:160px"><select data-c="kidG" aria-label="Filtrar por grupo"><option value="-1">Todos los grupos</option>'+GROUPS.map(function(g,i){return '<option value="'+i+'"'+(S.kidG===i?" selected":"")+'>'+g.name+'</option>';}).join("")+'</select></div><button class="btn" data-a="go" data-v="grupos">Agregar lista</button></div><span class="lock">🔒 Contactos y autorizados visibles solo para el coordinador</span></div>';
   h+='<div class="grid2"><div class="card"><h2>'+list.length+' niños</h2><div class="list">'+(list.length?list.map(function(k){return '<div class="item"><div class="grow"><b>'+esc(k.name)+'</b><span class="muted">'+GROUPS[k.g].name+' · '+GROUPS[k.g].lvl+'</span></div><button class="btn small" data-a="kid" data-v="'+k.id+'">Ver ficha</button></div>';}).join(""):'<p class="empty">No hay niños con ese nombre.</p>')+'</div></div>';
   h+='<div class="card"><h2>Ficha del niño</h2><p>Toca <b>Ver ficha</b> en cualquier niño para abrir su información: grupo, asistencia de hoy y adultos autorizados a retirarlo.</p><p class="muted">Sin RUT del niño, según la especificación. Los cambios quedan en el registro de accesos.</p></div>';
   return h+'</div>';
@@ -714,7 +723,7 @@ function vGrupo(){
   h+='<div class="card"><h2>Semana de '+g.name+'</h2><div class="scroll"><div class="week"><div></div>'+MODS.map(function(mm){return '<div class="muted" style="font-weight:800">'+mm.h+'</div>';}).join("");
   DAYS.forEach(function(d,di){h+='<div style="font-weight:800;align-self:center">'+d.name+'</div>';for(var m=0;m<3;m++){var t=tallerAt(gi,di,m);h+='<div class="cell t-'+t.id+'"><b style="font-size:16px">'+esc(partName(t,di))+'</b><span>'+esc(t.sala)+'</span></div>';}});
   h+='</div></div></div>';
-  h+='<div class="card"><div class="row between"><h2>Nómina</h2><div class="row"><button class="btn small" data-a="goImport" data-v="'+gi+'">Agregar lista</button><span class="lock">🔒 Solo coordinador</span></div></div><form id="addKid" class="row"><input type="text" id="addKidN" placeholder="Nombre y apellido del niño" aria-label="Nombre del niño nuevo" style="flex:1;min-width:200px"><button class="btn primary small" type="submit">Agregar niño</button></form><div class="list">'+
+  h+='<div class="card"><div class="row between"><h2>Nómina</h2><div class="row"><button class="btn small" data-a="goImport" data-v="'+gi+'">Agregar lista completa</button><span class="lock">🔒 Solo coordinador</span></div></div><form id="addKid" class="row"><input type="text" id="addKidN" placeholder="Nombre y apellido del niño" aria-label="Nombre del niño nuevo" style="flex:1;min-width:200px"><button class="btn primary small" type="submit">Agregar niño</button></form><div class="list">'+
     (ks.length?ks.map(function(k){return '<div class="item"><div class="grow"><b>'+esc(k.name)+'</b><span class="muted">'+(k.aut&&k.aut.length?k.aut.length+' autorizados':'Sin autorizados registrados')+'</span></div><select data-c="moveKid" data-k="'+k.id+'" aria-label="Mover a '+esc(k.name)+' a otro grupo" style="width:auto;min-width:110px">'+GROUPS.map(function(x,i){return '<option value="'+i+'"'+(i===gi?" selected":"")+'>'+x.name+'</option>';}).join("")+'</select><button class="btn small" data-a="kid" data-v="'+k.id+'">Ficha</button><button class="btn small" data-a="delKid" data-v="'+k.id+'" aria-label="Quitar a '+esc(k.name)+'">✕</button></div>';}).join(""):'<p class="empty">Este grupo no tiene niños todavía.</p>')+'</div></div>';
   return h;
 }
@@ -832,6 +841,12 @@ function renderApp(){
   if(af)af.addEventListener("submit",function(e){e.preventDefault();var k=kidById(S.modal.id),nm=document.getElementById("aN").value.trim();if(!k||!nm)return;k.aut.push({name:nm,rel:document.getElementById("aR").value.trim()||"Autorizado",tel:document.getElementById("aT").value.trim()||"Sin teléfono"});S.modal=null;save();render();toast("Autorizado agregado.");});
   var rqI=document.getElementById("rq");
   if(rqI)rqI.addEventListener("input",function(){S.rq=rqI.value;var pos=rqI.selectionStart;save();render();var n2=document.getElementById("rq");n2.focus();try{n2.setSelectionRange(pos,pos);}catch(e){}});
+  var inf=document.getElementById("inscForm");
+  if(inf)inf.addEventListener("submit",function(e){e.preventDefault();var v=function(i){return document.getElementById(i).value.trim();};var nm=v("inN"),an=v("inA");if(!nm||!an)return;
+    var gi=+v("inG"),em=v("inE").toLowerCase(),k={id:"n"+Date.now(),g:gi,name:nm,ins:todayISO(),aut:[{name:an,rel:v("inR"),tel:v("inT")||""}]};
+    S.kids.push(k);KIDS=S.kids;var inv=em&&document.getElementById("inI").checked&&!S.famUsers.some(function(u){return u.email===em;});
+    if(inv)S.famUsers.push({id:"f"+Date.now(),kid:k.id,name:an,rel:v("inR"),email:em});
+    S.inscOpen=false;S.kidG=gi;S.kidQ="";S.modal={type:"kid",id:k.id};save();render();toast(nm+" inscrito en "+GROUPS[gi].name+(inv?". Invitación enviada a "+em+".":"."));});
   var ak=document.getElementById("addKid");
   if(ak)ak.addEventListener("submit",function(e){e.preventDefault();var nm=document.getElementById("addKidN").value.trim();if(!nm)return;S.kids.push({id:"n"+Date.now(),g:S.gsel,name:nm,aut:[]});KIDS=S.kids;save();render();toast(nm+" agregado a "+GROUPS[S.gsel].name+".");});
   var mf=document.getElementById("matForm");
@@ -874,6 +889,8 @@ document.addEventListener("click",function(e){
   if(a==="cClose"){(S.casos||[]).forEach(function(c){if(String(c.id)===v)c.closed=!c.closed;});save();render();toast("Listo.");return;}
   if(a==="actDone"){var pp=v.split("|");(S.casos||[]).forEach(function(c){if(String(c.id)===pp[0]){var x=c.acts[+pp[1]];if(x){x.done=!x.done;x.at=x.done?fmtDate(todayISO())+", "+nowHM():"";}}});save();render();return;}
   if(a==="monAbs"){var di=S.eqDate||todayISO();S.monAbs=S.monAbs||{};S.monAbs[di]=S.monAbs[di]||{};if(S.monAbs[di][v])delete S.monAbs[di][v];else S.monAbs[di][v]=true;save();render();return;}
+  if(a==="inscOpen"){S.inscOpen=true;render();var n0=document.getElementById("inN");if(n0)n0.focus();return;}
+  if(a==="inscClose"){S.inscOpen=false;render();return;}
   if(a==="delDir"){S.dirUsers.splice(+v,1);save();render();toast("Acceso quitado.");return;}
   if(a==="delFam"){S.famUsers=S.famUsers.filter(function(u){return u.id!==v;});save();render();toast("Acceso quitado.");return;}
   if(a==="lgGoogle"){S.lg={step:"google"};save();render();return;}
