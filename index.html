@@ -63,7 +63,7 @@ button{cursor:pointer}
 .nav button .ico{width:20px;text-align:center}
 .role{padding:12px;border:1px dashed var(--line);border-radius:12px;display:flex;flex-direction:column;gap:6px}
 .role label{font-size:12px;font-weight:700;color:var(--soft);text-transform:uppercase;letter-spacing:.06em}
-select,input[type=text],input[type=date],input[type=email],input[type=month],textarea{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 11px;width:100%;min-height:40px}
+select,input[type=text],input[type=date],input[type=email],input[type=month],input[type=password],textarea{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 11px;width:100%;min-height:40px}
 textarea{min-height:110px;resize:vertical}
 .main{padding:24px 28px 60px;display:flex;flex-direction:column;gap:18px;min-width:0;max-width:1180px}
 .top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
@@ -279,12 +279,13 @@ S.att[seedDay]={k4:false,k22:false,k41:false,k77:false};
 S.taken[seedDay]={0:true,1:true,2:true,4:true,5:true};
 S.props=[{id:501,tid:"art",by:"Tomás Fuentes",title:"Traer ropa vieja para pintar",text:"La próxima semana en Arte pintamos con témpera. Por favor enviar una polera vieja o delantal marcado con el nombre.",dest:"all",when:dateOf(1,1),status:"pend",at:"hoy, 10:15"}];
 S.monAbs[dateOf(1,-1)]={"tomas.fuentes@gmail.com":true};S.monAbs[dateOf(3,-2)]={"camila.rojas@gmail.com":true};
-try{var sv=JSON.parse(localStorage.getItem("edj-proto-v12")||"null");if(sv){for(var key in sv){S[key]=sv[key];}}}catch(e){}
+try{var sv=JSON.parse(localStorage.getItem("edj-proto-v14")||"null");if(sv){for(var key in sv){S[key]=sv[key];}}}catch(e){}
 if(!S.kids||!S.kids.length)S.kids=KIDS;KIDS=S.kids;
+if(!S.coordP)S.coordP={name:"Nicolás Novakovic Pinochet",email:"nicolas.novakovic@gmail.com",tel:"",cargo:"Coordinador École de Jeu",photo:""};
 if(!S.dirUsers)S.dirUsers=[{name:"Dirección Lycée Claude Gay",email:"direccion.ejemplo@gmail.com"}];
-if(!S.famUsers)S.famUsers=KIDS.filter(function(k){return k.aut&&k.aut[0];}).map(function(k,i){return {id:"f"+i,kid:k.id,name:k.aut[0].name,rel:k.aut[0].rel,email:famEmail(k)};});
+if(!S.famUsers){S.famUsers=KIDS.filter(function(k){return k.aut&&k.aut[0];}).map(function(k,i){return {id:"f"+i,kid:k.id,name:k.aut[0].name,rel:k.aut[0].rel,email:famEmail(k)};});S.famUsers.forEach(function(u){if(u.kid===S.famKid)u.pw=pwHash("ecole2027");});}
 S.modal=null;
-function save(){try{localStorage.setItem("edj-proto-v12",JSON.stringify(S));}catch(e){}}
+function save(){try{localStorage.setItem("edj-proto-v14",JSON.stringify(S));}catch(e){}}
 
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
 function dk(){return dateOf(S.day,S.wk||0);}
@@ -299,10 +300,10 @@ function perMon(d){var p=d.slice(4).split("|"),t=TALLERES.filter(function(x){ret
 function destLabel(d){if(d.indexOf("tal:")===0){var tt=TALLERES.filter(function(x){return x.id===d.slice(4);})[0];return tt?"Monitor de "+tt.name:d;}if(d.indexOf("per:")===0){var pm=perMon(d);return pm&&pm.m?pm.m.name+" (personal)":"Monitor (personal)";}if(d==="all")return "Todas las familias";if(d==="mon")return "Monitores";if(d==="dir")return "Dirección";if(d.indexOf("lvl:")===0)return d.slice(4);var g=GROUPS.filter(function(x){return x.id===d;})[0];return g?"Familias de "+g.name:d;}
 
 var NAV={
-  coord:[["inicio","⌂","Inicio"],["usuarios","⚙","Usuarios"],["horario","▦","Horario"],["calendario","▣","Calendario"],["talleres","◉","Talleres"],["grupos","▤","Grupos"],["asistencia","✓","Asistencia"],["ninos","☺","Niños"],["apoderados","✎","Registro de conducta"],["retiros","➜","Retiros"],["avisos","✉","Avisos"],["equipo","★","Equipo"],["planes","☰","Planificaciones"],["informes","▤","Informes"]],
+  coord:[["inicio","⌂","Inicio"],["perfil","☻","Mi perfil"],["usuarios","⚙","Usuarios"],["horario","▦","Horario"],["calendario","▣","Calendario"],["talleres","◉","Talleres"],["grupos","▤","Grupos"],["asistencia","✓","Asistencia"],["ninos","☺","Niños"],["apoderados","✎","Registro de conducta"],["retiros","➜","Retiros"],["avisos","✉","Avisos"],["equipo","★","Equipo"],["planes","☰","Planificaciones"],["informes","▤","Informes"]],
   mon:[["midia","⌂","Mi día"],["asistencia","✓","Asistencia"],["miplan","☰","Planificación"],["avisos","✉","Avisos"]],
   dir:[["resumen","⌂","Resumen"],["horario","▦","Horario"],["calendario","▣","Calendario"],["apoderados","✎","Registro de conducta"],["avisos","✉","Avisos enviados"]],
-  fam:[["mihijo","☺","Mi hijo"],["monitores","★","Monitores"],["avisos","✉","Avisos"]]
+  fam:[["mihijo","☺","Mi hijo"],["monitores","★","Monitores"],["avisos","✉","Avisos"],["cuenta","⚙","Mi cuenta"]]
 };
 
 function weekBar(){var w=S.wk||0;return '<div class="row wkbar" style="gap:8px;margin:0 0 10px;align-items:center"><button class="btn small" data-a="wk" data-v="-1" aria-label="Semana anterior">◀</button><b>'+wkLabel(wkKey(w))+(w===0?' (esta semana)':'')+'</b><button class="btn small" data-a="wk" data-v="1" aria-label="Semana siguiente">▶</button>'+(w!==0?'<button class="btn small" data-a="wk" data-v="0">Volver a hoy</button>':'')+'</div>';}
@@ -543,7 +544,7 @@ function greet(a){
   if(a.dest.indexOf("tal:")===0){var tt=TALLERES.filter(function(x){return x.id===a.dest.slice(4);})[0];return "Estimado/a monitor/a de "+(tt?tt.name:"")+":";}
   return a.dest==="mon"?"Estimado equipo de monitores:":a.dest==="dir"?"Estimada Dirección:":"Estimados apoderados:";}
 function msgBody(a){
-  return greet(a)+"\n\n"+(isStaff(a.dest)?"":"Junto con saludar, les informamos lo siguiente:\n\n")+(a.when?"📅 Para el "+whenLabel(a)+"\n\n":"")+a.text+"\n\n"+"Saludos cordiales,\nNicolás Novakovic Pinochet\nCoordinador École de Jeu\nLycée Claude Gay · Osorno";
+  return greet(a)+"\n\n"+(isStaff(a.dest)?"":"Junto con saludar, les informamos lo siguiente:\n\n")+(a.when?"📅 Para el "+whenLabel(a)+"\n\n":"")+a.text+"\n\n"+"Saludos cordiales,\n"+S.coordP.name+"\n"+S.coordP.cargo+"\nLycée Claude Gay · Osorno";
 }
 function mailHref(a){
   var to=[];
@@ -741,44 +742,62 @@ function parseRows(rows,defG,replace){
 }
 function vUsuarios(){
   var h=top("Usuarios","Quién puede entrar al sistema · solo el administrador")+'<div class="card"><p>Nadie puede registrarse solo: solo entran las personas que agregas aquí. Al agregar a alguien, en el sistema real le llega una invitación por correo.</p></div>';
-  h+='<div class="card"><h2>Administrador</h2><div class="list"><div class="item"><span class="av" style="background:#2F3A73;color:#fff">NN</span><div class="grow"><b>Nicolás Novakovic Pinochet</b><span class="muted" style="display:block">nicolas.novakovic@gmail.com · Coordinador</span></div><span class="pill p-info">Admin</span></div></div></div>';
+  h+='<div class="card"><div class="row between"><h2>Administrador</h2><button class="btn small" data-a="go" data-v="perfil">Editar mi perfil</button></div><div class="list"><div class="item">'+monPic(S.coordP,40)+'<div class="grow"><b>'+esc(S.coordP.name)+'</b><span class="muted" style="display:block">'+esc(S.coordP.email)+' · Coordinador</span></div><span class="pill p-info">Admin</span></div></div></div>';
   h+='<div class="card"><h2>Dirección</h2><p class="muted">Ven resúmenes, informes y el registro de conducta (solo lectura).</p><div class="list">'+S.dirUsers.map(function(u,i){return '<div class="item"><div class="grow"><b>'+esc(u.name)+'</b><span class="muted" style="display:block">'+esc(u.email)+'</span></div><button class="btn small" data-a="delDir" data-v="'+i+'">Quitar acceso</button></div>';}).join("")+'</div><form id="dirForm" class="row" style="gap:8px;margin-top:10px;align-items:flex-end"><div class="field" style="flex:1;min-width:160px"><label for="duN">Nombre</label><input type="text" id="duN" required></div><div class="field" style="flex:1;min-width:180px"><label for="duE">Correo (Google)</label><input type="email" id="duE" required></div><button class="btn primary small" type="submit">Agregar</button></form></div>';
   var ml=[];TALLERES.forEach(function(t){mons(t).forEach(function(m){ml.push('<div class="item">'+monPic(m,36)+'<div class="grow"><b>'+esc(m.name)+'</b><span class="muted" style="display:block">'+(m.email?esc(m.email):'⚠ Sin correo: no puede entrar')+' · '+t.name+'</span></div></div>');});});
   h+='<div class="card"><div class="row between"><h2>Monitores</h2><button class="btn small" data-a="go" data-v="equipo">Agregar o quitar en Equipo</button></div><p class="muted">Cada monitor entra con el correo que pusiste en Equipo y solo ve su taller.</p><div class="list">'+(ml.join("")||'<p class="empty">Sin monitores.</p>')+'</div></div>';
   var gi=S.ugroup||0,fu=S.famUsers.filter(function(u){var k=kidById(u.kid);return k&&k.g===gi;});
-  h+='<div class="card"><h2>Familias ('+S.famUsers.length+')</h2><p class="muted">Entran con un link que les llega al correo. Solo ven a su hijo, los monitores, el horario y los avisos.</p><div class="field" style="width:220px"><label for="ug">Grupo</label><select id="ug" data-c="ugroup">'+GROUPS.map(function(g,i){return '<option value="'+i+'"'+(i===gi?' selected':'')+'>'+g.name+'</option>';}).join("")+'</select></div><div class="list" style="margin-top:10px">'+(fu.length?fu.map(function(u){var k=kidById(u.kid);return '<div class="item"><div class="grow"><b>'+esc(u.name)+'</b><span class="muted" style="display:block">'+esc(u.rel||"")+' de '+esc(k.name)+' · '+esc(u.email)+'</span></div><button class="btn small" data-a="delFam" data-v="'+u.id+'">Quitar acceso</button></div>';}).join(""):'<p class="empty">Sin familias con acceso en este grupo.</p>')+'</div>';
+  h+='<div class="card"><h2>Familias ('+S.famUsers.length+')</h2><p class="muted">Entran con su correo y la contraseña que crean con el link de invitación. Solo ven a su hijo, los monitores, el horario y los avisos.</p><div class="field" style="width:220px"><label for="ug">Grupo</label><select id="ug" data-c="ugroup">'+GROUPS.map(function(g,i){return '<option value="'+i+'"'+(i===gi?' selected':'')+'>'+g.name+'</option>';}).join("")+'</select></div><div class="list" style="margin-top:10px">'+(fu.length?fu.map(function(u){var k=kidById(u.kid);return '<div class="item"><div class="grow"><b>'+esc(u.name)+'</b><span class="muted" style="display:block">'+esc(u.rel||"")+' de '+esc(k.name)+' · '+esc(u.email)+' · '+(u.pw?'✓ Activa':'Invitación enviada')+'</span></div><button class="btn small" data-a="delFam" data-v="'+u.id+'">Quitar acceso</button></div>';}).join(""):'<p class="empty">Sin familias con acceso en este grupo.</p>')+'</div>';
   h+='<h3 style="margin-top:16px">Invitar a un apoderado</h3><form id="famForm" class="list" style="gap:10px"><div class="row"><div class="field" style="flex:1;min-width:180px"><label for="fuK">Niño</label><select id="fuK">'+kidsOf(gi).map(function(k){return '<option value="'+k.id+'">'+esc(k.name)+'</option>';}).join("")+'</select></div><div class="field" style="flex:1;min-width:160px"><label for="fuR">Parentesco</label><select id="fuR"><option>Madre</option><option>Padre</option><option>Apoderado/a</option><option>Abuelo/a</option><option>Otro</option></select></div></div><div class="row"><div class="field" style="flex:1;min-width:160px"><label for="fuN">Nombre</label><input type="text" id="fuN" required></div><div class="field" style="flex:1;min-width:180px"><label for="fuE">Correo</label><input type="email" id="fuE" required></div></div><div class="row"><button class="btn primary small" type="submit">Enviar invitación</button></div></form></div>';
   return h;}
-function vMonitores(){var h=top("Monitores","El equipo que acompaña a tu hijo en la École de Jeu")+'<div class="grid3">';
+function vMonitores(){var c=S.coordP,h=top("Monitores","El equipo que acompaña a tu hijo en la École de Jeu")+'<div class="card" style="display:flex;flex-direction:row;flex-wrap:wrap;gap:18px;align-items:center">'+monPic(c,110)+'<div class="grow"><p class="eyebrow" style="margin:0">Coordinación</p><b style="font-size:20px;display:block">'+esc(c.name)+'</b><span class="muted">'+esc(c.cargo)+'</span><p style="margin:8px 0 0">✉ <a href="mailto:'+esc(c.email)+'">'+esc(c.email)+'</a>'+(c.tel?' · ☎ <a href="tel:'+esc(c.tel.replace(/\s/g,""))+'">'+esc(c.tel)+'</a>':'')+'</p></div></div><h2 style="margin:18px 0 10px">Monitores</h2><div class="grid3">';
   TALLERES.forEach(function(t){mons(t).forEach(function(m){h+='<div class="card" style="align-items:center;text-align:center;display:flex;flex-direction:column;gap:8px">'+monPic(m,120)+'<b style="font-size:18px">'+esc(m.name)+'</b><div class="tname t-'+t.id+'" style="justify-content:center"><span class="sw s-'+t.id+'"></span><span>'+t.name+'</span></div></div>';});});
-  return h+'</div><p class="muted">Además, las ASEM del colegio apoyan en el almuerzo y los recreos. Coordinación: Nicolás Novakovic Pinochet.</p>';}
-var VIEWS={monitores:vMonitores,usuarios:vUsuarios,grupos:vGrupos,talleres:vTalleres,inicio:vInicio,horario:vHorario,asistencia:vAsistencia,ninos:vNinos,informes:vInformes,calendario:vCalendario,apoderados:vApoderados,retiros:vRetiros,avisos:vAvisos,equipo:vEquipo,planes:vPlanes,midia:vMiDia,miplan:vMiPlan,resumen:vResumen,mihijo:vMiHijo};
+  return h+'</div><p class="muted">Además, las ASEM del colegio apoyan en el almuerzo y los recreos.</p>';}
+function vCuenta(){var u=S.user,fu=S.famUsers.filter(function(x){return x.email===u.email;})[0]||{};
+  return top("Mi cuenta","Tus datos de acceso")+'<div class="card"><h2>Datos</h2><p><b>'+esc(u.name)+'</b><br>'+esc(u.email)+'<br>'+esc(u.sub||"")+'</p><p class="muted">Si cambia tu correo, pídeselo al coordinador.</p></div><div class="card"><h2>Cambiar contraseña</h2><form id="cpForm" class="list" style="gap:10px;max-width:420px"><div class="field"><label for="cp0">Contraseña actual</label><input type="password" id="cp0" required autocomplete="current-password"></div><div class="field"><label for="cp1">Contraseña nueva</label><input type="password" id="cp1" required minlength="8" autocomplete="new-password"></div><div class="field"><label for="cp2">Repite la contraseña nueva</label><input type="password" id="cp2" required autocomplete="new-password"></div><div class="row"><button class="btn primary" type="submit">Guardar</button></div></form></div>';}
+function vPerfil(){var c=S.coordP;return top("Mi perfil","Así te ven las familias y el equipo")+'<div class="card" style="display:flex;flex-direction:row;flex-wrap:wrap;gap:18px;align-items:center">'+monPic(c,110)+'<div class="list" style="gap:8px"><label class="btn small" style="cursor:pointer;width:max-content">📷 '+(c.photo?'Cambiar foto':'Subir foto')+'<input type="file" accept="image/*" data-photo="coord" hidden></label>'+(c.photo?'<button class="btn small" data-a="delCoordPhoto" style="width:max-content">Quitar foto</button>':'')+'</div></div>'+
+  '<div class="card"><h2>Datos</h2><form id="perfF" class="list" style="gap:12px;max-width:560px"><div class="field"><label for="cpN">Nombre</label><input type="text" id="cpN" required value="'+esc(c.name)+'"></div><div class="field"><label for="cpC">Cargo</label><input type="text" id="cpC" value="'+esc(c.cargo)+'"></div><div class="row"><div class="field" style="flex:1;min-width:200px"><label for="cpE">Correo (Google)</label><input type="email" id="cpE" required value="'+esc(c.email)+'"></div><div class="field" style="flex:1;min-width:160px"><label for="cpT">Teléfono</label><input type="text" id="cpT" placeholder="+56 9 ..." value="'+esc(c.tel)+'"></div></div><p class="muted" style="margin:0">El nombre y el cargo aparecen en la firma de los avisos. Las familias ven tu foto, nombre, correo y teléfono en "Monitores".</p><div class="row"><button class="btn primary" type="submit">Guardar</button></div></form></div>';}
+var VIEWS={perfil:vPerfil,cuenta:vCuenta,monitores:vMonitores,usuarios:vUsuarios,grupos:vGrupos,talleres:vTalleres,inicio:vInicio,horario:vHorario,asistencia:vAsistencia,ninos:vNinos,informes:vInformes,calendario:vCalendario,apoderados:vApoderados,retiros:vRetiros,avisos:vAvisos,equipo:vEquipo,planes:vPlanes,midia:vMiDia,miplan:vMiPlan,resumen:vResumen,mihijo:vMiHijo};
 
 /* ---------- Login de prueba ---------- */
 function slug(t){return t.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z ]/g,"").trim().replace(/\s+/g,".");}
 function famEmail(k){return k.aut&&k.aut[0]?slug(k.aut[0].name)+"@gmail.com":"";}
 var ROLEL={coord:"Coordinador",dir:"Dirección",mon:"Monitor",fam:"Familia"};
-function staffAccounts(){var o=[{role:"coord",name:"Nicolás Novakovic Pinochet",email:"nicolas.novakovic@gmail.com",sub:"Admin"}].concat((S.dirUsers||[]).map(function(u){return {role:"dir",name:u.name,email:u.email};}));
+function staffAccounts(){var o=[{role:"coord",name:S.coordP.name,email:S.coordP.email,sub:"Admin",photo:S.coordP.photo}].concat((S.dirUsers||[]).map(function(u){return {role:"dir",name:u.name,email:u.email};}));
   TALLERES.forEach(function(t,i){mons(t).forEach(function(m){if(m.email)o.push({role:"mon",name:m.name,email:m.email,monT:i,sub:t.name,photo:m.photo});});});return o;}
 var GSVG='<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>';
 function avatar(n,c){return '<span class="av" style="background:'+c+'">'+esc(n.split(" ").map(function(w){return w[0];}).slice(0,2).join(""))+'</span>';}
 var AVC={coord:"#2F3A73",dir:"#1F63BF",mon:"#2E9E5B",fam:"#C25A0E"};
 function vLogin(){var L=S.lg||{},h='<div class="lg"><div class="lgbox"><div><h1>École de Jeu</h1><p class="muted" style="margin:2px 0 0">Lycée Claude Gay · Osorno · 2027</p><div class="dots"><i class="s-psi"></i><i class="s-mus"></i><i class="s-rit"></i><i class="s-art"></i><i class="s-exp"></i><i class="s-con"></i></div></div>';
   if(L.step==="google"){h+='<div class="row" style="gap:8px;align-items:center">'+GSVG.replace('<svg','<svg style="width:22px;height:22px"')+'<b>Elige una cuenta</b></div><p class="muted" style="margin:0">para continuar a École de Jeu</p><div class="list" style="gap:8px">'+staffAccounts().map(function(a,i){return '<button class="acc" data-a="lgPick" data-v="'+i+'">'+(a.photo?monPic(a,36):avatar(a.name,AVC[a.role]))+'<span><b>'+esc(a.name)+'</b><small>'+esc(a.email)+' · '+ROLEL[a.role]+(a.sub?' · '+esc(a.sub):'')+'</small></span></button>';}).join("")+'</div><button class="btn small" data-a="lgBack">← Volver</button>';}
-  else if(L.step==="sent"){var k=kidById(L.kid);h+='<h2 style="margin:0">Revisa tu correo</h2><p style="margin:0">Enviamos un link de acceso a <b>'+esc(L.email)+'</b>. Es válido por 1 hora y no necesitas contraseña.</p><div class="mail"><p class="muted" style="margin:0 0 6px">📧 Así se ve el correo (simulación)</p><p style="margin:0 0 4px"><b>De:</b> École de Jeu</p><p style="margin:0 0 10px"><b>Asunto:</b> Tu acceso a École de Jeu</p><p style="margin:0 0 12px">Hola '+esc((L.name||"").split(" ")[0])+', haz clic para entrar y ver la información de '+esc(k.name.split(" ")[0])+'.</p><button class="btn primary" data-a="lgLink">Entrar a École de Jeu</button></div><button class="btn small" data-a="lgBack">← Usar otro correo</button>';}
-  else{h+='<h2 style="margin:0">Iniciar sesión</h2><p class="muted" style="margin:0">Coordinación, Dirección y monitores</p><button class="gbtn" data-a="lgGoogle">'+GSVG+'Continuar con Google</button><div class="lgsep">Familias</div><form id="lgForm" class="list" style="gap:10px"><div class="field"><label for="lgE">Correo del apoderado</label><input type="email" id="lgE" required placeholder="nombre@correo.com" value="'+esc(L.email||"")+'"></div>'+(L.err?'<div class="alert bad" role="alert"><span>'+L.err+'</span></div>':'')+'<button class="btn primary" type="submit">Recibir link de acceso</button></form><p class="muted" style="margin:0;font-size:13px">Solo entran los correos invitados por el coordinador. No hay registro abierto.</p><p class="muted" style="margin:0;font-size:12px;border-top:1px dashed var(--line);padding-top:10px">Prototipo: no hay contraseñas ni se envían correos de verdad. Familia de prueba: <b>'+esc(((S.famUsers.filter(function(u){return u.kid===S.famKid;})[0])||S.famUsers[0]||{}).email||"")+'</b></p>';}
+  else if(L.step==="sent"){var k=kidById(L.kid);h+='<h2 style="margin:0">Revisa tu correo</h2><p style="margin:0">Enviamos un link a <b>'+esc(L.email)+'</b> para crear tu contraseña. Es válido por 1 hora.</p><div class="mail"><p class="muted" style="margin:0 0 6px">📧 Así se ve el correo (simulación)</p><p style="margin:0 0 4px"><b>De:</b> École de Jeu</p><p style="margin:0 0 10px"><b>Asunto:</b> Crea tu contraseña de École de Jeu</p><p style="margin:0 0 12px">Hola '+esc((L.name||"").split(" ")[0])+', haz clic para crear tu contraseña y ver la información de '+esc(k.name.split(" ")[0])+'.</p><button class="btn primary" data-a="lgLink">Crear mi contraseña</button></div><button class="btn small" data-a="lgBack">← Volver</button>';}
+  else if(L.step==="newpw"){h+='<h2 style="margin:0">Crea tu contraseña</h2><p class="muted" style="margin:0">Cuenta: <b>'+esc(L.email)+'</b></p><form id="lgPw" class="list" style="gap:10px"><div class="field"><label for="pw1">Contraseña nueva</label><input type="password" id="pw1" required minlength="8" autocomplete="new-password"></div><div class="field"><label for="pw2">Repite la contraseña</label><input type="password" id="pw2" required autocomplete="new-password"></div><p class="muted" style="margin:0;font-size:13px">Mínimo 8 caracteres.</p>'+(L.err?'<div class="alert bad" role="alert"><span>'+L.err+'</span></div>':'')+'<button class="btn primary" type="submit">Guardar y entrar</button></form>';}
+  else if(L.step==="forgot"){h+='<h2 style="margin:0">Crear o recuperar contraseña</h2><p class="muted" style="margin:0">Escribe el correo que le diste al coordinador. Te enviaremos un link para crear una contraseña nueva.</p><form id="lgForgotF" class="list" style="gap:10px"><div class="field"><label for="lgE2">Correo del apoderado</label><input type="email" id="lgE2" required value="'+esc(L.email||"")+'"></div>'+(L.err?'<div class="alert bad" role="alert"><span>'+L.err+'</span></div>':'')+'<button class="btn primary" type="submit">Enviar link</button></form><button class="btn small" data-a="lgBack">← Volver</button>';}
+  else{var demo=((S.famUsers.filter(function(u){return u.pw;})[0])||{}).email||"";h+='<h2 style="margin:0">Iniciar sesión</h2><p class="muted" style="margin:0">Coordinación, Dirección y monitores</p><button class="gbtn" data-a="lgGoogle">'+GSVG+'Continuar con Google</button><div class="lgsep">Familias</div><form id="lgForm" class="list" style="gap:10px"><div class="field"><label for="lgE">Correo</label><input type="email" id="lgE" required autocomplete="username" placeholder="nombre@correo.com" value="'+esc(L.email||"")+'"></div><div class="field"><label for="lgP">Contraseña</label><input type="password" id="lgP" required autocomplete="current-password"></div>'+(L.err?'<div class="alert bad" role="alert"><span>'+L.err+'</span></div>':'')+'<button class="btn primary" type="submit">Entrar</button></form><button class="btn small" data-a="lgForgot">¿Primera vez u olvidaste tu contraseña?</button><p class="muted" style="margin:0;font-size:13px">Solo entran los correos invitados por el coordinador. No hay registro abierto.</p><p class="muted" style="margin:0;font-size:12px;border-top:1px dashed #E2DFEA;padding-top:10px">Prototipo: no se envían correos de verdad. Familia de prueba: <b>'+esc(demo)+'</b> · contraseña <b>ecole2027</b>. Las demás familias aún no crean su contraseña.</p>';}
   return h+'</div></div>';}
+function pwHash(t){var h=5381;for(var i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;return "h"+h;}
+function famLogin(fu){var kk=kidById(fu.kid);doLogin({role:"fam",name:fu.name,email:fu.email,kid:kk.id,sub:(fu.rel||"Apoderado")+" de "+kk.name.split(" ")[0]});window.scrollTo(0,0);}
 function doLogin(u){S.user=u;S.role=u.role;if(u.role==="mon")S.monT=u.monT;if(u.role==="fam")S.famKid=u.kid;S.view=NAV[S.role][0][0];S.lg=null;}
-function userBox(){var u=S.user;return '<div class="ubox row" style="gap:10px;align-items:center;flex-wrap:nowrap">'+avatar(u.name,AVC[u.role])+'<div class="grow" style="min-width:0"><b style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(u.name)+'</b><span>'+ROLEL[u.role]+(u.sub?' · '+esc(u.sub):'')+'</span></div></div><button class="btn small" data-a="logout">Cerrar sesión</button>';}
+function userBox(){var u=S.user;return '<div class="ubox row" style="gap:10px;align-items:center;flex-wrap:nowrap">'+(u.role==="coord"&&S.coordP.photo?monPic(S.coordP,34):avatar(u.name,AVC[u.role]))+'<div class="grow" style="min-width:0"><b style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(u.name)+'</b><span>'+ROLEL[u.role]+(u.sub?' · '+esc(u.sub):'')+'</span></div></div><button class="btn small" data-a="logout">Cerrar sesión</button>';}
 function render(){
   var lg=document.getElementById("login"),app=document.querySelector(".app");
   if(!S.user){lg.hidden=false;app.style.display="none";lg.innerHTML=vLogin();
+    var famBy=function(em){return S.famUsers.filter(function(u){return u.email===em&&kidById(u.kid);})[0];};
     var lf=document.getElementById("lgForm");
-    if(lf)lf.addEventListener("submit",function(e){e.preventDefault();var em=document.getElementById("lgE").value.trim().toLowerCase();
-      var fu=S.famUsers.filter(function(u){return u.email===em&&kidById(u.kid);})[0];
-      if(fu)S.lg={step:"sent",email:em,kid:fu.kid,name:fu.name,rel:fu.rel};
-      else if(staffAccounts().some(function(a){return a.email===em;}))S.lg={email:em,err:"Las cuentas del equipo entran con <b>Continuar con Google</b>."};
-      else S.lg={email:em,err:"Este correo no está invitado. Pídele acceso al coordinador."};
+    if(lf)lf.addEventListener("submit",function(e){e.preventDefault();var em=document.getElementById("lgE").value.trim().toLowerCase(),pw=document.getElementById("lgP").value,fu=famBy(em);
+      if(fu&&fu.pw&&fu.pw===pwHash(pw)){famLogin(fu);}
+      else if(fu&&!fu.pw)S.lg={step:"forgot",email:em,err:"Todavía no creas tu contraseña. Aprieta &quot;Enviar link&quot; y te llegará un correo para crearla."};
+      else if(!fu&&staffAccounts().some(function(a){return a.email===em;}))S.lg={email:em,err:"Las cuentas del equipo entran con <b>Continuar con Google</b>."};
+      else if(!fu)S.lg={email:em,err:"Este correo no está invitado. Pídele acceso al coordinador."};
+      else S.lg={email:em,err:"Correo o contraseña incorrectos."};
+      save();render();});
+    var gf=document.getElementById("lgForgotF");
+    if(gf)gf.addEventListener("submit",function(e){e.preventDefault();var em=document.getElementById("lgE2").value.trim().toLowerCase(),fu=famBy(em);
+      S.lg=fu?{step:"sent",email:em,kid:fu.kid,name:fu.name,rel:fu.rel}:{step:"forgot",email:em,err:"Este correo no está invitado. Pídele acceso al coordinador."};save();render();});
+    var pf2=document.getElementById("lgPw");
+    if(pf2)pf2.addEventListener("submit",function(e){e.preventDefault();var a1=document.getElementById("pw1").value,a2=document.getElementById("pw2").value,fu=famBy(S.lg.email);
+      if(a1.length<8)S.lg.err="La contraseña debe tener al menos 8 caracteres.";else if(a1!==a2)S.lg.err="Las contraseñas no coinciden.";
+      else if(fu){fu.pw=pwHash(a1);famLogin(fu);toast("Contraseña creada. Desde ahora entras con tu correo y contraseña.");}
       save();render();});
     return;}
   lg.hidden=true;lg.innerHTML="";app.style.display="";
@@ -860,6 +879,12 @@ function renderApp(){
     save();render();toast("Planificación enviada al coordinador.");});
   var kq=document.getElementById("kq");
   if(kq){kq.addEventListener("input",function(){S.kidQ=kq.value;var pos=kq.selectionStart;save();render();var n2=document.getElementById("kq");n2.focus();try{n2.setSelectionRange(pos,pos);}catch(e){}});}
+  var pff=document.getElementById("perfF");
+  if(pff)pff.addEventListener("submit",function(e){e.preventDefault();var g=function(i){return document.getElementById(i).value.trim();};if(!g("cpN")||!g("cpE"))return;S.coordP.name=g("cpN");S.coordP.cargo=g("cpC");S.coordP.email=g("cpE").toLowerCase();S.coordP.tel=g("cpT");S.user.name=S.coordP.name;S.user.email=S.coordP.email;save();render();toast("Perfil guardado.");});
+  var cpf=document.getElementById("cpForm");
+  if(cpf)cpf.addEventListener("submit",function(e){e.preventDefault();var fu=S.famUsers.filter(function(x){return x.email===S.user.email;})[0],a0=document.getElementById("cp0").value,a1=document.getElementById("cp1").value,a2=document.getElementById("cp2").value;
+    if(!fu||fu.pw!==pwHash(a0)){toast("La contraseña actual no es correcta.");return;}if(a1.length<8){toast("La nueva debe tener al menos 8 caracteres.");return;}if(a1!==a2){toast("Las contraseñas nuevas no coinciden.");return;}
+    fu.pw=pwHash(a1);save();cpf.reset();toast("Contraseña actualizada.");});
   var df=document.getElementById("dirForm");
   if(df)df.addEventListener("submit",function(e){e.preventDefault();var n=document.getElementById("duN").value.trim(),em=document.getElementById("duE").value.trim().toLowerCase();if(!n||!em)return;S.dirUsers.push({name:n,email:em});save();render();toast("Invitación enviada a "+em+".");});
   var ff2=document.getElementById("famForm");
@@ -891,12 +916,14 @@ document.addEventListener("click",function(e){
   if(a==="monAbs"){var di=S.eqDate||todayISO();S.monAbs=S.monAbs||{};S.monAbs[di]=S.monAbs[di]||{};if(S.monAbs[di][v])delete S.monAbs[di][v];else S.monAbs[di][v]=true;save();render();return;}
   if(a==="inscOpen"){S.inscOpen=true;render();var n0=document.getElementById("inN");if(n0)n0.focus();return;}
   if(a==="inscClose"){S.inscOpen=false;render();return;}
+  if(a==="delCoordPhoto"){S.coordP.photo="";save();render();return;}
   if(a==="delDir"){S.dirUsers.splice(+v,1);save();render();toast("Acceso quitado.");return;}
   if(a==="delFam"){S.famUsers=S.famUsers.filter(function(u){return u.id!==v;});save();render();toast("Acceso quitado.");return;}
   if(a==="lgGoogle"){S.lg={step:"google"};save();render();return;}
   if(a==="lgBack"){S.lg=null;save();render();return;}
   if(a==="lgPick"){var ac=staffAccounts()[+v];if(ac){doLogin(ac);save();render();window.scrollTo(0,0);toast("Hola, "+ac.name.split(" ")[0]+".");}return;}
-  if(a==="lgLink"){var kk=kidById(S.lg&&S.lg.kid);if(kk){doLogin({role:"fam",name:S.lg.name,email:S.lg.email,kid:kk.id,sub:(S.lg.rel||"Apoderado")+" de "+kk.name.split(" ")[0]});save();render();window.scrollTo(0,0);}return;}
+  if(a==="lgLink"){if(S.lg){S.lg={step:"newpw",email:S.lg.email};save();render();}return;}
+  if(a==="lgForgot"){var e0=document.getElementById("lgE");S.lg={step:"forgot",email:e0?e0.value.trim():""};save();render();return;}
   if(a==="logout"){S.user=null;S.lg=null;save();render();window.scrollTo(0,0);return;}
   if(a==="propOk"){(S.props||[]).forEach(function(p){if(String(p.id)===v&&p.status==="pend"){p.status="ok";S.avisos.unshift({id:Date.now(),title:p.title,text:p.text,dest:p.dest,tipo:"General",when:p.when,date:"hoy",reads:0,from:p.by});}});save();render();toast("Aviso aprobado y publicado.");return;}
   if(a==="propEdit"){S.propEdit=+v;save();render();var fe=document.getElementById("avForm");if(fe)fe.scrollIntoView();toast("Edita el aviso y publícalo.");return;}
@@ -949,12 +976,12 @@ document.addEventListener("click",function(e){
     return;
   }
   else if(a==="toast"){toast(v);return;}
-  else if(a==="reset"){try{localStorage.removeItem("edj-proto-v12");}catch(err){}location.reload();return;}
+  else if(a==="reset"){try{localStorage.removeItem("edj-proto-v14");}catch(err){}location.reload();return;}
   save();render();
 });
 document.addEventListener("change",function(e){
   var ph=e.target.getAttribute&&e.target.getAttribute("data-photo");
-  if(ph){var f=e.target.files&&e.target.files[0];if(!f)return;var pr=ph.split("|"),tt=TALLERES.filter(function(x){return x.id===pr[0];})[0],m=tt&&mons(tt)[+pr[1]];if(!m)return;
+  if(ph){var f=e.target.files&&e.target.files[0];if(!f)return;var pr=ph.split("|"),tt=TALLERES.filter(function(x){return x.id===pr[0];})[0],m=ph==="coord"?S.coordP:(tt&&mons(tt)[+pr[1]]);if(!m)return;
     var rd=new FileReader();rd.onload=function(){var im=new Image();im.onload=function(){var c=document.createElement("canvas"),z=240,sc=Math.max(z/im.width,z/im.height);c.width=z;c.height=z;var g=c.getContext("2d");g.drawImage(im,(z-im.width*sc)/2,(z-im.height*sc)/2,im.width*sc,im.height*sc);m.photo=c.toDataURL("image/jpeg",0.82);save();render();toast("Foto de "+m.name.split(" ")[0]+" guardada.");};im.src=rd.result;};rd.readAsDataURL(f);return;}
   var c=e.target.getAttribute&&e.target.getAttribute("data-c");if(!c||c==="pick")return;
   var val=e.target.value;
