@@ -367,9 +367,14 @@ function board(di,hlG){
 function pickStatus(r){var st=r.status||"pend";return st==="ok"?'<span class="pill p-ok">Aprobado</span>':st==="no"?'<span class="pill p-bad">Rechazado</span>':'<span class="pill p-warn">Pendiente</span>';}
 function pickBtns(r){return '<div class="row" style="gap:6px"><button class="btn small primary" data-a="pickOk" data-v="'+r.id+'">✓ Aprobar</button><button class="btn small" data-a="pickNo" data-v="'+r.id+'">✕ Rechazar</button></div>';}
 function newPickups(){var l=[];Object.keys(S.early).forEach(function(dd){var d={name:dayLabel(dd),k:dd};(S.early[dd]||[]).forEach(function(r){if(r.src==="fam"&&(r.status||"pend")==="pend")l.push([d,r]);});});return l;}
+var ATT_FROM="14:00",ATT_TO="14:10";
+function hmMin(x){var p=x.split(":");return +p[0]*60+ +p[1];}
+function attPhase(){if(dk()!==todayISO()||!schoolDay(dk())||blocked(dk()))return "off";var n=nowHM();return n<ATT_FROM?"before":n<ATT_TO?"open":n<"16:00"?"late":"over";}
+function lateAtt(){var ph=attPhase();if(ph!=="late"&&ph!=="over")return [];var o=[];for(var g=0;g<6;g++){if(!(S.taken[dk()]||{})[g]){var t=tallerAt(g,S.day,0);o.push({g:g,t:t,mon:monNameDay(t,S.day)});}}return o;}
 function homeAlerts(){
   var al=[];
-  for(var g=0;g<6&&!blocked(dk());g++){if(!(S.taken[dk()]||{})[g]){var t=tallerAt(g,S.day,0);al.push('<div class="alert warn">⚠ <span><b>'+GROUPS[g].name+'</b> no tiene asistencia registrada (módulo 1 en '+t.name+').</span></div>');}}
+  var ph=attPhase();
+  if(ph==="off"&&dk()<todayISO())for(var g=0;g<6&&!blocked(dk());g++){if(!(S.taken[dk()]||{})[g]){var t=tallerAt(g,S.day,0);al.push('<div class="alert warn">⚠ <span><b>'+GROUPS[g].name+'</b> no tiene asistencia registrada (módulo 1 en '+t.name+').</span></div>');}}
   (S.early[dk()]||[]).forEach(function(r){if(!r.ok){var k=kidById(r.kid);if(k)al.push('<div class="alert bad">⛔ <span>Retiro anticipado de <b>'+esc(k.name)+'</b> por una persona no autorizada ('+esc(r.by)+', '+r.time+').</span></div>');}});
   var sinAut=KIDS.filter(function(k){return !k.aut||!k.aut.length;}).length;
   if(sinAut)al.push('<div class="alert warn">⚠ <span>'+sinAut+' niños no tienen personas autorizadas registradas. <button class="btn small" data-a="go" data-v="retiros">Revisar</button></span></div>');
@@ -381,11 +386,14 @@ function homeAlerts(){
 function todayISO(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
 function fmtDate(iso){if(!iso)return "";var p=iso.split("-");return (+p[2])+" de "+MESES[+p[1]-1];}
 function dueActs(){var l=[],t=todayISO();(S.casos||[]).forEach(function(c){if(!c.closed&&c.rec&&c.rec<=t)c.acts.forEach(function(a,i){if(!a.done)l.push([c,a,i]);});});return l;}
-function alertTotal(){return homeAlerts().length+newPickups().length+(S.readN||[]).length+dueActs().length+(S.absN||[]).length+propPend().length;}
+function alertTotal(){return lateAtt().length+homeAlerts().length+newPickups().length+(S.readN||[]).length+dueActs().length+(S.absN||[]).length+propPend().length;}
 function vInicio(){
   var abs=absCount(),tk=takenCount(),pend=6-tk;
   var ear=(S.early[dk()]||[]).length;
   var h=top("Inicio",DAYS[S.day].name+" · resumen del día")+'<div class="card">'+dayChips()+'</div>';
+  var la=lateAtt(),ph=attPhase();
+  if(la.length)h+='<div class="card notif" style="border-color:#C0392B;background:var(--bad-t)" role="alert"><div class="row between"><h2>⏰ Asistencia atrasada ('+la.length+')</h2><span class="pill p-bad">Plazo: '+ATT_TO+'</span></div><p class="muted" style="margin:0 0 8px">Los monitores tienen 10 minutos desde las '+ATT_FROM+' para pasar lista.</p><div class="list" style="gap:8px">'+la.map(function(x){var rem=((S.attRem||{})[dk()]||{})[x.g];return '<div class="item"><div class="grow"><b>'+GROUPS[x.g].name+'</b><span class="muted" style="display:block">'+esc(partName(x.t,S.day))+' · 👤 '+esc(x.mon||"Sin monitor")+'</span></div>'+(rem?'<span class="pill p-info">Recordatorio enviado '+rem+'</span>':'<button class="btn small primary" data-a="attRem" data-v="'+x.g+'">Recordar al monitor</button>')+'</div>';}).join("")+'</div></div>';
+  else if(ph==="open"&&takenCount()<6)h+='<div class="card notif rec" role="status"><h2>⏳ Pasando lista · '+takenCount()+' de 6 grupos</h2><p style="margin:0">Los monitores tienen hasta las <b>'+ATT_TO+'</b>. Quedan '+(hmMin(ATT_TO)-hmMin(nowHM()))+' min.</p></div>';
   var an=S.absN||[];
   if(an.length)h+='<div class="card notif absn" role="status"><div class="row between"><h2>📝 '+(an.length===1?'1 inasistencia avisada':an.length+' inasistencias avisadas')+'</h2><button class="btn small" data-a="clearAbsN">OK, visto</button></div><div class="list" style="gap:8px">'+an.map(function(x){var k=kidById(x.kid);return '<div class="alert info"><span><b>'+esc(k?k.name:"")+'</b> ('+(k?GROUPS[k.g].name:"")+') no viene el <b>'+dayLabel(x.date)+'</b>'+(x.motivo?' · '+esc(x.motivo):'')+'. Avisó: '+esc(x.reg)+' a las '+x.at+'.</span></div>';}).join("")+'</div></div>';
   var pp=propPend();
@@ -406,6 +414,7 @@ function vInicio(){
   h+='<div class="card"><div class="row between"><h2>Rotación de hoy</h2><button class="btn small" data-a="go" data-v="horario">Ver horario completo</button></div>'+board(S.day,-1)+'</div>';
   h+='<div class="grid2"><div class="card"><h2>Jornada</h2><div class="scroll"><table><tbody>'+JORNADA.map(function(j){return '<tr><td style="width:70px;font-variant-numeric:tabular-nums;color:var(--soft)">'+j[0]+'</td><td>'+j[1]+'</td></tr>';}).join("")+'</tbody></table></div></div>';
   h+='<div class="card"><div class="row between"><h2>Último aviso</h2><button class="btn small" data-a="go" data-v="avisos">Ir a avisos</button></div>'+avisoCard(S.avisos[0],true)+'</div></div>';
+  h+='<div class="card noprint"><div class="row" style="align-items:flex-end;gap:10px"><div class="field" style="width:220px"><label for="dnow">Prototipo: simular la hora</label><select id="dnow" data-c="demoNow"><option value="">Hora real ('+(function(){var n=new Date();return ("0"+n.getHours()).slice(-2)+":"+("0"+n.getMinutes()).slice(-2);})()+')</option>'+["13:55","14:05","14:15","15:40","16:20"].map(function(x){return '<option'+(S.demoNow===x?' selected':'')+'>'+x+'</option>';}).join("")+'</select></div><p class="muted" style="margin:0">Para probar las alertas de hora (asistencia, retiros). Solo existe en la maqueta.</p></div></div>';
   return h;
 }
 function vHorario(){
@@ -538,7 +547,7 @@ function vNinos(){
   return h+'</div>';
 }
 function kidById(id){return KIDS.filter(function(k){return k.id===id;})[0];}
-function nowHM(){var n=new Date();return ("0"+n.getHours()).slice(-2)+":"+("0"+n.getMinutes()).slice(-2);}
+function nowHM(){if(S.demoNow)return S.demoNow;var n=new Date();return ("0"+n.getHours()).slice(-2)+":"+("0"+n.getMinutes()).slice(-2);}
 function earlyForm(gi,showTel){
   var ks=kidsOf(gi),k=kidById(S.rkid);if(!k||k.g!==gi)k=ks[0];
   return '<form id="earlyForm" class="list" style="gap:12px"><div class="row"><div class="field" style="flex:1;min-width:160px"><label for="rg">Grupo</label><select id="rg" data-c="rgroup">'+GROUPS.map(function(g,i){return '<option value="'+i+'"'+(i===gi?" selected":"")+'>'+g.name+'</option>';}).join("")+'</select></div><div class="field" style="flex:2;min-width:200px"><label for="rk">Niño</label><select id="rk" data-c="rkid">'+ks.map(function(x){return '<option value="'+x.id+'"'+(k&&x.id===k.id?" selected":"")+'>'+esc(x.name)+'</option>';}).join("")+'</select></div></div>'+
@@ -720,6 +729,12 @@ function vMiDia(){
   var ti=S.monT,t=TALLERES[ti];
   var h=top("Mi día",(monName(t)?esc(monName(t))+" · ":"")+"Monitor de "+t.name)+(S.user?'<div hidden>':'<div class="card">')+'<div class="field"><label for="mt">Demo: elige el taller del monitor</label><select id="mt" data-c="monT">'+TALLERES.map(function(x,i){return '<option value="'+i+'"'+(ti===i?" selected":"")+'>'+x.name+'</option>';}).join("")+'</select></div>'+dayChips()+'</div>';
   if(blocked(dk()))return h+blockBanner(dk());
+  var mg=[];for(var g0=0;g0<6;g0++){if(tallerAt(g0,S.day,0)===t&&!(S.taken[dk()]||{})[g0])mg.push(g0);}
+  var aph=attPhase();
+  if(mg.length&&aph!=="off"){var gn=mg.map(function(g){return GROUPS[g].name;}).join(", "),rem=mg.some(function(g){return ((S.attRem||{})[dk()]||{})[g];});
+    if(aph==="before")h+='<div class="card notif" role="status"><h2>📋 Asistencia de '+gn+'</h2><p style="margin:0">Pásala entre las <b>'+ATT_FROM+'</b> y las <b>'+ATT_TO+'</b>, al empezar el módulo 1.</p></div>';
+    else if(aph==="open")h+='<div class="card notif rec" role="alert"><h2>⏳ Pasa la asistencia de '+gn+'</h2><p style="margin:0">Tienes hasta las <b>'+ATT_TO+'</b>. Quedan <b>'+(hmMin(ATT_TO)-hmMin(nowHM()))+' min</b>.</p></div>';
+    else h+='<div class="card notif" style="border-color:#C0392B;background:var(--bad-t)" role="alert"><h2>⏰ Asistencia atrasada · '+gn+'</h2><p style="margin:0">El plazo era las '+ATT_TO+'. El coordinador ya fue notificado'+(rem?' y te envió un recordatorio':'')+'. Pásala ahora.</p></div>';}
   var ma=monAvisos(t);
   if(ma.length)h+='<div class="card notif pur" role="status"><h2>🔔 '+(ma.length===1?'Tienes un aviso nuevo':'Tienes '+ma.length+' avisos nuevos')+'</h2><div class="list" style="gap:8px">'+ma.map(function(a){return '<div class="alert info"><span><b>'+esc(a.title)+'</b>'+(a.when?' · 📅 '+whenLabel(a):'')+(a.dest.indexOf("per:")===0?' · <i>personal</i>':'')+'</span><span>'+esc(a.text)+'</span><div class="row"><button class="btn small primary" data-a="readAv" data-v="'+a.id+'|'+t.id+'">✓ Entendido</button></div></div>';}).join("")+'</div></div>';
   h+='<div class="card t-'+t.id+'" style="border:0"><h2>'+(dk()===todayISO()?'Hoy':'Este día')+' en '+t.name+(t.parts?': '+partName(t,S.day):'')+'</h2><p>'+t.sala+'</p></div><div class="grid3">';
@@ -975,6 +990,7 @@ document.addEventListener("click",function(e){
   if(a==="inscOpen"){S.inscOpen=true;render();var n0=document.getElementById("inN");if(n0)n0.focus();return;}
   if(a==="inscClose"){S.inscOpen=false;render();return;}
   if(a==="delCoordPhoto"){S.coordP.photo="";save();render();return;}
+  if(a==="attRem"){S.attRem=S.attRem||{};S.attRem[dk()]=S.attRem[dk()]||{};S.attRem[dk()][v]=nowHM();save();render();toast("Recordatorio enviado al monitor.");return;}
   if(a==="delDir"){S.dirUsers.splice(+v,1);save();render();toast("Acceso quitado.");return;}
   if(a==="delFam"){S.famUsers=S.famUsers.filter(function(u){return u.id!==v;});save();render();toast("Acceso quitado.");return;}
   if(a==="lgGoogle"){S.lg={step:"google"};save();render();return;}
@@ -1046,7 +1062,7 @@ document.addEventListener("change",function(e){
   var c=e.target.getAttribute&&e.target.getAttribute("data-c");if(!c||c==="pick")return;
   var val=e.target.value;
   if(c==="moveKid"){var kk=S.kids.filter(function(k){return k.id===e.target.getAttribute("data-k");})[0];if(kk){kk.g=+val;toast(kk.name+" movido a "+GROUPS[+val].name+".");}}
-  else if(c==="famKid")S.famKid=val;else if(c==="rkid")S.rkid=val;else if(c==="ckid")S.ckid=val;else if(c==="ugroup"){S.ugroup=+val;S.uq="";}else if(c==="eqDate")S.eqDate=val;else if(c==="eqMes")S.eqMes=val;else{S[c]=+val;if(c==="rgroup")S.rkid="";if(c==="cgroup")S.ckid="";}
+  else if(c==="famKid")S.famKid=val;else if(c==="rkid")S.rkid=val;else if(c==="ckid")S.ckid=val;else if(c==="demoNow")S.demoNow=val||null;else if(c==="ugroup"){S.ugroup=+val;S.uq="";}else if(c==="eqDate")S.eqDate=val;else if(c==="eqMes")S.eqMes=val;else{S[c]=+val;if(c==="rgroup")S.rkid="";if(c==="cgroup")S.ckid="";}
   save();render();
 });
 function applyTheme(t){
